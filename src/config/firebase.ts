@@ -24,12 +24,14 @@ const firebaseConfig = {
 const mockAuth = {
   currentUser: null,
   onAuthStateChanged: (callback: (user: any) => void) => {
-    // Simulate auth state change after a delay
+    // Simulate initial auth check based on the current mockAuth.currentUser state
     setTimeout(() => {
-      // To test logged out state, call callback(null)
-      // To test logged in state, call callback({ uid: 'mock-user-id', email: 'test@stud.haw-landshut.de', displayName: 'Max Mustermann' })
-      // callback(null); 
-    }, 1000);
+      // @ts-ignore
+      callback(mockAuth.currentUser);
+    }, 50); // Short delay for initial check
+
+    // This mock doesn't simulate real-time changes after the initial one.
+    // A full mock would need to store callbacks and call them when login/logout methods change mockAuth.currentUser.
     return () => {}; // Unsubscribe function
   },
   signInWithEmailAndPassword: async (email?: string, password?: string) => {

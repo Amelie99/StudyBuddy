@@ -1,28 +1,11 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/contexts/AuthContext';
 import { Loader2 } from 'lucide-react';
+// useEffect, useRouter, useAuth have been removed as AuthContext now handles redirection logic for the root page.
 
 export default function HomePage() {
-  const { currentUser, loading } = useAuth();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (!loading) {
-      if (currentUser) {
-        if (currentUser.profileComplete) {
-          router.replace('/dashboard');
-        } else {
-          router.replace('/profil-erstellen');
-        }
-      } else {
-        router.replace('/anmelden');
-      }
-    }
-  }, [currentUser, loading, router]);
-
+  // AuthContext will handle redirection from '/', so this page
+  // will likely only show briefly or if AuthContext is still loading.
   return (
     <div className="flex h-screen w-full items-center justify-center bg-background">
       <Loader2 className="h-12 w-12 animate-spin text-primary" />

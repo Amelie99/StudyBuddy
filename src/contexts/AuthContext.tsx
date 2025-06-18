@@ -36,8 +36,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // @ts-ignore
     const unsubscribe = auth.onAuthStateChanged((user: FirebaseUser | null) => {
       if (user) {
-        // In a real app, you might fetch additional profile data from Firestore here
-        // For mock, we assume profileComplete based on a mock property or default to false
         setCurrentUser({
           uid: user.uid,
           email: user.email || '',
@@ -54,14 +52,37 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
   
   useEffect(() => {
-    if (!loading && !currentUser && !pathname.startsWith('/anmelden') && !pathname.startsWith('/registrierung')) {
-      router.push('/anmelden');
-    } else if (!loading && currentUser && !currentUser.profileComplete && !pathname.startsWith('/profil-erstellen') && !pathname.startsWith('/anmelden') && !pathname.startsWith('/registrierung')) {
-      router.push('/profil-erstellen');
-    } else if (!loading && currentUser && currentUser.profileComplete && (pathname.startsWith('/anmelden') || pathname.startsWith('/registrierung') || pathname === '/profil-erstellen' || pathname === '/')) {
-       router.push('/dashboard');
+    if (loading) {
+      return; // Wait until auth state is resolved
     }
 
+    const isAuthPage = pathname.startsWith('/anmelden') || pathname.startsWith('/registrierung');
+    const isProfileSetupPage = pathname.startsWith('/profil-erstellen');
+
+    if (!currentUser) {
+      // Not authenticated
+      // If not on an auth page, redirect to /anmelden.
+      // This includes the root page '/' which will redirect to /anmelden if not authenticated.
+      if (!isAuthPage) {
+        router.replace('/anmelden');
+      }
+    } else {
+      // Authenticated
+      if (!currentUser.profileComplete) {
+        // Profile incomplete
+        // If not on the profile setup page or an auth page, redirect to /profil-erstellen.
+        // This includes the root page '/' which will redirect to /profil-erstellen if profile is incomplete.
+        if (!isProfileSetupPage && !isAuthPage) {
+          router.replace('/profil-erstellen');
+        }
+      } else {
+        // Profile complete
+        // If on an auth page, profile setup page, or the root page, redirect to dashboard.
+        if (isAuthPage || isProfileSetupPage || pathname === '/') {
+          router.replace('/dashboard');
+        }
+      }
+    }
   }, [currentUser, loading, router, pathname]);
 
 
@@ -104,7 +125,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // @ts-ignore
     await auth.signOut();
     setCurrentUser(null);
-    router.push('/anmelden');
+    router.replace('/anmelden'); // Use replace to avoid back button to authenticated state
   };
 
   const sendPasswordReset = async (email: string) => {
