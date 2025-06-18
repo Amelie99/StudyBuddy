@@ -15,7 +15,7 @@ interface AuthContextType {
   logout: () => Promise<void>;
   sendPasswordReset: (email: string) => Promise<void>;
   isHochschuleEmail: (email: string) => boolean;
-  updateAuthContextUser: (updatedUser: Partial<AppUser>) => void; // For profile updates
+  updateAuthContextUser: (updatedUser: Partial<AppUser>) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -35,13 +35,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const pathname = usePathname();
 
   useEffect(() => {
-    // @ts-ignore
+    // Simulate an automatically logged-in user with a complete profile
+    const mockUser: AppUser = {
+      uid: 'mock-dashboard-user-id',
+      email: 'dashboard.user@stud.haw-landshut.de',
+      displayName: 'Dashboard User',
+      photoURL: 'https://placehold.co/100x100.png',
+      profileComplete: true, // Key for redirecting to dashboard
+      studiengang: 'Informatik',
+      semester: '5',
+      ueberMich: 'Ich bin ein Testnutzer für das Dashboard.',
+      lerninteressen: ['klausurvorbereitung'],
+      lernstil: 'visuell',
+      kurse: ['Testkurs 1', 'Testkurs 2'],
+      verfuegbarkeit: ['wochentags'],
+    };
+    setCurrentUser(mockUser);
+    setLoading(false);
+
+    // The original onAuthStateChanged listener is commented out to enforce the mock user
+    /*
     const unsubscribe = auth.onAuthStateChanged((user: FirebaseUser | null) => {
       if (user) {
         const appUser: AppUser = {
           uid: user.uid,
           email: user.email || '',
-          displayName: (user as any).displayName || '',
+          displayName: (user as any).displayName || null,
           photoURL: (user as any).photoURL || '',
           profileComplete: (user as any).profileComplete !== undefined ? (user as any).profileComplete : false,
           studiengang: (user as any).studiengang || '',
@@ -59,11 +78,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(false);
     });
     return unsubscribe;
+    */
   }, []);
   
   useEffect(() => {
     if (loading) {
-      return; // Wait until auth state is resolved
+      return; 
     }
 
     const isAuthPage = pathname.startsWith('/anmelden') || pathname.startsWith('/registrierung');
@@ -71,32 +91,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const isRootPage = pathname === '/';
 
     if (currentUser) {
-      // User is authenticated
       if (!currentUser.profileComplete) {
-        // Profile is incomplete
-        if (!isProfileSetupPage) { // If not already on profile setup page, redirect
+        if (!isProfileSetupPage) {
           router.replace('/profil-erstellen');
         }
       } else {
-        // Profile is complete
-        // If on auth page, profile setup page, or the root page, redirect to dashboard
         if (isAuthPage || isProfileSetupPage || isRootPage) {
-          if (pathname !== '/dashboard') { // Avoid redirect loop if already on dashboard for some reason
+          if (pathname !== '/dashboard') {
              router.replace('/dashboard');
           }
         }
       }
     } else {
-      // User is not authenticated
-      // If trying to access a protected page (not auth, not profile setup, not root)
-      // or if on the root page and not authenticated, redirect to /anmelden.
       if ((!isAuthPage && !isProfileSetupPage && !isRootPage) || (isRootPage && !isAuthPage)) {
          router.replace('/anmelden');
       }
-      // If on an auth page (/anmelden, /registrierung) and not authenticated, no redirect is needed.
-      // If on profile setup page and not authenticated, this case should also lead to /anmelden.
-      // (The profile setup page should ideally be protected too, but this logic covers it).
-      if(isProfileSetupPage && !isAuthPage){ // Edge case: if somehow on profile setup without auth
+      if(isProfileSetupPage && !isAuthPage){
           router.replace('/anmelden');
       }
     }
@@ -115,27 +125,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   };
 
+  // These functions will not be actively used when bypassing login,
+  // but they are kept for structural integrity.
   const login = async (email: string, pass: string) => {
+    console.warn("Login function called, but AuthContext is set to bypass login.");
     // @ts-ignore
     return auth.signInWithEmailAndPassword(email, pass);
-    // onAuthStateChanged in useEffect will handle setting currentUser and loading state
   };
 
   const register = async (email: string, pass: string) => {
+    console.warn("Register function called, but AuthContext is set to bypass login.");
     // @ts-ignore
     return auth.createUserWithEmailAndPassword(email, pass);
-    // onAuthStateChanged in useEffect will handle setting currentUser and loading state
   };
 
   const logout = async () => {
-    // @ts-ignore
-    await auth.signOut();
-    // onAuthStateChanged will handle currentUser = null
-    // The useEffect hook will then handle redirecting to /anmelden
+    console.warn("Logout function called. To re-enable login, AuthContext needs to be reverted.");
+     // @ts-ignore
+    await auth.signOut(); 
+    // To truly log out and go back to login screen, you'd need to revert the auto-login in useEffect.
+    // For now, this will clear the mock auth state but the auto-login might kick back in on refresh.
+    setCurrentUser(null); 
+    router.replace('/anmelden'); // Manually redirect to login
   };
 
   const sendPasswordReset = async (email: string) => {
-    // @ts-ignore
+     // @ts-ignore
     return auth.sendPasswordResetEmail(email);
   };
 

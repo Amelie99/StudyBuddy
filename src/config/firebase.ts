@@ -18,28 +18,30 @@ let authStateChangedCallback: ((user: any) => void) | null = null;
 
 // Mock implementation for UI development without actual Firebase backend
 const mockAuth = {
-  currentUser: null,
+  currentUser: null, // This will be largely overridden by AuthContext's direct user setting
   onAuthStateChanged: (callback: (user: any) => void) => {
-    authStateChangedCallback = callback; // Store the callback
-
-    // Simulate initial auth check based on the current mockAuth.currentUser state
-    setTimeout(() => {
-      // @ts-ignore
-      if (authStateChangedCallback) authStateChangedCallback(mockAuth.currentUser);
-    }, 50); // Short delay for initial check
-
+    // This mock onAuthStateChanged is simplified as AuthContext will now directly set a user.
+    // It can call back with null initially if desired, but AuthContext will override.
+    authStateChangedCallback = callback;
+    // console.log("firebase.ts: onAuthStateChanged listener registered by AuthContext.");
+    // // Optionally, simulate an initial "not logged in" state if AuthContext doesn't set user immediately
+    // setTimeout(() => {
+    //   if (authStateChangedCallback) authStateChangedCallback(mockAuth.currentUser);
+    // }, 0); 
     return () => { // Unsubscribe function
+      // console.log("firebase.ts: onAuthStateChanged listener unregistered.");
       authStateChangedCallback = null;
     };
   },
   signInWithEmailAndPassword: async (email?: string, password?: string) => {
+    console.log("firebase.ts: signInWithEmailAndPassword called (mock)");
     if (email && password && email.endsWith('@stud.haw-landshut.de')) {
-      let mockUserProperties = {
-        uid: 'mock-user-id-' + email.split('@')[0], // Make UID somewhat unique for testing
+      let mockUserProperties: any = {
+        uid: 'mock-user-id-' + email.split('@')[0],
         email,
-        displayName: 'Neuer Nutzer', 
+        displayName: 'Eingeloggter Nutzer', 
         photoURL: '',
-        profileComplete: false, // Default for new users
+        profileComplete: false, 
         studiengang: '',
         semester: '',
         ueberMich: '',
@@ -51,32 +53,30 @@ const mockAuth = {
 
       if (email === 'max.mustermann@stud.haw-landshut.de') {
           mockUserProperties.displayName = 'Max Mustermann';
-          mockUserProperties.profileComplete = true; // Max's profile is complete
-          // Optionally, pre-fill Max's other details if needed for testing
+          mockUserProperties.profileComplete = true; 
           mockUserProperties.studiengang = "Informatik";
           mockUserProperties.semester = "4";
       }
       
       // @ts-ignore
       mockAuth.currentUser = mockUserProperties;
-      // @ts-ignore
-      if (authStateChangedCallback) authStateChangedCallback(mockAuth.currentUser); // Manually trigger
+      if (authStateChangedCallback) authStateChangedCallback(mockAuth.currentUser);
       return { user: mockUserProperties };
     }
     // @ts-ignore
-    mockAuth.currentUser = null; // Failed login
-    // @ts-ignore
-    if (authStateChangedCallback) authStateChangedCallback(mockAuth.currentUser); // Manually trigger
+    mockAuth.currentUser = null; 
+    if (authStateChangedCallback) authStateChangedCallback(mockAuth.currentUser);
     throw new Error('Ungültige Anmeldeinformationen oder Domain.');
   },
   createUserWithEmailAndPassword: async (email?: string, password?: string) => {
+    console.log("firebase.ts: createUserWithEmailAndPassword called (mock)");
      if (email && password && email.endsWith('@stud.haw-landshut.de')) {
       const mockUser = {
         uid: 'new-mock-user-id-' +  email.split('@')[0],
         email,
-        displayName: null, // New users don't have a display name yet
+        displayName: null, 
         photoURL: '',
-        profileComplete: false, // New users need to complete profile
+        profileComplete: false, 
         studiengang: '',
         semester: '',
         ueberMich: '',
@@ -85,23 +85,21 @@ const mockAuth = {
         kurse: [],
         verfuegbarkeit: [],
       };
-       // @ts-ignore
-      mockAuth.currentUser = mockUser;
       // @ts-ignore
-      if (authStateChangedCallback) authStateChangedCallback(mockAuth.currentUser); // Manually trigger
+      mockAuth.currentUser = mockUser;
+      if (authStateChangedCallback) authStateChangedCallback(mockAuth.currentUser);
       return { user: mockUser };
     }
     // @ts-ignore
-    mockAuth.currentUser = null; // Failed registration
-    // @ts-ignore
-    if (authStateChangedCallback) authStateChangedCallback(mockAuth.currentUser); // Manually trigger
+    mockAuth.currentUser = null;
+    if (authStateChangedCallback) authStateChangedCallback(mockAuth.currentUser);
     throw new Error('Ungültige E-Mail-Domain oder Passwort.');
   },
   signOut: async () => {
-     // @ts-ignore
-    mockAuth.currentUser = null;
+    console.log("firebase.ts: signOut called (mock)");
     // @ts-ignore
-    if (authStateChangedCallback) authStateChangedCallback(mockAuth.currentUser); // Manually trigger
+    mockAuth.currentUser = null;
+    if (authStateChangedCallback) authStateChangedCallback(mockAuth.currentUser);
   },
   sendPasswordResetEmail: async (email:string) => {
     if (!email) throw new Error("Email is required for password reset");
