@@ -38,13 +38,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // @ts-ignore
     const unsubscribe = auth.onAuthStateChanged((user: FirebaseUser | null) => {
       if (user) {
-        // Ensure all AppUser fields are mapped from the Firebase user (or mock)
-        // The mock user object in firebase.ts should provide these fields
         const appUser: AppUser = {
           uid: user.uid,
           email: user.email || '',
-          displayName: user.displayName || '',
-          photoURL: (user as any).photoURL || '', // Cast to any if mock adds fields
+          displayName: (user as any).displayName || '',
+          photoURL: (user as any).photoURL || '',
           profileComplete: (user as any).profileComplete !== undefined ? (user as any).profileComplete : false,
           studiengang: (user as any).studiengang || '',
           semester: (user as any).semester || '',
@@ -70,29 +68,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const isAuthPage = pathname.startsWith('/anmelden') || pathname.startsWith('/registrierung');
     const isProfileSetupPage = pathname.startsWith('/profil-erstellen');
+    const isRootPage = pathname === '/';
 
-    if (!currentUser) {
-      // Not authenticated
-      // If not on an auth page, redirect to /anmelden.
-      // This includes the root page '/' which will redirect to /anmelden if not authenticated.
-      if (!isAuthPage && pathname !== '/anmelden') {
-        router.replace('/anmelden');
-      }
-    } else {
-      // Authenticated
+    if (currentUser) {
+      // User is authenticated
       if (!currentUser.profileComplete) {
-        // Profile incomplete
-        // If not on the profile setup page or an auth page, redirect to /profil-erstellen.
-        // This includes the root page '/' which will redirect to /profil-erstellen if profile is incomplete.
-        if (!isProfileSetupPage && !isAuthPage && pathname !== '/profil-erstellen') {
+        // Profile is incomplete
+        if (!isProfileSetupPage) { // If not already on profile setup page, redirect
           router.replace('/profil-erstellen');
         }
       } else {
-        // Profile complete
-        // If on an auth page, profile setup page, or the root page, redirect to dashboard.
-        if ((isAuthPage || isProfileSetupPage || pathname === '/') && pathname !== '/dashboard') {
-          router.replace('/dashboard');
+        // Profile is complete
+        // If on auth page, profile setup page, or the root page, redirect to dashboard
+        if (isAuthPage || isProfileSetupPage || isRootPage) {
+          if (pathname !== '/dashboard') { // Avoid redirect loop if already on dashboard for some reason
+             router.replace('/dashboard');
+          }
         }
+      }
+    } else {
+      // User is not authenticated
+      // If trying to access a protected page (not auth, not profile setup, not root)
+      // or if on the root page and not authenticated, redirect to /anmelden.
+      if ((!isAuthPage && !isProfileSetupPage && !isRootPage) || (isRootPage && !isAuthPage)) {
+         router.replace('/anmelden');
+      }
+      // If on an auth page (/anmelden, /registrierung) and not authenticated, no redirect is needed.
+      // If on profile setup page and not authenticated, this case should also lead to /anmelden.
+      // (The profile setup page should ideally be protected too, but this logic covers it).
+      if(isProfileSetupPage && !isAuthPage){ // Edge case: if somehow on profile setup without auth
+          router.replace('/anmelden');
       }
     }
   }, [currentUser, loading, router, pathname]);
@@ -101,43 +106,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setCurrentUser(prevUser => {
       if (!prevUser) return null;
       const newUser = { ...prevUser, ...updatedData };
-      // Also update the mock user in firebase.ts if this were a real backend call
-      // For now, this just updates context state.
       // @ts-ignore
       if (auth.currentUser && auth.currentUser.uid === newUser.uid) {
          // @ts-ignore
-        Object.assign(auth.currentUser, updatedData); // Keep mock in sync
+        Object.assign(auth.currentUser, updatedData); 
       }
       return newUser;
     });
   };
 
-
   const login = async (email: string, pass: string) => {
     // @ts-ignore
-    const result = await auth.signInWithEmailAndPassword(email, pass);
-    // @ts-ignore
-    if (result.user) { // onAuthStateChanged will handle setting currentUser state
-      // No need to setCurrentUser here, onAuthStateChanged will fire
-    }
-    return result;
+    return auth.signInWithEmailAndPassword(email, pass);
+    // onAuthStateChanged in useEffect will handle setting currentUser and loading state
   };
 
   const register = async (email: string, pass: string) => {
     // @ts-ignore
-    const result = await auth.createUserWithEmailAndPassword(email, pass);
-    // @ts-ignore
-    if (result.user) { // onAuthStateChanged will handle setting currentUser state
-       // No need to setCurrentUser here, onAuthStateChanged will fire
-    }
-    return result;
+    return auth.createUserWithEmailAndPassword(email, pass);
+    // onAuthStateChanged in useEffect will handle setting currentUser and loading state
   };
 
   const logout = async () => {
     // @ts-ignore
     await auth.signOut();
-    // setCurrentUser(null); // onAuthStateChanged will handle this
-    // router.replace('/anmelden'); // Redirect is handled by useEffect
+    // onAuthStateChanged will handle currentUser = null
+    // The useEffect hook will then handle redirecting to /anmelden
   };
 
   const sendPasswordReset = async (email: string) => {
