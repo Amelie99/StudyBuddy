@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -49,7 +50,7 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
     } catch (error: any) {
       toast({
         title: 'Anmeldefehler',
-        description: error.message || 'Anmeldung fehlgeschlagen. Bitte versuchen Sie es erneut.',
+        description: String(error?.message || 'Anmeldung fehlgeschlagen. Bitte versuchen Sie es erneut.'),
         variant: 'destructive',
       });
     } finally {
@@ -69,7 +70,7 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
       setShowPasswordReset(false);
       setResetEmail('');
     } catch (error: any) {
-      toast({ title: 'Fehler', description: error.message || 'Fehler beim Senden der E-Mail zum Zurücksetzen des Passworts.', variant: 'destructive' });
+      toast({ title: 'Fehler', description: String(error?.message || 'Fehler beim Senden der E-Mail zum Zurücksetzen des Passworts.'), variant: 'destructive' });
     } finally {
       setIsLoading(false);
     }
