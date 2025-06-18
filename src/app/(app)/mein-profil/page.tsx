@@ -15,7 +15,7 @@ import { lerninteressenOptions, lernstilOptions, verfuegbarkeitOptions, studieng
 import type { AppUser } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Loader2, Edit3, Save, ShieldCheck, Star } from 'lucide-react';
+import { Loader2, Edit3, Save, ShieldCheck, Star, Users } from 'lucide-react';
 import Image from 'next/image';
 
 const profileSchema = z.object({
@@ -242,3 +242,4 @@ const Badge: React.FC<{ children: React.ReactNode; variant?: 'default' | 'second
     {children}
   </span>
 );
+
