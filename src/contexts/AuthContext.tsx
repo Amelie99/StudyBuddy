@@ -1,3 +1,4 @@
+
 'use client';
 
 import type { User as FirebaseUser } from 'firebase/auth';
@@ -14,6 +15,7 @@ interface AuthContextType {
   logout: () => Promise<void>;
   sendPasswordReset: (email: string) => Promise<void>;
   isHochschuleEmail: (email: string) => boolean;
+  updateAuthContextUser: (updatedUser: Partial<AppUser>) => void; // For profile updates
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -36,13 +38,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // @ts-ignore
     const unsubscribe = auth.onAuthStateChanged((user: FirebaseUser | null) => {
       if (user) {
-        setCurrentUser({
+        // Ensure all AppUser fields are mapped from the Firebase user (or mock)
+        // The mock user object in firebase.ts should provide these fields
+        const appUser: AppUser = {
           uid: user.uid,
           email: user.email || '',
           displayName: user.displayName || '',
-          // @ts-ignore
-          profileComplete: user.profileComplete !== undefined ? user.profileComplete : false,
-        });
+          photoURL: (user as any).photoURL || '', // Cast to any if mock adds fields
+          profileComplete: (user as any).profileComplete !== undefined ? (user as any).profileComplete : false,
+          studiengang: (user as any).studiengang || '',
+          semester: (user as any).semester || '',
+          ueberMich: (user as any).ueberMich || '',
+          lerninteressen: (user as any).lerninteressen || [],
+          lernstil: (user as any).lernstil || '',
+          kurse: (user as any).kurse || [],
+          verfuegbarkeit: (user as any).verfuegbarkeit || [],
+        };
+        setCurrentUser(appUser);
       } else {
         setCurrentUser(null);
       }
@@ -63,7 +75,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Not authenticated
       // If not on an auth page, redirect to /anmelden.
       // This includes the root page '/' which will redirect to /anmelden if not authenticated.
-      if (!isAuthPage) {
+      if (!isAuthPage && pathname !== '/anmelden') {
         router.replace('/anmelden');
       }
     } else {
@@ -72,34 +84,41 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // Profile incomplete
         // If not on the profile setup page or an auth page, redirect to /profil-erstellen.
         // This includes the root page '/' which will redirect to /profil-erstellen if profile is incomplete.
-        if (!isProfileSetupPage && !isAuthPage) {
+        if (!isProfileSetupPage && !isAuthPage && pathname !== '/profil-erstellen') {
           router.replace('/profil-erstellen');
         }
       } else {
         // Profile complete
         // If on an auth page, profile setup page, or the root page, redirect to dashboard.
-        if (isAuthPage || isProfileSetupPage || pathname === '/') {
+        if ((isAuthPage || isProfileSetupPage || pathname === '/') && pathname !== '/dashboard') {
           router.replace('/dashboard');
         }
       }
     }
   }, [currentUser, loading, router, pathname]);
 
+  const updateAuthContextUser = (updatedData: Partial<AppUser>) => {
+    setCurrentUser(prevUser => {
+      if (!prevUser) return null;
+      const newUser = { ...prevUser, ...updatedData };
+      // Also update the mock user in firebase.ts if this were a real backend call
+      // For now, this just updates context state.
+      // @ts-ignore
+      if (auth.currentUser && auth.currentUser.uid === newUser.uid) {
+         // @ts-ignore
+        Object.assign(auth.currentUser, updatedData); // Keep mock in sync
+      }
+      return newUser;
+    });
+  };
+
 
   const login = async (email: string, pass: string) => {
     // @ts-ignore
     const result = await auth.signInWithEmailAndPassword(email, pass);
     // @ts-ignore
-    if (result.user) {
-       // @ts-ignore
-      const user = result.user;
-      setCurrentUser({
-        uid: user.uid,
-        email: user.email || '',
-        displayName: user.displayName || 'Mock User',
-        // @ts-ignore // Assume profileComplete from mock or default
-        profileComplete: user.profileComplete !== undefined ? user.profileComplete : false, 
-      });
+    if (result.user) { // onAuthStateChanged will handle setting currentUser state
+      // No need to setCurrentUser here, onAuthStateChanged will fire
     }
     return result;
   };
@@ -108,15 +127,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // @ts-ignore
     const result = await auth.createUserWithEmailAndPassword(email, pass);
     // @ts-ignore
-    if (result.user) {
-      // @ts-ignore
-      const user = result.user;
-      setCurrentUser({
-        uid: user.uid,
-        email: user.email || '',
-        displayName: user.displayName || null, // DisplayName is set during profile creation
-        profileComplete: false, // Profile is not complete upon registration
-      });
+    if (result.user) { // onAuthStateChanged will handle setting currentUser state
+       // No need to setCurrentUser here, onAuthStateChanged will fire
     }
     return result;
   };
@@ -124,8 +136,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = async () => {
     // @ts-ignore
     await auth.signOut();
-    setCurrentUser(null);
-    router.replace('/anmelden'); // Use replace to avoid back button to authenticated state
+    // setCurrentUser(null); // onAuthStateChanged will handle this
+    // router.replace('/anmelden'); // Redirect is handled by useEffect
   };
 
   const sendPasswordReset = async (email: string) => {
@@ -145,6 +157,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     logout,
     sendPasswordReset,
     isHochschuleEmail,
+    updateAuthContextUser,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
