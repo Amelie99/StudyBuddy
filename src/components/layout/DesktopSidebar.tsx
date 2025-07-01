@@ -38,7 +38,7 @@ export function DesktopSidebar() {
           {/* Expanded Logo */}
           <HochschuleLogo className="h-10 w-40 group-data-[state=collapsed]:hidden" />
           {/* Collapsed Logo */}
-          <HochschuleLogo className="h-8 w-8 hidden group-data-[state=collapsed]:block" />
+          <HochschuleLogo iconOnly className="h-8 w-8 hidden group-data-[state=collapsed]:block" />
         </Link>
         <div className="w-full flex justify-start group-data-[collapsible=icon]:justify-center">
            <SidebarTrigger />
