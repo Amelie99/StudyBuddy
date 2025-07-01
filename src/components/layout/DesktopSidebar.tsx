@@ -38,7 +38,7 @@ export function DesktopSidebar() {
           <HochschuleLogo className="h-12 w-auto" />
         </Link>
         <div className="w-full flex justify-start group-data-[collapsible=icon]:justify-center">
-           <SidebarTrigger className="group-data-[collapsible=icon]:hidden" />
+           <SidebarTrigger />
         </div>
       </SidebarHeader>
       
