@@ -33,14 +33,14 @@ export function DesktopSidebar() {
 
   return (
     <Sidebar collapsible="icon" className="border-r">
-      <SidebarHeader className="p-4 flex flex-col items-center">
+      <SidebarHeader className="p-4 flex flex-col items-center group-data-[state=collapsed]:p-2 transition-all duration-200">
         <Link href="/dashboard" className="mb-4 block h-12 w-full flex items-center justify-start group-data-[state=collapsed]:justify-center">
           {/* Expanded Logo */}
           <HochschuleLogo className="h-10 w-40 group-data-[state=collapsed]:hidden" />
           {/* Collapsed Logo */}
           <HochschuleLogo iconOnly className="h-8 w-8 hidden group-data-[state=collapsed]:block" />
         </Link>
-        <div className="w-full flex justify-start group-data-[collapsible=icon]:justify-center">
+        <div className="w-full flex justify-start group-data-[state=collapsed]:justify-center">
            <SidebarTrigger />
         </div>
       </SidebarHeader>
@@ -76,7 +76,7 @@ export function DesktopSidebar() {
         </SidebarMenu>
       </SidebarContent>
       
-      <SidebarFooter className="p-4 mt-auto border-t">
+      <SidebarFooter className="p-4 mt-auto border-t group-data-[state=collapsed]:p-2 transition-all duration-200">
         {currentUser && (
           <SidebarMenu>
             <SidebarMenuItem>
