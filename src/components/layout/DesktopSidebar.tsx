@@ -34,8 +34,9 @@ export function DesktopSidebar() {
   return (
     <Sidebar collapsible="icon" className="border-r">
       <SidebarHeader className="p-4 flex flex-col items-center">
-        <Link href="/dashboard" className="mb-4 block">
-          <HochschuleLogo className="h-12 w-auto" />
+        <Link href="/dashboard" className="mb-4 block h-12 flex items-center justify-center">
+          <HochschuleLogo className="h-12 w-auto group-data-[state=collapsed]:hidden" />
+          <HochschuleLogo iconOnly className="h-8 w-8 hidden group-data-[state=collapsed]:block" />
         </Link>
         <div className="w-full flex justify-start group-data-[collapsible=icon]:justify-center">
            <SidebarTrigger />
