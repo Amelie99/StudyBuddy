@@ -74,7 +74,7 @@ export function RegistrationForm({ onSwitchToLogin }: RegistrationFormProps) {
             <FormItem>
               <FormLabel>E-Mail</FormLabel>
               <FormControl>
-                <Input type="email" placeholder={`name${HAW_LANDSHUT_EMAIL_DOMAIN}`} {...field} />
+                <Input type="email" placeholder="name@haw-landshut.de" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

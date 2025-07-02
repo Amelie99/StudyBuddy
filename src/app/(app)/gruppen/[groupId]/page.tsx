@@ -165,7 +165,7 @@ export default function GroupDetailPage() {
                     <Input 
                       id="invite-email" 
                       type="email" 
-                      placeholder="name@stud.haw-landshut.de" 
+                      placeholder="name@haw-landshut.de" 
                       value={inviteEmail}
                       onChange={(e) => setInviteEmail(e.target.value)}
                     />
