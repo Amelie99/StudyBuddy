@@ -139,14 +139,6 @@ export default function SessionDetailPage() {
                             ))}
                          </div>
                     </div>
-
-                    <Separator />
-
-                    <div className="flex flex-col sm:flex-row gap-2 pt-2">
-                        <Button className="w-full sm:w-auto">Teilnahme bestätigen</Button>
-                        <Button variant="outline" className="w-full sm:w-auto">Vielleicht</Button>
-                        <Button variant="destructive" className="w-full sm:w-auto">Absagen</Button>
-                    </div>
                 </CardContent>
             </Card>
         </div>
