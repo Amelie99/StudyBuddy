@@ -7,10 +7,11 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
 const conversations = [
-  { id: "1", name: "Max Mustermann", lastMessage: "Klar, lass uns das morgen besprechen!", timestamp: "10:30", unread: 2, avatar: "https://placehold.co/100x100.png", dataAiHint: "man person" },
-  { id: "2", name: "Lerngruppe Mathe Profis", lastMessage: "Lisa: Super Idee!", timestamp: "Gestern", unread: 0, avatar: "https://placehold.co/100x100.png", dataAiHint: "group icon" },
+  { id: "1", name: "Lisa Schmidt", lastMessage: "Super, danke dir!", timestamp: "11:45", unread: 1, avatar: "https://placehold.co/100x100.png", dataAiHint: "woman student" },
+  { id: "2", name: "David Meier", lastMessage: "Können wir uns morgen treffen?", timestamp: "10:30", unread: 0, avatar: "https://placehold.co/100x100.png", dataAiHint: "man student" },
+  { id: "group-1", name: "Mathe Profis WS23/24", lastMessage: "Max: Ich lade die neue Version hoch.", timestamp: "Gestern", unread: 3, avatar: "https://placehold.co/100x100.png", dataAiHint: "group icon" },
+  { id: "group-2", name: "SE Projekt 'LernApp'", lastMessage: "Perfekt, danke!", timestamp: "18.12.", unread: 0, avatar: "https://placehold.co/100x100.png", dataAiHint: "team collaboration" },
   { id: "3", name: "Sarah Chen", lastMessage: "Danke für die Hilfe :)", timestamp: "Mo", unread: 0, avatar: "https://placehold.co/100x100.png", dataAiHint: "woman smiling" },
-  { id: "4", name: "Projekt SE Team", lastMessage: "David: Ich lade die neue Version hoch.", timestamp: "18.12.", unread: 5, avatar: "https://placehold.co/100x100.png", dataAiHint: "team collaboration" },
 ];
 
 export default function ChatsPage() {

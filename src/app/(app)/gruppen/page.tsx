@@ -43,7 +43,7 @@ export default function GruppenPage() {
               </CardContent>
               <CardFooter className="flex justify-between">
                 <Button variant="outline" size="sm" asChild>
-                  <Link href={`/chats/group-${group.id}`}> {/* Example chat link */}
+                  <Link href={`/chats/group-${group.id}`}> 
                     <MessageSquare className="mr-2 h-4 w-4" /> Chat
                   </Link>
                 </Button>

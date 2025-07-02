@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Send, CalendarPlus, Phone, Video, Smile, Paperclip, Loader2 } from 'lucide-react';
+import { ArrowLeft, Send, CalendarPlus, Smile, Paperclip, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import React, { useEffect, useState, useRef } from 'react';
 import { cn } from '@/lib/utils';
@@ -17,28 +17,56 @@ const fetchChatDetails = async (chatId: string) => {
   await new Promise(resolve => setTimeout(resolve, 300)); // Simulate API call
   
   const chats: {[key: string]: any} = {
-    "1": {
+    "1": { // Lisa Schmidt
       id: "1",
-      name: "Max Mustermann",
-      avatar: "https://placehold.co/100x100.png",
-      dataAiHint: "man student",
+      name: "Lisa Schmidt",
+      avatar: "https://placehold.co/100x100.png", dataAiHint: "woman student",
       type: "user",
       messages: [
-        { id: "m1", senderId: "user1", text: "Hallo Max, hast du Zeit für die Matheaufgaben?", timestamp: "10:30", self: false },
+        { id: "m1", senderId: "user1", text: "Hallo, hast du Zeit für die Matheaufgaben?", timestamp: "10:30", self: false },
         { id: "m2", senderId: "currentUser", text: "Hey! Ja, klar. Wann passt es dir?", timestamp: "10:31", self: true },
-        { id: "m3", senderId: "user1", text: "Morgen Vormittag?", timestamp: "10:32", self: false },
+        { id: "m3", senderId: "user1", text: "Super, danke dir!", timestamp: "11:45", self: false },
       ]
     },
-    "group-1": {
+    "2": { // David Meier
+      id: "2",
+      name: "David Meier",
+      avatar: "https://placehold.co/100x100.png", dataAiHint: "man student",
+      type: "user",
+      messages: [
+        { id: "dm1", senderId: "user2", text: "Können wir uns morgen treffen?", timestamp: "10:30", self: false },
+      ]
+    },
+    "3": { // Sarah Chen
+      id: "3",
+      name: "Sarah Chen",
+      avatar: "https://placehold.co/100x100.png", dataAiHint: "woman smiling",
+      type: "user",
+      messages: [
+        { id: "sc1", senderId: "user3", text: "Danke für die Hilfe :)", timestamp: "Mo", self: false },
+      ]
+    },
+    "group-1": { // Mathe Profis
       id: "group-1",
-      name: "Lerngruppe Mathe Profis",
-      avatar: "https://placehold.co/100x100.png",
-      dataAiHint: "group icon",
+      name: "Mathe Profis WS23/24",
+      avatar: "https://placehold.co/100x100.png", dataAiHint: "group icon",
       type: "group",
       membersCount: 5,
       messages: [
         { id: "gm1", senderId: "user2", senderName: "Lisa", text: "Hat jemand die Lösungen für Blatt 3?", timestamp: "Gestern 14:00", self: false },
         { id: "gm2", senderId: "currentUser", text: "Ich schau mal nach.", timestamp: "Gestern 14:05", self: true },
+        { id: "gm3", senderId: "currentUser", senderName: "Max", text: "Ich lade die neue Version hoch.", timestamp: "Gestern", self: true },
+      ]
+    },
+    "group-2": { // SE Projekt
+      id: "group-2",
+      name: "SE Projekt 'LernApp'",
+      avatar: "https://placehold.co/100x100.png", dataAiHint: "team collaboration",
+      type: "group",
+      membersCount: 3,
+      messages: [
+        { id: "se1", senderId: "user2", senderName: "David", text: "Ich hab den neuen Sprint Plan commited.", timestamp: "18.12.", self: false },
+        { id: "se2", senderId: "currentUser", text: "Perfekt, danke!", timestamp: "18.12.", self: true },
       ]
     }
   };
@@ -128,8 +156,6 @@ export default function ChatDetailPage() {
           {chatDetails.type === 'user' && <p className="text-xs text-green-500">Online</p>}
         </div>
         <div className="flex items-center space-x-2">
-          {/* <Button variant="ghost" size="icon"><Phone className="h-5 w-5" /></Button>
-          <Button variant="ghost" size="icon"><Video className="h-5 w-5" /></Button> */}
           <Button variant="outline" size="sm" asChild>
             <Link href={`/kalender/event-erstellen?chatId=${chatId}`}>
               <CalendarPlus className="mr-1.5 h-4 w-4" /> Sitzung planen

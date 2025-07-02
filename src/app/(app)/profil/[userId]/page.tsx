@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { ArrowLeft, Loader2, MessageSquare } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { lerninteressenOptions, lernstilOptions, verfuegbarkeitOptions } from '@/lib/constants';
-import Image from 'next/image';
+import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 
 // Mock data fetching for a user
@@ -31,9 +31,6 @@ const fetchUserDetails = async (userId: string) => {
       lernstil: "diskussion",
       kurse: "Einführung in die Soziale Arbeit, Wissenschaftliches Arbeiten",
       verfuegbarkeit: ["wochentags", "flexibel"],
-      badges: [
-          { id: 1, name: "Gründergeist", image: "https://placehold.co/80x80.png", dataAiHint:"shield award" },
-      ]
     },
     "2": {
       id: "2",
@@ -47,10 +44,6 @@ const fetchUserDetails = async (userId: string) => {
       lernstil: "visuell",
       kurse: "Regelungstechnik II, Simulationstechnik",
       verfuegbarkeit: ["abends"],
-      badges: [
-           { id: 2, name: "Feedback-Champion", image: "https://placehold.co/80x80.png", dataAiHint:"star badge" },
-           { id: 3, name: "Teamplayer", image: "https://placehold.co/80x80.png", dataAiHint:"team award" },
-      ]
     },
   };
   return users[userId] || null;
@@ -112,7 +105,11 @@ export default function UserProfilePage() {
                 </CardHeader>
                 <CardContent className="space-y-6 pt-6">
                     <div className="flex justify-center gap-2">
-                        <Button><MessageSquare className="mr-2 h-4 w-4" /> Nachricht senden</Button>
+                        <Button asChild>
+                            <Link href={`/chats/${user.id}`}>
+                               <MessageSquare className="mr-2 h-4 w-4" /> Nachricht senden
+                            </Link>
+                        </Button>
                     </div>
                     <div>
                         <h3 className="font-semibold text-lg mb-1">Über Mich</h3>
