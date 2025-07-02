@@ -193,6 +193,13 @@ export default function DashboardPage() {
                 </Button>
             </CardContent>
           </Card>
+          
+          <Card className="border-dashed">
+            <CardContent className="p-4 text-center">
+              <p className="text-sm text-muted-foreground">Hier könnte Ihre Werbung stehen!</p>
+            </CardContent>
+          </Card>
+
           <Card>
             <CardHeader>
               <CardTitle>Schnellzugriff</CardTitle>
