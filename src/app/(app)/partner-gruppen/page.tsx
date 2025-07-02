@@ -6,17 +6,12 @@ import { PlusCircle, Users, MessageSquare, User, Search } from "lucide-react";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useGroups } from "@/contexts/GroupsContext";
-
-// Mock data for partners remains local to this component for now
-const myPartners = [
-  { id: "1", name: "Lisa Schmidt", course: "Soziale Arbeit", avatar: "https://placehold.co/100x100.png", dataAiHint: "woman student" },
-  { id: "2", name: "David Meier", course: "Master Elektrotechnik", avatar: "https://placehold.co/100x100.png", dataAiHint: "man student" },
-  { id: "3", name: "Sarah Chen", course: "Betriebswirtschaft (BWL)", avatar: "https://placehold.co/100x100.png", dataAiHint: "woman smiling" },
-];
+import { usePartners } from "@/contexts/PartnersContext";
 
 
 export default function PartnerAndGroupsPage() {
   const { groups: myGroups } = useGroups();
+  const { partners: myPartners } = usePartners();
 
   return (
     <div className="container mx-auto py-8">

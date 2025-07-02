@@ -2,6 +2,7 @@
 'use client';
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { Heart, Search, SlidersHorizontal, X, CheckCircle } from "lucide-react";
+import { Heart, Search, SlidersHorizontal, X, CheckCircle, MessageSquare } from "lucide-react";
 import Image from "next/image";
 import {
   AlertDialog,
@@ -20,9 +21,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { usePartners, type SuggestedPartner } from "@/contexts/PartnersContext";
+import Link from "next/link";
 
 // Mock data for swipe cards
-const initialPartners = [
+const initialPartners: SuggestedPartner[] = [
   { id: 1, name: "Anna Kurz", studiengang: "Informatik, 3. Sem.", image: "https://placehold.co/300x400.png", dataAiHint:"woman programmer", mutualInterests: ["Web-Entwicklung", "Python"] },
   { id: 2, name: "Markus Lang", studiengang: "BWL, 5. Sem.", image: "https://placehold.co/300x400.png", dataAiHint: "man business", mutualInterests: ["Marketing", "Statistik"] },
   { id: 3, name: "Julia Klein", studiengang: "Soziale Arbeit, 1. Sem.", image: "https://placehold.co/300x400.png", dataAiHint:"woman social", mutualInterests: ["Grundlagen Psychologie"] },
@@ -31,11 +34,24 @@ const initialPartners = [
 export default function PartnerFindenPage() {
   const [partners, setPartners] = useState(initialPartners);
   const [showMatchDialog, setShowMatchDialog] = useState(false);
-  const [matchedPartnerName, setMatchedPartnerName] = useState("");
+  const [matchedPartner, setMatchedPartner] = useState<SuggestedPartner | null>(null);
+  const { addPartner } = usePartners();
+  const router = useRouter();
+
+  const advanceQueueAndClose = () => {
+    setShowMatchDialog(false);
+    // Use a timeout to allow the dialog to close before the card disappears
+    setTimeout(() => {
+        setPartners(currentPartners => currentPartners.slice(1));
+        setMatchedPartner(null);
+    }, 150);
+  };
 
   const handleInterest = () => {
     if (partners.length === 0) return;
-    setMatchedPartnerName(partners[0].name);
+    const currentPartner = partners[0];
+    addPartner(currentPartner); // Automatically add partner to the user's list
+    setMatchedPartner(currentPartner);
     setShowMatchDialog(true);
   };
   
@@ -43,11 +59,11 @@ export default function PartnerFindenPage() {
      if (partners.length === 0) return;
      setPartners(currentPartners => currentPartners.slice(1));
   }
-  
-  const handleContinueSearching = () => {
-    setShowMatchDialog(false);
-    // Move to the next partner after closing the dialog
-    setPartners(currentPartners => currentPartners.slice(1));
+
+  const handleChat = () => {
+    if (!matchedPartner) return;
+    router.push(`/chats/${matchedPartner.id}`);
+    advanceQueueAndClose();
   };
 
   return (
@@ -191,11 +207,15 @@ export default function PartnerFindenPage() {
             <CheckCircle className="h-16 w-16 text-green-500 mb-2" />
             <AlertDialogTitle className="text-2xl">Lernpartner gefunden!</AlertDialogTitle>
             <AlertDialogDescription>
-              Super! Du und {matchedPartnerName} habt Interesse aneinander. Starte doch gleich ein Gespräch im Chat.
+              Super! Du und {matchedPartner?.name} habt Interesse aneinander. Starte doch gleich ein Gespräch oder suche weiter.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogAction onClick={handleContinueSearching} className="w-full">Suche weiter</AlertDialogAction>
+          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+            <Button onClick={advanceQueueAndClose} className="w-full sm:w-auto" variant="outline">Suche weiter</Button>
+            <Button onClick={handleChat} className="w-full sm:w-auto">
+               <MessageSquare className="mr-2 h-4 w-4" />
+               Chat starten
+            </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

@@ -9,16 +9,12 @@ import Link from "next/link";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 import { useState } from "react";
+import { usePartners } from "@/contexts/PartnersContext";
 
 // Mock data
 const upcomingSessions = [
   { id: 1, title: "Mathe II Lerngruppe", time: "Morgen, 10:00 Uhr", type: "Gruppe" },
   { id: 2, title: "Projektbesprechung SE", time: "25. Dez, 14:30 Uhr", type: "Einzel" },
-];
-
-const learningPartners = [
-  { id: 1, name: "Lisa Schmidt", course: "Soziale Arbeit", avatar: "https://placehold.co/100x100.png", dataAiHint: "woman student" },
-  { id: 2, name: "David Meier", course: "Master Elektrotechnik", avatar: "https://placehold.co/100x100.png", dataAiHint: "man student" },
 ];
 
 const initialNotifications = [
@@ -31,6 +27,7 @@ export default function DashboardPage() {
   const { currentUser } = useAuth();
   const [notifications, setNotifications] = useState(initialNotifications);
   const [isProfileProgressVisible, setProfileProgressVisible] = useState(true);
+  const { partners: learningPartners } = usePartners();
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
@@ -65,13 +62,15 @@ export default function DashboardPage() {
           <PopoverContent className="w-80" align="end">
             <div className="grid gap-4">
               <div className="space-y-2">
-                <h4 className="font-medium leading-none">Benachrichtigungen</h4>
+                <div className="space-y-1">
+                  <h4 className="font-medium leading-none">Benachrichtigungen</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Du hast {unreadCount} ungelesene {unreadCount === 1 ? 'Nachricht' : 'Nachrichten'}.
+                  </p>
+                </div>
                 <Button variant="link" size="sm" className="h-auto p-0 text-xs justify-start" onClick={handleMarkAllRead} disabled={unreadCount === 0}>
                     Alle als gelesen markieren
                 </Button>
-                <p className="text-sm text-muted-foreground">
-                  Du hast {unreadCount} ungelesene {unreadCount === 1 ? 'Nachricht' : 'Nachrichten'}.
-                </p>
               </div>
               <Separator />
                {notifications.length > 0 ? (
