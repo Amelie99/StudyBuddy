@@ -9,7 +9,7 @@ import Link from "next/link";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 import { useState } from "react";
-import { usePartners } from "@/contexts/PartnersContext";
+import { useBuddies } from "@/contexts/PartnersContext";
 
 // Mock data
 const upcomingSessions = [
@@ -27,7 +27,7 @@ export default function DashboardPage() {
   const { currentUser } = useAuth();
   const [notifications, setNotifications] = useState(initialNotifications);
   const [isProfileProgressVisible, setProfileProgressVisible] = useState(true);
-  const { partners: learningPartners } = usePartners();
+  const { buddies } = useBuddies();
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
@@ -62,12 +62,10 @@ export default function DashboardPage() {
           <PopoverContent className="w-80" align="end">
             <div className="grid gap-4">
               <div className="space-y-2">
-                <div className="space-y-1">
-                  <h4 className="font-medium leading-none">Benachrichtigungen</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Du hast {unreadCount} ungelesene {unreadCount === 1 ? 'Nachricht' : 'Nachrichten'}.
-                  </p>
-                </div>
+                <h4 className="font-medium leading-none">Benachrichtigungen</h4>
+                <p className="text-sm text-muted-foreground mb-2">
+                  Du hast {unreadCount} ungelesene {unreadCount === 1 ? 'Nachricht' : 'Nachrichten'}.
+                </p>
                 <Button variant="link" size="sm" className="h-auto p-0 text-xs justify-start" onClick={handleMarkAllRead} disabled={unreadCount === 0}>
                     Alle als gelesen markieren
                 </Button>
@@ -143,30 +141,30 @@ export default function DashboardPage() {
             <CardHeader>
               <CardTitle className="flex items-center">
                 <Users className="mr-2 h-5 w-5 text-primary" />
-                Meine Lernpartner
+                Meine Buddies
               </CardTitle>
               <CardDescription>Bleibe mit deinen Connections in Kontakt.</CardDescription>
             </CardHeader>
             <CardContent>
-              {learningPartners.length > 0 ? (
+              {buddies.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {learningPartners.map(partner => (
-                    <Link key={partner.id} href={`/profil/${partner.id}`} className="block rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+                  {buddies.map(buddy => (
+                    <Link key={buddy.id} href={`/profil/${buddy.id}`} className="block rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
                         <div className="flex items-center space-x-3 p-3 border rounded-lg hover:shadow-md transition-shadow h-full">
-                          <Image src={partner.avatar} alt={partner.name} width={40} height={40} className="rounded-full" data-ai-hint={partner.dataAiHint} />
+                          <Image src={buddy.avatar} alt={buddy.name} width={40} height={40} className="rounded-full" data-ai-hint={buddy.dataAiHint} />
                           <div>
-                            <p className="font-semibold">{partner.name}</p>
-                            <p className="text-xs text-muted-foreground">{partner.course}</p>
+                            <p className="font-semibold">{buddy.name}</p>
+                            <p className="text-xs text-muted-foreground">{buddy.course}</p>
                           </div>
                         </div>
                     </Link>
                   ))}
                 </div>
               ) : (
-                <p className="text-muted-foreground">Du hast noch keine Lernpartner.</p>
+                <p className="text-muted-foreground">Du hast noch keine Buddies.</p>
               )}
                <Button className="mt-4 w-full md:w-auto" asChild>
-                 <Link href="/partner-finden">Neue Partner finden</Link>
+                 <Link href="/partner-finden">Neue Buddies finden</Link>
                </Button>
             </CardContent>
           </Card>

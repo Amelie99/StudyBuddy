@@ -21,48 +21,48 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { usePartners, type SuggestedPartner } from "@/contexts/PartnersContext";
+import { useBuddies, type SuggestedBuddy } from "@/contexts/PartnersContext";
 import Link from "next/link";
 
 // Mock data for swipe cards
-const initialPartners: SuggestedPartner[] = [
+const initialBuddies: SuggestedBuddy[] = [
   { id: 1, name: "Anna Kurz", studiengang: "Informatik, 3. Sem.", image: "https://placehold.co/300x400.png", dataAiHint:"woman programmer", mutualInterests: ["Web-Entwicklung", "Python"] },
   { id: 2, name: "Markus Lang", studiengang: "BWL, 5. Sem.", image: "https://placehold.co/300x400.png", dataAiHint: "man business", mutualInterests: ["Marketing", "Statistik"] },
   { id: 3, name: "Julia Klein", studiengang: "Soziale Arbeit, 1. Sem.", image: "https://placehold.co/300x400.png", dataAiHint:"woman social", mutualInterests: ["Grundlagen Psychologie"] },
 ];
 
 export default function PartnerFindenPage() {
-  const [partners, setPartners] = useState(initialPartners);
+  const [buddies, setBuddies] = useState(initialBuddies);
   const [showMatchDialog, setShowMatchDialog] = useState(false);
-  const [matchedPartner, setMatchedPartner] = useState<SuggestedPartner | null>(null);
-  const { addPartner } = usePartners();
+  const [matchedBuddy, setMatchedBuddy] = useState<SuggestedBuddy | null>(null);
+  const { addBuddy } = useBuddies();
   const router = useRouter();
 
   const advanceQueueAndClose = () => {
     setShowMatchDialog(false);
     // Use a timeout to allow the dialog to close before the card disappears
     setTimeout(() => {
-        setPartners(currentPartners => currentPartners.slice(1));
-        setMatchedPartner(null);
+        setBuddies(currentBuddies => currentBuddies.slice(1));
+        setMatchedBuddy(null);
     }, 150);
   };
 
   const handleInterest = () => {
-    if (partners.length === 0) return;
-    const currentPartner = partners[0];
-    addPartner(currentPartner); // Automatically add partner to the user's list
-    setMatchedPartner(currentPartner);
+    if (buddies.length === 0) return;
+    const currentBuddy = buddies[0];
+    addBuddy(currentBuddy); // Automatically add buddy to the user's list
+    setMatchedBuddy(currentBuddy);
     setShowMatchDialog(true);
   };
   
   const handleReject = () => {
-     if (partners.length === 0) return;
-     setPartners(currentPartners => currentPartners.slice(1));
+     if (buddies.length === 0) return;
+     setBuddies(currentBuddies => currentBuddies.slice(1));
   }
 
   const handleChat = () => {
-    if (!matchedPartner) return;
-    router.push(`/chats/${matchedPartner.id}`);
+    if (!matchedBuddy) return;
+    router.push(`/chats/${matchedBuddy.id}`);
     advanceQueueAndClose();
   };
 
@@ -70,7 +70,7 @@ export default function PartnerFindenPage() {
     <>
       <div className="h-full flex flex-col justify-center items-center py-8">
         <div className="w-full max-w-xl">
-          <h1 className="text-3xl font-bold mb-8 text-foreground">Partner finden</h1>
+          <h1 className="text-3xl font-bold mb-8 text-foreground">Buddies finden</h1>
           <Tabs defaultValue="vorschlaege" className="w-full">
             <TabsList className="grid w-full grid-cols-2 mb-6">
               <TabsTrigger value="vorschlaege">Vorschläge</TabsTrigger>
@@ -80,27 +80,27 @@ export default function PartnerFindenPage() {
             <TabsContent value="vorschlaege">
               <Card className="bg-transparent border-none shadow-none">
                 <CardHeader className="text-center">
-                  <CardTitle>Lernpartner entdecken</CardTitle>
+                  <CardTitle>Buddies entdecken</CardTitle>
                   <CardDescription>Wische durch Profile oder nutze die Buttons.</CardDescription>
                 </CardHeader>
                 <CardContent className="flex flex-col items-center">
-                  {partners.length > 0 ? (
+                  {buddies.length > 0 ? (
                     <div className="relative w-full max-w-xs h-[450px] md:h-[500px]">
-                      {partners.map((partner, index) => (
+                      {buddies.map((buddy, index) => (
                         <Card 
-                          key={partner.id} 
+                          key={buddy.id} 
                           className="absolute w-full h-full rounded-xl overflow-hidden shadow-2xl transition-all duration-300 ease-out"
                           style={{ 
-                            zIndex: partners.length - index,
+                            zIndex: buddies.length - index,
                             transform: `translateY(${index * 10}px) scale(${1 - index * 0.05})`,
                             opacity: index === 0 ? 1 : (index < 2 ? 0.7 : 0) // Show top 2 cards
                           }}
                         >
-                          <Image src={partner.image} alt={partner.name} layout="fill" objectFit="cover" data-ai-hint={partner.dataAiHint}/>
+                          <Image src={buddy.image} alt={buddy.name} layout="fill" objectFit="cover" data-ai-hint={buddy.dataAiHint}/>
                           <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 text-white">
-                            <h3 className="text-xl font-bold">{partner.name}</h3>
-                            <p className="text-sm">{partner.studiengang}</p>
-                            <p className="text-xs mt-1">Interessen: {partner.mutualInterests.join(', ')}</p>
+                            <h3 className="text-xl font-bold">{buddy.name}</h3>
+                            <p className="text-sm">{buddy.studiengang}</p>
+                            <p className="text-xs mt-1">Interessen: {buddy.mutualInterests.join(', ')}</p>
                           </div>
                         </Card>
                       ))}
@@ -109,10 +109,10 @@ export default function PartnerFindenPage() {
                     <div className="flex flex-col items-center justify-center text-center h-[450px] md:h-[500px] bg-secondary rounded-xl w-full max-w-xs">
                         <CardTitle>Keine weiteren Vorschläge</CardTitle>
                         <CardDescription className="mt-2">Du hast alle aktuellen Vorschläge gesehen. <br/> Probiere die gezielte Suche!</CardDescription>
-                        <Button className="mt-4" onClick={() => setPartners(initialPartners)}>Nochmal anzeigen</Button>
+                        <Button className="mt-4" onClick={() => setBuddies(initialBuddies)}>Nochmal anzeigen</Button>
                     </div>
                   )}
-                  {partners.length > 0 && (
+                  {buddies.length > 0 && (
                     <div className="flex justify-center space-x-6 mt-8">
                       <Button onClick={handleReject} variant="outline" size="icon" className="rounded-full h-16 w-16 border-destructive text-destructive hover:bg-destructive/10">
                         <X className="h-8 w-8" />
@@ -132,7 +132,7 @@ export default function PartnerFindenPage() {
               <Card>
                 <CardHeader>
                   <CardTitle>Gezielte Suche</CardTitle>
-                  <CardDescription>Finde Lernpartner nach deinen Kriterien.</CardDescription>
+                  <CardDescription>Finde Buddies nach deinen Kriterien.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="flex space-x-2">
@@ -205,9 +205,9 @@ export default function PartnerFindenPage() {
         <AlertDialogContent>
           <AlertDialogHeader className="items-center text-center">
             <CheckCircle className="h-16 w-16 text-green-500 mb-2" />
-            <AlertDialogTitle className="text-2xl">Lernpartner gefunden!</AlertDialogTitle>
+            <AlertDialogTitle className="text-2xl">Buddy gefunden!</AlertDialogTitle>
             <AlertDialogDescription>
-              Super! Du und {matchedPartner?.name} habt Interesse aneinander. Starte doch gleich ein Gespräch oder suche weiter.
+              Super! Du und {matchedBuddy?.name} habt Interesse aneinander. Starte doch gleich ein Gespräch oder suche weiter.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-col sm:flex-row gap-2">

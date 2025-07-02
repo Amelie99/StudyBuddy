@@ -63,7 +63,7 @@ export default function ChatsPage() {
             <CardHeader>
               <MessageSquarePlus className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
               <CardTitle>Keine Chats vorhanden</CardTitle>
-              <CardDescription>Starte eine neue Konversation oder finde Lernpartner.</CardDescription>
+              <CardDescription>Starte eine neue Konversation oder finde Buddies.</CardDescription>
             </CardHeader>
             <CardContent>
                 <Button>Neuen Chat starten</Button>

@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils';
 
 export const metadata: Metadata = {
   title: 'StudyBuddy HS Landshut',
-  description: 'Plattform für Studierende der Hochschule Landshut um Lernpartner zu finden.',
+  description: 'Plattform für Studierende der Hochschule Landshut um Buddies zu finden.',
 };
 
 const inter = Inter({

@@ -2,8 +2,8 @@
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
-// Consistent Partner type for use across the app
-export interface Partner {
+// Consistent Buddy type for use across the app
+export interface Buddy {
     id: string;
     name: string;
     course: string;
@@ -11,8 +11,8 @@ export interface Partner {
     dataAiHint: string;
 }
 
-// This is the shape of the partner object from the "partner-finden" page suggestions
-export interface SuggestedPartner {
+// This is the shape of the buddy object from the "partner-finden" page suggestions
+export interface SuggestedBuddy {
     id: number;
     name: string;
     studiengang: string;
@@ -22,56 +22,56 @@ export interface SuggestedPartner {
 }
 
 
-interface PartnersContextType {
-    partners: Partner[];
-    addPartner: (partner: SuggestedPartner) => void;
+interface BuddiesContextType {
+    buddies: Buddy[];
+    addBuddy: (buddy: SuggestedBuddy) => void;
 }
 
 // Mock initial data, consistent with the other pages
-const initialPartners: Partner[] = [
+const initialBuddies: Buddy[] = [
   { id: "1", name: "Lisa Schmidt", course: "Soziale Arbeit", avatar: "https://placehold.co/100x100.png", dataAiHint: "woman student" },
   { id: "2", name: "David Meier", course: "Master Elektrotechnik", avatar: "https://placehold.co/100x100.png", dataAiHint: "man student" },
 ];
 
-const PartnersContext = createContext<PartnersContextType | undefined>(undefined);
+const BuddiesContext = createContext<BuddiesContextType | undefined>(undefined);
 
-export function usePartners() {
-    const context = useContext(PartnersContext);
+export function useBuddies() {
+    const context = useContext(BuddiesContext);
     if (!context) {
-        throw new Error('usePartners must be used within a PartnersProvider');
+        throw new Error('useBuddies must be used within a BuddiesProvider');
     }
     return context;
 }
 
-export const PartnersProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-    const [partners, setPartners] = useState<Partner[]>(initialPartners);
+export const BuddiesProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+    const [buddies, setBuddies] = useState<Buddy[]>(initialBuddies);
 
-    const addPartner = (suggestedPartner: SuggestedPartner) => {
-        const partnerId = suggestedPartner.id.toString();
-        // Check if partner already exists
-        if (partners.some(p => p.id === partnerId)) {
+    const addBuddy = (suggestedBuddy: SuggestedBuddy) => {
+        const buddyId = suggestedBuddy.id.toString();
+        // Check if buddy already exists
+        if (buddies.some(p => p.id === buddyId)) {
             return;
         }
 
-        const newPartner: Partner = {
-            id: partnerId,
-            name: suggestedPartner.name,
-            course: suggestedPartner.studiengang,
+        const newBuddy: Buddy = {
+            id: buddyId,
+            name: suggestedBuddy.name,
+            course: suggestedBuddy.studiengang,
             // Adjust image size from swipe card to list view avatar
-            avatar: suggestedPartner.image.replace('300x400', '100x100'),
-            dataAiHint: suggestedPartner.dataAiHint,
+            avatar: suggestedBuddy.image.replace('300x400', '100x100'),
+            dataAiHint: suggestedBuddy.dataAiHint,
         };
-        setPartners(prevPartners => [...prevPartners, newPartner]);
+        setBuddies(prevBuddies => [...prevBuddies, newBuddy]);
     };
 
     const value = {
-        partners,
-        addPartner,
+        buddies,
+        addBuddy,
     };
 
     return (
-        <PartnersContext.Provider value={value}>
+        <BuddiesContext.Provider value={value}>
             {children}
-        </PartnersContext.Provider>
+        </BuddiesContext.Provider>
     );
 };
