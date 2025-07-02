@@ -2,12 +2,13 @@
 'use client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
-import { Bell, CheckCircle, Users, CalendarClock, Info } from "lucide-react";
+import { Bell, CheckCircle, Users, CalendarClock, Info, CheckCheck } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
+import { useState } from "react";
 
 // Mock data
 const upcomingSessions = [
@@ -20,14 +21,23 @@ const learningPartners = [
   { id: 2, name: "David Meier", course: "Master Elektrotechnik", avatar: "https://placehold.co/100x100.png", dataAiHint: "man student" },
 ];
 
-const notifications = [
-    { id: 1, title: "Update: Mathe II Lerngruppe", description: "Der Treffpunkt wurde auf Raum E0.04 geändert.", time: "vor 5 Min." },
-    { id: 2, title: "Info: Projektbesprechung SE", description: "Lisa hat neue Dokumente für das Treffen hochgeladen.", time: "vor 1 Std." },
+const initialNotifications = [
+    { id: 1, title: "Update: Mathe II Lerngruppe", description: "Der Treffpunkt wurde auf Raum E0.04 geändert.", time: "vor 5 Min.", read: false },
+    { id: 2, title: "Info: Projektbesprechung SE", description: "Lisa hat neue Dokumente für das Treffen hochgeladen.", time: "vor 1 Std.", read: false },
 ];
 
 
 export default function DashboardPage() {
   const { currentUser } = useAuth();
+  const [notifications, setNotifications] = useState(initialNotifications);
+
+  const unreadCount = notifications.filter(n => !n.read).length;
+
+  const handleMarkAllRead = () => {
+    setNotifications(currentNotifications => 
+      currentNotifications.map(n => ({...n, read: true}))
+    );
+  };
 
   return (
     <div className="container mx-auto py-8 px-4 md:px-0">
@@ -42,43 +52,59 @@ export default function DashboardPage() {
           <PopoverTrigger asChild>
             <Button variant="ghost" size="icon" className="relative mt-4 sm:mt-0">
               <Bell className="h-6 w-6" />
-              <span className="absolute top-0 right-0 flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
-              </span>
+              {unreadCount > 0 && (
+                <span className="absolute top-0 right-0 flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                </span>
+              )}
               <span className="sr-only">Benachrichtigungen</span>
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-80" align="end">
             <div className="grid gap-4">
               <div className="space-y-2">
-                <h4 className="font-medium leading-none">Benachrichtigungen</h4>
+                 <div className="flex items-center justify-between">
+                    <h4 className="font-medium leading-none">Benachrichtigungen</h4>
+                    <Button variant="link" size="sm" className="h-auto p-0 text-xs" onClick={handleMarkAllRead} disabled={unreadCount === 0}>
+                        <CheckCheck className="mr-1 h-3 w-3" />
+                        Alle als gelesen markieren
+                    </Button>
+                </div>
                 <p className="text-sm text-muted-foreground">
-                  Du hast {notifications.length} ungelesene Nachrichten.
+                  Du hast {unreadCount} ungelesene {unreadCount === 1 ? 'Nachricht' : 'Nachrichten'}.
                 </p>
               </div>
               <Separator />
-              <div className="grid gap-2">
-                {notifications.map((notification) => (
-                  <div
-                    key={notification.id}
-                    className="grid grid-cols-[25px_1fr] items-start pb-4 last:mb-0 last:pb-0"
-                  >
-                    <span className="flex h-2 w-2 translate-y-1.5 rounded-full bg-primary" />
-                    <div className="grid gap-1">
-                      <p className="text-sm font-medium leading-none">
-                        {notification.title}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {notification.description}
-                      </p>
-                       <p className="text-xs text-muted-foreground/80 mt-1">
-                        {notification.time}
-                      </p>
+               {notifications.length > 0 ? (
+                <div className="grid gap-2">
+                  {notifications.map((notification) => (
+                    <div
+                      key={notification.id}
+                      className="grid grid-cols-[25px_1fr] items-start pb-4 last:mb-0 last:pb-0"
+                    >
+                      {!notification.read ? (
+                         <span className="flex h-2 w-2 translate-y-1.5 rounded-full bg-primary" />
+                      ) : (
+                         <span className="flex h-2 w-2 translate-y-1.5 rounded-full bg-transparent border border-muted-foreground" />
+                      )}
+                      <div className="grid gap-1">
+                        <p className="text-sm font-medium leading-none">
+                          {notification.title}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {notification.description}
+                        </p>
+                         <p className="text-xs text-muted-foreground/80 mt-1">
+                          {notification.time}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-center text-muted-foreground">Keine neuen Benachrichtigungen.</p>
+              )}
             </div>
           </PopoverContent>
         </Popover>
