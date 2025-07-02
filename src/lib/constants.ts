@@ -13,8 +13,8 @@ export interface NavItem {
 
 export const NAV_ITEMS_CONFIG: NavItem[] = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, matchSubpaths: false },
-  { href: '/partner-finden', label: 'Partner finden', icon: Search, matchSubpaths: false },
-  { href: '/partner-gruppen', label: 'Partner & Gruppen', icon: Users, matchSubpaths: true },
+  { href: '/partner-finden', label: 'Buddies finden', icon: Search, matchSubpaths: false },
+  { href: '/partner-gruppen', label: 'Buddies & Gruppen', icon: Users, matchSubpaths: true },
   { href: '/chats', label: 'Chats', icon: MessageSquare, matchSubpaths: true },
   { href: '/kalender', label: 'Kalender', icon: CalendarDays, matchSubpaths: true },
   { href: '/mein-profil', label: 'Mein Profil', icon: UserCircle, matchSubpaths: false },
