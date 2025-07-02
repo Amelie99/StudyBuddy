@@ -105,7 +105,7 @@ export default function DashboardPage() {
                         <p className="text-sm text-muted-foreground">{session.time} - {session.type}</p>
                       </div>
                       <Button variant="outline" size="sm" asChild>
-                        <Link href="/kalender">Details</Link>
+                        <Link href={`/kalender/${session.id}`}>Details</Link>
                       </Button>
                     </li>
                   ))}
