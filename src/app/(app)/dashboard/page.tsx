@@ -128,13 +128,15 @@ export default function DashboardPage() {
               {learningPartners.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {learningPartners.map(partner => (
-                    <div key={partner.id} className="flex items-center space-x-3 p-3 border rounded-lg hover:shadow-md transition-shadow">
-                      <Image src={partner.avatar} alt={partner.name} width={40} height={40} className="rounded-full" data-ai-hint={partner.dataAiHint} />
-                      <div>
-                        <p className="font-semibold">{partner.name}</p>
-                        <p className="text-xs text-muted-foreground">{partner.course}</p>
-                      </div>
-                    </div>
+                    <Link key={partner.id} href={`/profil/${partner.id}`} className="block rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+                        <div className="flex items-center space-x-3 p-3 border rounded-lg hover:shadow-md transition-shadow h-full">
+                          <Image src={partner.avatar} alt={partner.name} width={40} height={40} className="rounded-full" data-ai-hint={partner.dataAiHint} />
+                          <div>
+                            <p className="font-semibold">{partner.name}</p>
+                            <p className="text-xs text-muted-foreground">{partner.course}</p>
+                          </div>
+                        </div>
+                    </Link>
                   ))}
                 </div>
               ) : (
