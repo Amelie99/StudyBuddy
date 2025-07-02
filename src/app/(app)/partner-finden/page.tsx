@@ -46,6 +46,7 @@ export default function PartnerFindenPage() {
   
   const handleContinueSearching = () => {
     setShowMatchDialog(false);
+    // Move to the next partner after closing the dialog
     setPartners(currentPartners => currentPartners.slice(1));
   };
 
