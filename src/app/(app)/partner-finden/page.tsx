@@ -17,10 +17,10 @@ const suggestedPartners = [
 
 export default function PartnerFindenPage() {
   return (
-    <div className="container mx-auto py-8 h-full flex flex-col">
-      <h1 className="text-3xl font-bold mb-8 text-foreground">Partner finden</h1>
-      <div className="flex-grow flex items-center justify-center">
-        <Tabs defaultValue="vorschlaege" className="w-full max-w-xl">
+    <div className="h-full flex flex-col justify-center items-center py-8">
+      <div className="w-full max-w-xl">
+        <h1 className="text-3xl font-bold mb-8 text-foreground">Partner finden</h1>
+        <Tabs defaultValue="vorschlaege" className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-6">
             <TabsTrigger value="vorschlaege">Vorschläge</TabsTrigger>
             <TabsTrigger value="suche">Suche & Filter</TabsTrigger>
