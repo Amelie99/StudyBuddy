@@ -10,6 +10,7 @@ import { ArrowLeft, Send, CalendarPlus, Smile, Paperclip, Loader2 } from 'lucide
 import Link from 'next/link';
 import React, { useEffect, useState, useRef } from 'react';
 import { cn } from '@/lib/utils';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 // Mock data - replace with actual data fetching
 const fetchChatDetails = async (chatId: string) => {
@@ -83,6 +84,7 @@ export default function ChatDetailPage() {
   const [loading, setLoading] = useState(true);
   const [newMessage, setNewMessage] = useState('');
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const emojis = ['😊', '👍', '😂', '🙏', '❤️'];
 
   // Mock current user ID
   const currentUserId = "currentUser"; 
@@ -182,7 +184,29 @@ export default function ChatDetailPage() {
       {/* Message Input Area */}
       <footer className="p-3 border-t sticky bottom-0 bg-card">
         <div className="flex items-center space-x-2">
-          <Button variant="ghost" size="icon"><Smile className="h-5 w-5 text-muted-foreground" /></Button>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <Smile className="h-5 w-5 text-muted-foreground" />
+                <span className="sr-only">Emoji hinzufügen</span>
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent side="top" className="w-auto p-2">
+              <div className="flex gap-1">
+                {emojis.map((emoji) => (
+                  <Button
+                    key={emoji}
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setNewMessage((prev) => prev + emoji)}
+                    className="text-xl p-1 h-auto w-auto"
+                  >
+                    {emoji}
+                  </Button>
+                ))}
+              </div>
+            </PopoverContent>
+          </Popover>
           <Button variant="ghost" size="icon"><Paperclip className="h-5 w-5 text-muted-foreground" /></Button>
           <Input 
             placeholder="Nachricht schreiben..." 
