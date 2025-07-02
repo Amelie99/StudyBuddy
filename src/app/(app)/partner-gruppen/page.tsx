@@ -43,9 +43,9 @@ export default function PartnerAndGroupsPage() {
           <div className="space-y-4">
             {myPartners.length > 0 ? (
               myPartners.map(partner => (
-                <Link href={`/profil/${partner.id}`} key={partner.id} className="block group">
-                  <Card className="hover:shadow-lg hover:border-primary/50 transition-all group-focus-visible:ring-2 group-focus-visible:ring-ring group-focus-visible:ring-offset-2">
-                    <CardContent className="flex items-center space-x-4 p-4">
+                <Card key={partner.id} className="hover:shadow-lg hover:border-primary/50 transition-all">
+                  <CardContent className="flex items-center space-x-4 p-4">
+                    <Link href={`/profil/${partner.id}`} className="flex items-center space-x-4 flex-1 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
                       <Avatar className="h-14 w-14">
                         <AvatarImage src={partner.avatar} alt={partner.name} data-ai-hint={partner.dataAiHint} />
                         <AvatarFallback>{partner.name.substring(0, 2).toUpperCase()}</AvatarFallback>
@@ -54,14 +54,14 @@ export default function PartnerAndGroupsPage() {
                         <p className="font-semibold text-lg">{partner.name}</p>
                         <p className="text-sm text-muted-foreground">{partner.course}</p>
                       </div>
-                       <Button variant="outline" size="sm" asChild onClick={(e) => e.stopPropagation()}>
-                          <Link href={`/chats/${partner.id}`}> 
-                            <MessageSquare className="mr-2 h-4 w-4" /> Chat
-                          </Link>
-                        </Button>
-                    </CardContent>
-                  </Card>
-                </Link>
+                    </Link>
+                     <Button variant="outline" size="sm" asChild>
+                        <Link href={`/chats/${partner.id}`}>
+                          <MessageSquare className="mr-2 h-4 w-4" /> Chat
+                        </Link>
+                      </Button>
+                  </CardContent>
+                </Card>
               ))
             ) : (
               <Card className="text-center py-12 border-dashed">
@@ -88,9 +88,9 @@ export default function PartnerAndGroupsPage() {
           <div className="space-y-4">
             {myGroups.length > 0 ? (
               myGroups.map(group => (
-                 <Link href={`/gruppen/${group.id}`} key={group.id} className="block group">
-                    <Card className="hover:shadow-lg hover:border-primary/50 transition-all group-focus-visible:ring-2 group-focus-visible:ring-ring group-focus-visible:ring-offset-2">
-                        <CardContent className="flex items-center space-x-4 p-4">
+                 <Card key={group.id} className="hover:shadow-lg hover:border-primary/50 transition-all">
+                    <CardContent className="flex items-center space-x-4 p-4">
+                        <Link href={`/gruppen/${group.id}`} className="flex items-center space-x-4 flex-1 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
                             <Avatar className="h-14 w-14">
                                 <AvatarImage src={group.image} alt={group.name} data-ai-hint={group.dataAiHint}/>
                                 <AvatarFallback>{group.name.substring(0, 2).toUpperCase()}</AvatarFallback>
@@ -102,14 +102,14 @@ export default function PartnerAndGroupsPage() {
                                     <span>{group.members} Mitglieder</span>
                                 </div>
                             </div>
-                            <Button variant="outline" size="sm" asChild onClick={(e) => e.stopPropagation()}>
-                                <Link href={`/chats/group-${group.id}`}> 
-                                    <MessageSquare className="mr-2 h-4 w-4" /> Chat
-                                </Link>
-                            </Button>
-                        </CardContent>
-                    </Card>
-                </Link>
+                        </Link>
+                        <Button variant="outline" size="sm" asChild>
+                            <Link href={`/chats/group-${group.id}`}> 
+                                <MessageSquare className="mr-2 h-4 w-4" /> Chat
+                            </Link>
+                        </Button>
+                    </CardContent>
+                </Card>
               ))
             ) : (
               <Card className="text-center py-12 border-dashed">
