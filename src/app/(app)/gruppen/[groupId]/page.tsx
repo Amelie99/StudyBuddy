@@ -118,7 +118,7 @@ export default function GroupDetailPage() {
               </Link>
             </Button>
              <Button variant="outline" asChild>
-              <Link href={`/kalender?group=${group.id}`}> {/* Link to calendar filtered by group */}
+              <Link href={`/kalender/event-erstellen?groupId=${group.id}`}>
                 <CalendarPlus className="mr-2 h-4 w-4" /> Termin planen
               </Link>
             </Button>
