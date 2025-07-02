@@ -35,26 +35,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const pathname = usePathname();
 
   useEffect(() => {
-    // Simulate an automatically logged-in user with a complete profile
-    const mockUser: AppUser = {
-      uid: 'mock-profil-user-id',
-      email: 'profil.user@stud.haw-landshut.de',
-      displayName: 'Profil User',
-      photoURL: 'https://placehold.co/128x128.png',
-      profileComplete: true, // Key for redirecting
-      studiengang: 'Wirtschaftsingenieurwesen',
-      semester: '2',
-      ueberMich: 'Dies ist mein Profil. Ich lerne gerne durch Diskussionen und gemeinsame Projekte.',
-      lerninteressen: ['diskussion', 'projektarbeit'],
-      lernstil: 'diskussion',
-      kurse: ['Projektmanagement', 'Marketing I'],
-      verfuegbarkeit: ['wochenende', 'abends'],
-    };
-    setCurrentUser(mockUser);
-    setLoading(false);
-
-    // The original onAuthStateChanged listener is commented out to enforce the mock user
-    /*
     const unsubscribe = auth.onAuthStateChanged((user: FirebaseUser | null) => {
       if (user) {
         const appUser: AppUser = {
@@ -78,7 +58,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(false);
     });
     return unsubscribe;
-    */
   }, []);
   
   useEffect(() => {
@@ -97,17 +76,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       } else {
         if (isAuthPage || isProfileSetupPage || isRootPage) {
-          if (pathname !== '/partner-finden') {
-             router.replace('/partner-finden');
+          // After login, redirect to a useful page like the dashboard
+          if (pathname !== '/dashboard') {
+             router.replace('/dashboard');
           }
         }
       }
     } else {
-      if ((!isAuthPage && !isProfileSetupPage && !isRootPage) || (isRootPage && !isAuthPage)) {
+      // If not logged in, and not on an auth-related page, redirect to login
+      if (!isAuthPage) {
          router.replace('/anmelden');
-      }
-      if(isProfileSetupPage && !isAuthPage){
-          router.replace('/anmelden');
       }
     }
   }, [currentUser, loading, router, pathname]);
@@ -125,26 +103,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   };
 
-  // These functions will not be actively used when bypassing login,
-  // but they are kept for structural integrity.
+  // These functions call the mock firebase auth functions
   const login = async (email: string, pass: string) => {
-    console.warn("Login function called, but AuthContext is set to bypass login.");
     // @ts-ignore
     return auth.signInWithEmailAndPassword(email, pass);
   };
 
   const register = async (email: string, pass: string) => {
-    console.warn("Register function called, but AuthContext is set to bypass login.");
     // @ts-ignore
     return auth.createUserWithEmailAndPassword(email, pass);
   };
 
   const logout = async () => {
-    console.warn("Logout function called. To re-enable login, AuthContext needs to be reverted.");
      // @ts-ignore
-    await auth.signOut(); 
-    // To truly log out and go back to login screen, you'd need to revert the auto-login in useEffect.
-    // For now, this will clear the mock auth state but the auto-login might kick back in on refresh.
+    await auth.signOut();
     setCurrentUser(null); 
     router.replace('/anmelden'); // Manually redirect to login
   };
