@@ -13,7 +13,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, Users2, PlusCircle } from 'lucide-react';
+import { Loader2, Users2, PlusCircle, UserPlus } from 'lucide-react';
 import { studiengangOptions } from '@/lib/constants';
 
 const groupSchema = z.object({
@@ -21,6 +21,7 @@ const groupSchema = z.object({
   description: z.string().max(200, { message: 'Beschreibung darf maximal 200 Zeichen lang sein.' }).optional(),
   studiengang: z.string().optional(),
   kursModul: z.string().optional(),
+  invites: z.string().optional(),
   isPrivate: z.boolean().default(false),
 });
 
@@ -39,6 +40,7 @@ export default function GruppeErstellenPage() {
       description: '',
       studiengang: '',
       kursModul: '',
+      invites: '',
       isPrivate: false,
     },
   });
@@ -144,6 +146,27 @@ export default function GruppeErstellenPage() {
                   )}
                 />
               </div>
+
+               <FormField
+                control={form.control}
+                name="invites"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center">
+                        <UserPlus className="mr-2 h-4 w-4" />
+                        Mitglieder einladen (optional)
+                    </FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="Namen oder E-Mails mit Komma getrennt eingeben..." {...field} />
+                    </FormControl>
+                    <FormDescription className="text-xs">
+                        Lade Mitglieder direkt bei der Erstellung ein.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               <FormField
                 control={form.control}
                 name="isPrivate"
