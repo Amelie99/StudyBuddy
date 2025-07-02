@@ -143,7 +143,7 @@ export default function ChatDetailPage() {
     <div className="flex flex-col h-[calc(100vh-var(--header-height,4rem)-var(--mobile-nav-height,4rem))] md:h-[calc(100vh-var(--header-height,4rem))] bg-card"> {/* Adjust heights */}
       {/* Chat Header */}
       <header className="flex items-center p-3 border-b sticky top-0 bg-card z-10">
-        <Button variant="ghost" size="icon" className="mr-2 md:hidden" onClick={() => router.back()}>
+        <Button variant="ghost" size="icon" className="mr-2" onClick={() => router.back()}>
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <Avatar className="h-10 w-10 mr-3">
