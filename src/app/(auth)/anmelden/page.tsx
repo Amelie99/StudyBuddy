@@ -20,7 +20,7 @@ export default function AnmeldenPage() {
           {isLoginView ? 'Willkommen zurück!' : 'Konto erstellen'}
         </CardTitle>
         <CardDescription>
-          {isLoginView ? 'Melden Sie sich bei LernBuddy an.' : `Registrieren Sie sich für LernBuddy an der HS Landshut.`}
+          {isLoginView ? 'Melden Sie sich bei StudyBuddy an.' : `Registrieren Sie sich für StudyBuddy an der HS Landshut.`}
         </CardDescription>
       </CardHeader>
       <CardContent>

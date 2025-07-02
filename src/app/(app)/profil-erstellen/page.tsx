@@ -142,7 +142,7 @@ export default function ProfilErstellenPage() {
         <CardHeader className="items-center text-center">
           <HochschuleLogo className="h-12 w-auto mb-4 text-primary" />
           <CardTitle className="text-2xl md:text-3xl font-bold tracking-tight">Profil erstellen</CardTitle>
-          <CardDescription>Vervollständige dein Profil, um LernBuddy optimal zu nutzen.</CardDescription>
+          <CardDescription>Vervollständige dein Profil, um StudyBuddy optimal zu nutzen.</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
