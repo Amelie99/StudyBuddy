@@ -5,21 +5,19 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { PlusCircle, Users, MessageSquare, User, Search } from "lucide-react";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useGroups } from "@/contexts/GroupsContext";
 
-// Mock data
+// Mock data for partners remains local to this component for now
 const myPartners = [
   { id: "1", name: "Lisa Schmidt", course: "Soziale Arbeit", avatar: "https://placehold.co/100x100.png", dataAiHint: "woman student" },
   { id: "2", name: "David Meier", course: "Master Elektrotechnik", avatar: "https://placehold.co/100x100.png", dataAiHint: "man student" },
   { id: "3", name: "Sarah Chen", course: "Betriebswirtschaft (BWL)", avatar: "https://placehold.co/100x100.png", dataAiHint: "woman smiling" },
 ];
 
-const myGroups = [
-  { id: "1", name: " Mathe Profis WS23/24", description: "Vorbereitung Analysis & Lineare Algebra", members: 5, image: "https://placehold.co/600x400.png", dataAiHint:"mathematics study-group" },
-  { id: "2", name: "SE Projekt 'LernApp'", description: "Entwicklungsteam für die Software Engineering App", members: 3, image: "https://placehold.co/600x400.png", dataAiHint:"software development" },
-  { id: "3", name: "BWL Erstis HAWL", description: "Allgemeine Lerngruppe für BWL Grundlagen", members: 12, image: "https://placehold.co/600x400.png", dataAiHint:"business students" },
-];
 
 export default function PartnerAndGroupsPage() {
+  const { groups: myGroups } = useGroups();
+
   return (
     <div className="container mx-auto py-8">
       <div className="flex flex-wrap justify-between items-center gap-4 mb-8">

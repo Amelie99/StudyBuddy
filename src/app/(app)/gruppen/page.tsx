@@ -1,16 +1,16 @@
+'use client';
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { PlusCircle, Users, MessageSquare, Settings } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useGroups } from "@/contexts/GroupsContext";
 
-const myGroups = [
-  { id: "1", name: " Mathe Profis WS23/24", description: "Vorbereitung Analysis & Lineare Algebra", members: 5, image: "https://placehold.co/600x400.png", dataAiHint:"mathematics study-group" },
-  { id: "2", name: "SE Projekt 'LernApp'", description: "Entwicklungsteam für die Software Engineering App", members: 3, image: "https://placehold.co/600x400.png", dataAiHint:"software development" },
-  { id: "3", name: "BWL Erstis HAWL", description: "Allgemeine Lerngruppe für BWL Grundlagen", members: 12, image: "https://placehold.co/600x400.png", dataAiHint:"business students" },
-];
 
 export default function GruppenPage() {
+  const { groups: myGroups } = useGroups();
+
   return (
     <div className="container mx-auto py-8">
       <div className="flex justify-between items-center mb-8">

@@ -15,6 +15,7 @@ import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, Users2, PlusCircle, UserPlus } from 'lucide-react';
 import { studiengangOptions } from '@/lib/constants';
+import { useGroups } from '@/contexts/GroupsContext';
 
 const groupSchema = z.object({
   name: z.string().min(3, { message: 'Gruppenname muss mindestens 3 Zeichen lang sein.' }).max(50, { message: 'Gruppenname darf maximal 50 Zeichen lang sein.' }),
@@ -32,6 +33,7 @@ export default function GruppeErstellenPage() {
   const { toast } = useToast();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const { addGroup } = useGroups();
 
   const form = useForm<GroupFormValues>({
     resolver: zodResolver(groupSchema),
@@ -52,9 +54,10 @@ export default function GruppeErstellenPage() {
     }
     setIsLoading(true);
     try {
-      // Simulate group creation
-      console.log('Neue Gruppe erstellen:', { ...data, createdBy: currentUser.uid });
-      // In a real app, save to Firestore and update user's groups
+      addGroup({
+        name: data.name,
+        description: data.description,
+      });
       
       toast({
         title: 'Gruppe erstellt!',
