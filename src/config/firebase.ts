@@ -20,16 +20,13 @@ let authStateChangedCallback: ((user: any) => void) | null = null;
 const mockAuth = {
   currentUser: null, // This will be largely overridden by AuthContext's direct user setting
   onAuthStateChanged: (callback: (user: any) => void) => {
-    // This mock onAuthStateChanged is simplified as AuthContext will now directly set a user.
-    // It can call back with null initially if desired, but AuthContext will override.
     authStateChangedCallback = callback;
-    // console.log("firebase.ts: onAuthStateChanged listener registered by AuthContext.");
-    // // Optionally, simulate an initial "not logged in" state if AuthContext doesn't set user immediately
-    // setTimeout(() => {
-    //   if (authStateChangedCallback) authStateChangedCallback(mockAuth.currentUser);
-    // }, 0); 
+    // Simulate the async nature of the real onAuthStateChanged, which
+    // is crucial for the app's loading state and initial redirection.
+    setTimeout(() => {
+      if (authStateChangedCallback) authStateChangedCallback(mockAuth.currentUser);
+    }, 0); 
     return () => { // Unsubscribe function
-      // console.log("firebase.ts: onAuthStateChanged listener unregistered.");
       authStateChangedCallback = null;
     };
   },
@@ -56,6 +53,11 @@ const mockAuth = {
           mockUserProperties.profileComplete = true; 
           mockUserProperties.studiengang = "Informatik";
           mockUserProperties.semester = "4";
+          mockUserProperties.ueberMich= "Suche jemanden, um komplexe Algorithmen zu besprechen und mich auf die Klausur in 'Software Engineering' vorzubereiten.";
+          mockUserProperties.lerninteressen= ["Klausurvorbereitung", "Tiefgehendes Verständnis"];
+          mockUserProperties.lernstil= "Durch Übung";
+          mockUserProperties.kurse= ["Software Engineering", "Datenbanken II", "Theoretische Informatik"];
+          mockUserProperties.verfuegbarkeit= ["wochentags", "abends"];
       }
       
       // @ts-ignore
