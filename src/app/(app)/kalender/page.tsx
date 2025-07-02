@@ -70,7 +70,8 @@ export default function KalenderPage() {
                 eventDay: allUpcomingSessions.map(e => e.date),
               }}
               classNames={{
-                day_selected: "border-2 border-primary bg-transparent text-accent-foreground rounded-md",
+                cell: "[&:has([aria-selected])]:bg-transparent",
+                day_selected: "border-4 border-primary bg-transparent text-primary rounded-md",
                 day_today: "border-2 border-primary rounded-md",
                 eventDay: "text-primary font-bold"
               }}
