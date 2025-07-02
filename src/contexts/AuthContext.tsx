@@ -97,8 +97,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       } else {
         if (isAuthPage || isProfileSetupPage || isRootPage) {
-          if (pathname !== '/mein-profil') {
-             router.replace('/mein-profil');
+          if (pathname !== '/partner-finden') {
+             router.replace('/partner-finden');
           }
         }
       }
