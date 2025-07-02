@@ -15,7 +15,7 @@ import { lerninteressenOptions, lernstilOptions, verfuegbarkeitOptions, studieng
 import type { AppUser } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Loader2, Edit3, Save, ShieldCheck, Star, Users } from 'lucide-react';
+import { Loader2, Edit3, Save } from 'lucide-react';
 import Image from 'next/image';
 
 const profileSchema = z.object({
@@ -31,13 +31,6 @@ const profileSchema = z.object({
 });
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
-
-// Mock Badges
-const badges = [
-  { id: 1, name: "Gründergeist", icon: ShieldCheck, description: "Erste Lerngruppe erstellt", image: "https://placehold.co/80x80.png", dataAiHint:"shield award" },
-  { id: 2, name: "Feedback-Champion", icon: Star, description: "10 Lernsitzungen bewertet", image: "https://placehold.co/80x80.png", dataAiHint:"star badge" },
-  { id: 3, name: "Teamplayer", icon: Users, description: "In 5+ Gruppen aktiv", image: "https://placehold.co/80x80.png", dataAiHint:"team award" },
-];
 
 
 export default function MeinProfilPage() {
@@ -163,22 +156,6 @@ export default function MeinProfilPage() {
                   {form.watch('verfuegbarkeit')?.map(zeit => <Badge variant="secondary" key={zeit}>{verfuegbarkeitOptions.find(o=>o.id === zeit)?.label || zeit}</Badge>) || <p className="text-muted-foreground">Keine angegeben.</p>}
                 </div>
               </div>
-               <div className="mt-8">
-                <h3 className="font-semibold text-lg mb-2">Abzeichen</h3>
-                {badges.length > 0 ? (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                    {badges.map(badge => (
-                      <div key={badge.id} className="flex flex-col items-center text-center p-2 border rounded-lg hover:shadow-md transition-shadow">
-                        <Image src={badge.image} alt={badge.name} width={48} height={48} className="mb-2" data-ai-hint={badge.dataAiHint} />
-                        <p className="text-sm font-medium">{badge.name}</p>
-                        <p className="text-xs text-muted-foreground">{badge.description}</p>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-muted-foreground">Noch keine Abzeichen verdient.</p>
-                )}
-              </div>
               <Button onClick={() => setIsEditing(true)} className="w-full mt-6">
                 <Edit3 className="mr-2 h-4 w-4" /> Profil bearbeiten
               </Button>
@@ -242,4 +219,3 @@ const Badge: React.FC<{ children: React.ReactNode; variant?: 'default' | 'second
     {children}
   </span>
 );
-

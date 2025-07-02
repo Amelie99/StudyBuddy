@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Loader2, MessageSquare, UserPlus, ShieldCheck, Star, Users } from 'lucide-react';
+import { ArrowLeft, Loader2, MessageSquare } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { lerninteressenOptions, lernstilOptions, verfuegbarkeitOptions } from '@/lib/constants';
 import Image from 'next/image';
@@ -113,7 +113,6 @@ export default function UserProfilePage() {
                 <CardContent className="space-y-6 pt-6">
                     <div className="flex justify-center gap-2">
                         <Button><MessageSquare className="mr-2 h-4 w-4" /> Nachricht senden</Button>
-                        <Button variant="outline"><UserPlus className="mr-2 h-4 w-4" /> Als Partner hinzufügen</Button>
                     </div>
                     <div>
                         <h3 className="font-semibold text-lg mb-1">Über Mich</h3>
@@ -138,21 +137,6 @@ export default function UserProfilePage() {
                         <div className="flex flex-wrap gap-2">
                             {user.verfuegbarkeit?.map((zeit: string) => <Badge variant="secondary" key={zeit}>{verfuegbarkeitOptions.find(o=>o.id === zeit)?.label || zeit}</Badge>) || <p className="text-muted-foreground">Keine angegeben.</p>}
                         </div>
-                    </div>
-                    <div className="mt-8">
-                        <h3 className="font-semibold text-lg mb-2">Abzeichen</h3>
-                        {user.badges && user.badges.length > 0 ? (
-                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                            {user.badges.map((badge: any) => (
-                            <div key={badge.id} className="flex flex-col items-center text-center p-2 border rounded-lg hover:shadow-md transition-shadow">
-                                <Image src={badge.image} alt={badge.name} width={48} height={48} className="mb-2" data-ai-hint={badge.dataAiHint} />
-                                <p className="text-sm font-medium">{badge.name}</p>
-                            </div>
-                            ))}
-                        </div>
-                        ) : (
-                        <p className="text-muted-foreground">Noch keine Abzeichen verdient.</p>
-                        )}
                     </div>
                 </CardContent>
             </Card>
