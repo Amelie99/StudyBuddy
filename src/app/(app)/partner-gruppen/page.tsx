@@ -1,10 +1,8 @@
-
 'use client';
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { PlusCircle, Users, MessageSquare, Settings, User, Search } from "lucide-react";
-import Image from "next/image";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { PlusCircle, Users, MessageSquare, User, Search } from "lucide-react";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
@@ -88,40 +86,31 @@ export default function PartnerAndGroupsPage() {
         {/* Lerngruppen Section */}
         <div>
           <h2 className="text-2xl font-bold mb-4 flex items-center"><Users className="mr-3 h-6 w-6 text-primary"/>Meine Lerngruppen</h2>
-          <div className="space-y-6">
+          <div className="space-y-4">
             {myGroups.length > 0 ? (
               myGroups.map(group => (
-                 <Card key={group.id} className="flex flex-col hover:shadow-lg hover:border-primary/50 transition-all group-focus-visible:ring-2 group-focus-visible:ring-ring group-focus-visible:ring-offset-2">
-                  <Link href={`/gruppen/${group.id}`} className="block group">
-                    <CardHeader>
-                        {group.image && (
-                        <div className="relative h-32 w-full mb-4 rounded-t-lg overflow-hidden">
-                            <Image src={group.image} alt={group.name} layout="fill" objectFit="cover" data-ai-hint={group.dataAiHint} />
-                        </div>
-                        )}
-                        <CardTitle>{group.name}</CardTitle>
-                        <CardDescription>{group.description}</CardDescription>
-                    </CardHeader>
-                    <CardContent className="flex-grow">
-                        <div className="flex items-center text-sm text-muted-foreground">
-                        <Users className="mr-2 h-4 w-4" />
-                        <span>{group.members} Mitglieder</span>
-                        </div>
-                    </CardContent>
-                  </Link>
-                    <CardFooter className="flex justify-between">
-                        <Button variant="outline" size="sm" asChild>
-                        <Link href={`/chats/group-${group.id}`}> 
-                            <MessageSquare className="mr-2 h-4 w-4" /> Chat
-                        </Link>
-                        </Button>
-                        <Button variant="default" size="sm" asChild>
-                        <Link href={`/gruppen/${group.id}`}>
-                            <Settings className="mr-2 h-4 w-4" /> Verwalten
-                        </Link>
-                        </Button>
-                    </CardFooter>
-                 </Card>
+                 <Link href={`/gruppen/${group.id}`} key={group.id} className="block group">
+                    <Card className="hover:shadow-lg hover:border-primary/50 transition-all group-focus-visible:ring-2 group-focus-visible:ring-ring group-focus-visible:ring-offset-2">
+                        <CardContent className="flex items-center space-x-4 p-4">
+                            <Avatar className="h-14 w-14">
+                                <AvatarImage src={group.image} alt={group.name} data-ai-hint={group.dataAiHint}/>
+                                <AvatarFallback>{group.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1">
+                                <p className="font-semibold text-lg">{group.name}</p>
+                                <div className="flex items-center text-sm text-muted-foreground">
+                                    <Users className="mr-2 h-4 w-4" />
+                                    <span>{group.members} Mitglieder</span>
+                                </div>
+                            </div>
+                            <Button variant="outline" size="sm" asChild onClick={(e) => e.stopPropagation()}>
+                                <Link href={`/chats/group-${group.id}`}> 
+                                    <MessageSquare className="mr-2 h-4 w-4" /> Chat
+                                </Link>
+                            </Button>
+                        </CardContent>
+                    </Card>
+                </Link>
               ))
             ) : (
               <Card className="text-center py-12 border-dashed">
