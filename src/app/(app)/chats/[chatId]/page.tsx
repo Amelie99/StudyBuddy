@@ -6,11 +6,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Send, CalendarPlus, Smile, Paperclip, Loader2 } from 'lucide-react';
+import { ArrowLeft, Send, CalendarPlus, Smile, Paperclip, Loader2, UploadCloud } from 'lucide-react';
 import Link from 'next/link';
 import React, { useEffect, useState, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 // Mock data - replace with actual data fetching
 const fetchChatDetails = async (chatId: string) => {
@@ -207,7 +208,32 @@ export default function ChatDetailPage() {
               </div>
             </PopoverContent>
           </Popover>
-          <Button variant="ghost" size="icon"><Paperclip className="h-5 w-5 text-muted-foreground" /></Button>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <Paperclip className="h-5 w-5 text-muted-foreground" />
+                <span className="sr-only">Datei anhängen</span>
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>Datei anhängen</DialogTitle>
+                <DialogDescription>
+                  Füge deiner Nachricht eine Datei hinzu. Diese Funktion ist ein Mock-up.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="py-4">
+                <div className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg border-muted-foreground/30 hover:bg-muted/20 transition-colors cursor-pointer">
+                  <UploadCloud className="w-12 h-12 text-muted-foreground/50" />
+                  <p className="mt-4 text-sm text-muted-foreground">Dateien per Drag & Drop hierher ziehen</p>
+                  <p className="text-xs text-muted-foreground/80 mt-1">oder</p>
+                  <Button variant="outline" className="mt-3">
+                    Datei auswählen
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
           <Input 
             placeholder="Nachricht schreiben..." 
             className="flex-1" 
