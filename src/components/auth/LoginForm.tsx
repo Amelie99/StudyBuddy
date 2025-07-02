@@ -42,11 +42,12 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
     },
   });
 
-  async function onSubmit(data: LoginFormValues) {
+  async function handleDemoLogin() {
     setIsLoading(true);
     try {
-      await login(data.email, data.password);
-      // Redirect is handled by AuthContext/AuthGuard
+      // Hardcoded login for demonstration purposes
+      await login('max.mustermann@stud.haw-landshut.de', 'password');
+      // Redirect is handled by AuthContext
     } catch (error: any) {
       toast({
         title: 'Anmeldefehler',
@@ -112,7 +113,10 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
+        <div className="text-center text-sm text-muted-foreground bg-secondary p-3 rounded-md">
+            Für Demozwecke ist keine Eingabe erforderlich. Klicken Sie einfach auf "Anmelden".
+        </div>
         <FormField
           control={form.control}
           name="email"
@@ -139,7 +143,7 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full" disabled={isLoading}>
+        <Button type="button" onClick={handleDemoLogin} className="w-full" disabled={isLoading}>
           {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           Anmelden
         </Button>
