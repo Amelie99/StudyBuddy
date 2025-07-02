@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -74,7 +75,7 @@ export function RegistrationForm({ onSwitchToLogin }: RegistrationFormProps) {
             <FormItem>
               <FormLabel>E-Mail</FormLabel>
               <FormControl>
-                <Input type="email" placeholder="name@haw-landshut.de" {...field} />
+                <Input type="email" placeholder="name@stud.haw-landshut.de" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

@@ -93,7 +93,7 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
             <Input 
               id="reset-email" 
               type="email" 
-              placeholder="name@haw-landshut.de" 
+              placeholder="name@stud.haw-landshut.de" 
               value={resetEmail}
               onChange={(e) => setResetEmail(e.target.value)} 
               disabled={isLoading}
@@ -124,7 +124,7 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
             <FormItem>
               <FormLabel>E-Mail</FormLabel>
               <FormControl>
-                <Input type="email" placeholder="name@haw-landshut.de" {...field} />
+                <Input type="email" placeholder="name@stud.haw-landshut.de" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

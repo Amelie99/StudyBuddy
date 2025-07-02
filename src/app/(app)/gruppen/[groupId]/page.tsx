@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
@@ -165,7 +166,7 @@ export default function GroupDetailPage() {
                     <Input 
                       id="invite-email" 
                       type="email" 
-                      placeholder="name@haw-landshut.de" 
+                      placeholder="name@stud.haw-landshut.de" 
                       value={inviteEmail}
                       onChange={(e) => setInviteEmail(e.target.value)}
                     />
