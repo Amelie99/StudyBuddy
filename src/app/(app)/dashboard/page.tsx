@@ -2,7 +2,7 @@
 'use client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
-import { Bell, CheckCircle, Users, CalendarClock, Info, CheckCheck } from "lucide-react";
+import { Bell, CheckCircle, Users, CalendarClock, Info, CheckCheck, X } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -30,6 +30,7 @@ const initialNotifications = [
 export default function DashboardPage() {
   const { currentUser } = useAuth();
   const [notifications, setNotifications] = useState(initialNotifications);
+  const [isProfileProgressVisible, setProfileProgressVisible] = useState(true);
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
@@ -64,12 +65,10 @@ export default function DashboardPage() {
           <PopoverContent className="w-80" align="end">
             <div className="grid gap-4">
               <div className="space-y-2">
-                 <div className="flex flex-col gap-2">
-                    <h4 className="font-medium leading-none">Benachrichtigungen</h4>
-                    <Button variant="link" size="sm" className="h-auto p-0 text-xs justify-start" onClick={handleMarkAllRead} disabled={unreadCount === 0}>
-                        Alle als gelesen markieren
-                    </Button>
-                </div>
+                <h4 className="font-medium leading-none">Benachrichtigungen</h4>
+                <Button variant="link" size="sm" className="h-auto p-0 text-xs justify-start" onClick={handleMarkAllRead} disabled={unreadCount === 0}>
+                    Alle als gelesen markieren
+                </Button>
                 <p className="text-sm text-muted-foreground">
                   Du hast {unreadCount} ungelesene {unreadCount === 1 ? 'Nachricht' : 'Nachrichten'}.
                 </p>
@@ -176,23 +175,34 @@ export default function DashboardPage() {
 
         {/* Sidebar area on desktop */}
         <div className="md:col-span-1 space-y-6">
-           <Card className="bg-primary text-primary-foreground">
-            <CardHeader>
-              <CardTitle>Profil Fortschritt</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center space-x-2">
-                <CheckCircle className="h-10 w-10 text-green-400" />
-                <div>
-                  <p className="font-semibold">Dein Profil ist vollständig!</p>
-                  <p className="text-sm opacity-90">Sehr gut! Du bist bereit, durchzustarten.</p>
-                </div>
-              </div>
-                <Button variant="secondary" className="mt-4 w-full" asChild>
-                  <Link href="/mein-profil">Profil ansehen</Link>
+            {isProfileProgressVisible && (
+              <Card className="bg-primary text-primary-foreground relative">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute top-2 right-2 h-6 w-6 rounded-full text-primary-foreground/70 hover:text-primary-foreground hover:bg-white/20"
+                  onClick={() => setProfileProgressVisible(false)}
+                >
+                  <X className="h-4 w-4" />
+                  <span className="sr-only">Schließen</span>
                 </Button>
-            </CardContent>
-          </Card>
+                <CardHeader>
+                  <CardTitle>Profil Fortschritt</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center space-x-2">
+                    <CheckCircle className="h-10 w-10 text-green-400" />
+                    <div>
+                      <p className="font-semibold">Dein Profil ist vollständig!</p>
+                      <p className="text-sm opacity-90">Sehr gut! Du bist bereit, durchzustarten.</p>
+                    </div>
+                  </div>
+                    <Button variant="secondary" className="mt-4 w-full" asChild>
+                      <Link href="/mein-profil">Profil ansehen</Link>
+                    </Button>
+                </CardContent>
+              </Card>
+            )}
           
           <Card className="border-dashed">
             <CardContent className="p-4 text-center">
