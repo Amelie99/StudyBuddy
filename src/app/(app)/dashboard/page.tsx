@@ -64,9 +64,9 @@ export default function DashboardPage() {
           <PopoverContent className="w-80" align="end">
             <div className="grid gap-4">
               <div className="space-y-2">
-                 <div className="flex flex-col gap-1">
+                 <div className="flex flex-col gap-2">
                     <h4 className="font-medium leading-none">Benachrichtigungen</h4>
-                    <Button variant="link" size="sm" className="h-auto p-0 text-xs" onClick={handleMarkAllRead} disabled={unreadCount === 0}>
+                    <Button variant="link" size="sm" className="h-auto p-0 text-xs justify-start" onClick={handleMarkAllRead} disabled={unreadCount === 0}>
                         <CheckCheck className="mr-1 h-3 w-3" />
                         Alle als gelesen markieren
                     </Button>
