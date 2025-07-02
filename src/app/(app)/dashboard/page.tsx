@@ -67,7 +67,6 @@ export default function DashboardPage() {
                  <div className="flex flex-col gap-2">
                     <h4 className="font-medium leading-none">Benachrichtigungen</h4>
                     <Button variant="link" size="sm" className="h-auto p-0 text-xs justify-start" onClick={handleMarkAllRead} disabled={unreadCount === 0}>
-                        <CheckCheck className="mr-1 h-3 w-3" />
                         Alle als gelesen markieren
                     </Button>
                 </div>
