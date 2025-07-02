@@ -77,9 +77,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } else {
         if (isAuthPage || isProfileSetupPage || isRootPage) {
           // After login, redirect to a useful page like the dashboard
-          if (pathname !== '/mein-profil') {
-             router.replace('/mein-profil');
-          }
+          router.replace('/dashboard');
         }
       }
     } else {
