@@ -68,13 +68,12 @@ export default function KalenderPage() {
               className="rounded-md border p-0"
               modifiers={{ 
                 eventDay: allUpcomingSessions.map(e => e.date),
-                today: today
               }}
-              modifiersStyles={{
-                eventDay: { fontWeight: 'bold', color: 'hsl(var(--primary))' },
-                today: { border: '2px solid hsl(var(--primary))' }
+              classNames={{
+                day_selected: "border-2 border-primary bg-transparent text-accent-foreground rounded-md",
+                day_today: "border-2 border-primary rounded-md",
+                eventDay: "text-primary font-bold"
               }}
-              
             />
           </CardContent>
         </Card>
