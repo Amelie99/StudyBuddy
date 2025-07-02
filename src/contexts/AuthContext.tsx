@@ -37,18 +37,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     // Simulate an automatically logged-in user with a complete profile
     const mockUser: AppUser = {
-      uid: 'mock-dashboard-user-id',
-      email: 'dashboard.user@stud.haw-landshut.de',
-      displayName: 'Dashboard User',
-      photoURL: 'https://placehold.co/100x100.png',
-      profileComplete: true, // Key for redirecting to dashboard
-      studiengang: 'Informatik',
-      semester: '5',
-      ueberMich: 'Ich bin ein Testnutzer für das Dashboard.',
-      lerninteressen: ['klausurvorbereitung'],
-      lernstil: 'visuell',
-      kurse: ['Testkurs 1', 'Testkurs 2'],
-      verfuegbarkeit: ['wochentags'],
+      uid: 'mock-profil-user-id',
+      email: 'profil.user@stud.haw-landshut.de',
+      displayName: 'Profil User',
+      photoURL: 'https://placehold.co/128x128.png',
+      profileComplete: true, // Key for redirecting
+      studiengang: 'Wirtschaftsingenieurwesen',
+      semester: '2',
+      ueberMich: 'Dies ist mein Profil. Ich lerne gerne durch Diskussionen und gemeinsame Projekte.',
+      lerninteressen: ['diskussion', 'projektarbeit'],
+      lernstil: 'diskussion',
+      kurse: ['Projektmanagement', 'Marketing I'],
+      verfuegbarkeit: ['wochenende', 'abends'],
     };
     setCurrentUser(mockUser);
     setLoading(false);
@@ -97,8 +97,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       } else {
         if (isAuthPage || isProfileSetupPage || isRootPage) {
-          if (pathname !== '/dashboard') {
-             router.replace('/dashboard');
+          if (pathname !== '/mein-profil') {
+             router.replace('/mein-profil');
           }
         }
       }
