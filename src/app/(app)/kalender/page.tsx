@@ -1,26 +1,42 @@
+
 'use client';
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar } from "@/components/ui/calendar"; // ShadCN Calendar
-import { PlusCircle, ListChecks, Clock, CalendarDays } from "lucide-react";
+import { PlusCircle, ListChecks, Clock, CalendarDays, Loader2 } from "lucide-react";
 import Link from "next/link";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { de } from 'date-fns/locale';
 import { format } from 'date-fns';
 
 
 export default function KalenderPage() {
-  const [date, setDate] = React.useState<Date | undefined>(new Date());
-  
-  const allUpcomingSessions = [
-    { id: 1, date: new Date(2024, 6, 4), title: "Mathe II Lerngruppe", time: "10:00 Uhr" },
-    { id: 'se-abgabe', date: new Date(2024, 6, 15), title: "Abgabe SE Projekt", time: "23:59 Uhr" },
-    { id: 'thesis-david', date: new Date(2024, 6, 18), title: "Diskussion Thesis David", time: "14:00 Uhr" },
-    { id: 2, date: new Date(new Date().getFullYear(), 11, 25), title: "Projektbesprechung SE", time: "14:30 Uhr" }, // Dec 25
-    { id: 'bwl-klausur', date: new Date(2024, 6, 22), title: "Klausur BWL Grundlagen", time: "09:00 Uhr" },
-  ];
+  const [date, setDate] = useState<Date | undefined>(undefined);
+  const [allUpcomingSessions, setAllUpcomingSessions] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    // This function runs only on the client, after the page has loaded.
+    // This is the correct way to use 'new Date()' to avoid server/client mismatches.
+    const getFutureDate = (days: number) => {
+      const future = new Date();
+      future.setDate(future.getDate() + days);
+      return future;
+    };
+    
+    // Set initial selected date and events on client mount
+    setDate(new Date()); 
+    setAllUpcomingSessions([
+        { id: 1, date: getFutureDate(2), title: "Mathe II Lerngruppe", time: "10:00 Uhr" },
+        { id: 'se-abgabe', date: getFutureDate(10), title: "Abgabe SE Projekt", time: "23:59 Uhr" },
+        { id: 'thesis-david', date: getFutureDate(15), title: "Diskussion Thesis David", time: "14:00 Uhr" },
+        { id: 2, date: getFutureDate(20), title: "Projektbesprechung SE", time: "14:30 Uhr" },
+        { id: 'bwl-klausur', date: getFutureDate(25), title: "Klausur BWL Grundlagen", time: "09:00 Uhr" },
+    ]);
+    setLoading(false);
+  }, []); // Empty dependency array ensures this runs once on mount
+  
   const today = new Date();
   today.setHours(0,0,0,0); // Normalize today's date
 
@@ -33,9 +49,16 @@ export default function KalenderPage() {
 
    // Filter for sessions that have a numeric ID and are upcoming.
   const linkableUpcomingSessions = allUpcomingSessions
-    .filter(session => typeof session.id === 'number' && session.date >= today)
-    .sort((a, b) => a.date.getTime() - b.date.getTime());
+    .filter(session => typeof session.id === 'number' && new Date(session.date) >= today)
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
+  if (loading) {
+      return (
+          <div className="container mx-auto py-8 space-y-8 flex justify-center items-center h-[60vh]">
+              <Loader2 className="h-12 w-12 animate-spin text-primary" />
+          </div>
+      )
+  }
 
   return (
     <div className="container mx-auto py-8 space-y-8">
