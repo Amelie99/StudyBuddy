@@ -37,6 +37,7 @@ interface ChatsContextType {
     getChatDetails: (chatId: string) => ChatDetail | null;
     startNewChat: (buddy: SuggestedBuddy) => void;
     addMessageToChat: (chatId: string, message: Omit<Message, 'id' | 'timestamp'>) => void;
+    markChatAsRead: (chatId: string) => void;
 }
 
 const initialConversations: Conversation[] = [
@@ -140,7 +141,15 @@ export const ChatsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         }));
     }, []);
 
-    const value = { conversations, getChatDetails, startNewChat, addMessageToChat };
+    const markChatAsRead = useCallback((chatId: string) => {
+        setConversations(prev =>
+            prev.map(conv =>
+                conv.id === chatId ? { ...conv, unread: 0 } : conv
+            )
+        );
+    }, []);
+
+    const value = { conversations, getChatDetails, startNewChat, addMessageToChat, markChatAsRead };
 
     return (
         <ChatsContext.Provider value={value}>

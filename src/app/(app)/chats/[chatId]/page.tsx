@@ -19,7 +19,7 @@ export default function ChatDetailPage() {
   const chatId = params.chatId as string;
   const router = useRouter();
   const { toast } = useToast();
-  const { getChatDetails, addMessageToChat } = useChats();
+  const { getChatDetails, addMessageToChat, markChatAsRead } = useChats();
   const [chatDetails, setChatDetails] = useState<ChatDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [newMessage, setNewMessage] = useState('');
@@ -34,13 +34,14 @@ export default function ChatDetailPage() {
       const data = getChatDetails(chatId);
       if (data) {
         setChatDetails(data);
+        markChatAsRead(chatId);
       } else {
         // This can happen briefly while context loads or if chat is invalid
         // We show a loader and if it persists, the user can navigate away.
       }
       setLoading(false);
     }
-  }, [chatId, getChatDetails]);
+  }, [chatId, getChatDetails, markChatAsRead]);
 
   useEffect(() => {
     // Scroll to bottom when new messages are added or chat loads
