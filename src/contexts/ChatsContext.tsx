@@ -84,7 +84,7 @@ export const ChatsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
             const newConversation: Conversation = {
                 id: buddyId,
                 name: buddy.name,
-                lastMessage: "Sagt hallo!",
+                lastMessage: "Sag Hallo!",
                 timestamp: "Jetzt",
                 unread: 0,
                 avatar: buddy.image,
