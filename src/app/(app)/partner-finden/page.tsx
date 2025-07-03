@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,7 +14,6 @@ import { Heart, Search, SlidersHorizontal, X, CheckCircle, MessageSquare } from 
 import Image from "next/image";
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
@@ -25,33 +24,42 @@ import { useBuddies, type SuggestedBuddy } from "@/contexts/PartnersContext";
 import Link from "next/link";
 import { useChats } from "@/contexts/ChatsContext";
 
-// Mock data for swipe cards - IDs updated to be unique
-const initialBuddies: SuggestedBuddy[] = [
+// The master list of all possible suggestions
+const allSuggestedBuddies: SuggestedBuddy[] = [
   { id: 101, name: "Anna Kurz", studiengang: "Informatik, 3. Sem.", image: "https://placehold.co/300x400.png", dataAiHint:"woman programmer", mutualInterests: ["Web-Entwicklung", "Python"] },
   { id: 102, name: "Markus Lang", studiengang: "BWL, 5. Sem.", image: "https://placehold.co/300x400.png", dataAiHint: "man business", mutualInterests: ["Marketing", "Statistik"] },
   { id: 103, name: "Julia Klein", studiengang: "Soziale Arbeit, 1. Sem.", image: "https://placehold.co/300x400.png", dataAiHint:"woman social", mutualInterests: ["Grundlagen Psychologie"] },
 ];
 
 export default function PartnerFindenPage() {
-  const [buddies, setBuddies] = useState(initialBuddies);
+  const [suggestionQueue, setSuggestionQueue] = useState<SuggestedBuddy[]>([]);
   const [showMatchDialog, setShowMatchDialog] = useState(false);
   const [matchedBuddy, setMatchedBuddy] = useState<SuggestedBuddy | null>(null);
-  const { addBuddy } = useBuddies();
+  const { buddies: myBuddies, addBuddy } = useBuddies();
   const { startNewChat } = useChats();
   const router = useRouter();
+
+  // Filter out buddies that the user has already added.
+  useEffect(() => {
+    const myBuddyIds = new Set(myBuddies.map(b => b.id));
+    const filteredSuggestions = allSuggestedBuddies.filter(
+      suggested => !myBuddyIds.has(suggested.id.toString())
+    );
+    setSuggestionQueue(filteredSuggestions);
+  }, [myBuddies]); // Re-filter whenever the user's buddy list changes.
 
   const advanceQueueAndClose = () => {
     setShowMatchDialog(false);
     // Use a timeout to allow the dialog to close before the card disappears
     setTimeout(() => {
-        setBuddies(currentBuddies => currentBuddies.slice(1));
+        setSuggestionQueue(currentQueue => currentQueue.slice(1));
         setMatchedBuddy(null);
     }, 150);
   };
 
   const handleInterest = () => {
-    if (buddies.length === 0) return;
-    const currentBuddy = buddies[0];
+    if (suggestionQueue.length === 0) return;
+    const currentBuddy = suggestionQueue[0];
     addBuddy(currentBuddy); // Automatically add buddy to the user's list
     startNewChat(currentBuddy); // Automatically create a new chat
     setMatchedBuddy(currentBuddy);
@@ -59,8 +67,8 @@ export default function PartnerFindenPage() {
   };
   
   const handleReject = () => {
-     if (buddies.length === 0) return;
-     setBuddies(currentBuddies => currentBuddies.slice(1));
+     if (suggestionQueue.length === 0) return;
+     setSuggestionQueue(currentQueue => currentQueue.slice(1));
   }
 
   const handleChat = () => {
@@ -87,14 +95,14 @@ export default function PartnerFindenPage() {
                   <CardDescription>Wische durch Profile oder nutze die Buttons.</CardDescription>
                 </CardHeader>
                 <CardContent className="flex flex-col items-center">
-                  {buddies.length > 0 ? (
+                  {suggestionQueue.length > 0 ? (
                     <div className="relative w-full max-w-xs h-[450px] md:h-[500px]">
-                      {buddies.map((buddy, index) => (
+                      {suggestionQueue.map((buddy, index) => (
                         <Card 
                           key={buddy.id} 
                           className="absolute w-full h-full rounded-xl overflow-hidden shadow-2xl transition-all duration-300 ease-out"
                           style={{ 
-                            zIndex: buddies.length - index,
+                            zIndex: suggestionQueue.length - index,
                             transform: `translateY(${index * 10}px) scale(${1 - index * 0.05})`,
                             opacity: index === 0 ? 1 : (index < 2 ? 0.7 : 0) // Show top 2 cards
                           }}
@@ -111,11 +119,10 @@ export default function PartnerFindenPage() {
                   ) : (
                     <div className="flex flex-col items-center justify-center text-center h-[450px] md:h-[500px] bg-secondary rounded-xl w-full max-w-xs">
                         <CardTitle>Keine weiteren Vorschläge</CardTitle>
-                        <CardDescription className="mt-2">Du hast alle aktuellen Vorschläge gesehen. <br/> Probiere die gezielte Suche!</CardDescription>
-                        <Button className="mt-4" onClick={() => setBuddies(initialBuddies)}>Nochmal anzeigen</Button>
+                        <CardDescription className="mt-2">Du hast alle aktuellen Vorschläge gesehen. <br/> Komme später wieder oder probiere die gezielte Suche!</CardDescription>
                     </div>
                   )}
-                  {buddies.length > 0 && (
+                  {suggestionQueue.length > 0 && (
                     <div className="flex justify-center space-x-6 mt-8">
                       <Button onClick={handleReject} variant="outline" size="icon" className="rounded-full h-16 w-16 border-destructive text-destructive hover:bg-destructive/10">
                         <X className="h-8 w-8" />
