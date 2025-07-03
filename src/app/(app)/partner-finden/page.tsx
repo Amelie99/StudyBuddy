@@ -29,7 +29,12 @@ const allSuggestedBuddies: SuggestedBuddy[] = [
   { id: 101, name: "Anna Kurz", studiengang: "Informatik, 3. Sem.", image: "https://placehold.co/300x400.png", dataAiHint:"woman programmer", mutualInterests: ["Web-Entwicklung", "Python"] },
   { id: 102, name: "Markus Lang", studiengang: "BWL, 5. Sem.", image: "https://placehold.co/300x400.png", dataAiHint: "man business", mutualInterests: ["Marketing", "Statistik"] },
   { id: 103, name: "Julia Klein", studiengang: "Soziale Arbeit, 1. Sem.", image: "https://placehold.co/300x400.png", dataAiHint:"woman social", mutualInterests: ["Grundlagen Psychologie"] },
+  { id: 104, name: "Jonas Huber", studiengang: "Wirtschaftsingenieurwesen, 4. Sem.", image: "https://placehold.co/300x400.png", dataAiHint: "man engineer", mutualInterests: ["Logistik", "Projektarbeit"] },
+  { id: 105, name: "Sophie Becker", studiengang: "Maschinenbau, 6. Sem.", image: "https://placehold.co/300x400.png", dataAiHint: "woman smiling", mutualInterests: ["Thermodynamik", "Bachelorarbeit"] },
+  { id: 106, name: "Felix Schmidt", studiengang: "Informatik, 2. Sem.", image: "https://placehold.co/300x400.png", dataAiHint: "man coding", mutualInterests: ["Java", "Algorithmen"] },
+  { id: 107, name: "Lena Wolf", studiengang: "BWL, 2. Sem.", image: "https://placehold.co/300x400.png", dataAiHint: "woman student", mutualInterests: ["Controlling", "Rechnungswesen"] },
 ];
+
 
 export default function PartnerFindenPage() {
   const [suggestionQueue, setSuggestionQueue] = useState<SuggestedBuddy[]>([]);
