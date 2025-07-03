@@ -1,4 +1,3 @@
-
 'use client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
@@ -33,7 +32,7 @@ export default function DashboardPage() {
     return [...events]
       .filter(event => event.date >= now)
       .sort((a, b) => a.date.getTime() - b.date.getTime())
-      .slice(0, 3)
+      .slice(0, 2)
       .map(event => ({
         id: event.id,
         title: event.title,
