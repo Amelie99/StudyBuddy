@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Card, CardContent } from '@/components/ui/card';
@@ -14,7 +15,7 @@ const settingsOptions = [
     id: 'notifications',
     title: 'Benachrichtigungen',
     icon: Bell,
-    href: '#',
+    href: '/einstellungen/benachrichtigungen',
   },
   {
     id: 'design',
