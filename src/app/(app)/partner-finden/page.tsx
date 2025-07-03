@@ -1,10 +1,11 @@
+
 'use client';
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Heart, X, CheckCircle, MessageSquare } from "lucide-react";
+import { Heart, X, CheckCircle, MessageSquare, Users } from "lucide-react";
 import Image from "next/image";
 import {
   AlertDialog,
@@ -16,6 +17,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useBuddies, type SuggestedBuddy } from "@/contexts/PartnersContext";
 import { useChats } from "@/contexts/ChatsContext";
+import { cn } from "@/lib/utils";
 
 // The master list of all possible suggestions
 const allSuggestedBuddies: SuggestedBuddy[] = [
@@ -37,13 +39,13 @@ export default function PartnerFindenPage() {
   const { startNewChat } = useChats();
   const router = useRouter();
   const [declinedBuddyIds, setDeclinedBuddyIds] = useState<Set<number>>(new Set());
+  const [swipeState, setSwipeState] = useState<'left' | 'right' | null>(null);
 
   // Load declined IDs from localStorage on initial render
   useEffect(() => {
     const storedDeclinedIds = localStorage.getItem('declinedBuddyIds');
     if (storedDeclinedIds) {
         try {
-            // Attempt to parse the stored data
             const parsedIds = JSON.parse(storedDeclinedIds);
             if (Array.isArray(parsedIds)) {
                 setDeclinedBuddyIds(new Set(parsedIds));
@@ -52,52 +54,58 @@ export default function PartnerFindenPage() {
             }
         } catch (error) {
             console.error("Error parsing declined IDs from localStorage", error);
-            localStorage.removeItem('declinedBuddyIds'); // Clear invalid data
+            localStorage.removeItem('declinedBuddyIds');
         }
     }
-  }, []); // Empty dependency array ensures this runs only once on mount
+  }, []);
 
   // Filter out buddies that the user has already added or declined.
   useEffect(() => {
-    // Ensure myBuddies IDs are numbers for consistent comparison
     const myBuddyIds = new Set(myBuddies.map(b => parseInt(b.id, 10)));
     
     const filteredSuggestions = allSuggestedBuddies.filter(
       suggested => !myBuddyIds.has(suggested.id) && !declinedBuddyIds.has(suggested.id)
     );
     setSuggestionQueue(filteredSuggestions);
-  }, [myBuddies, declinedBuddyIds]); // Re-filter whenever the user's buddy list or declined list changes.
+  }, [myBuddies, declinedBuddyIds]);
 
   const advanceQueueAndClose = () => {
     setShowMatchDialog(false);
-    // Use a timeout to allow the dialog to close gracefully before the card disappears.
-    // The suggestion queue will update automatically via the useEffect hook.
     setTimeout(() => {
         setMatchedBuddy(null);
     }, 150);
   };
 
   const handleInterest = () => {
-    if (suggestionQueue.length === 0) return;
+    if (suggestionQueue.length === 0 || swipeState) return;
     const currentBuddy = suggestionQueue[0];
-    addBuddy(currentBuddy); // Automatically add buddy, triggering the useEffect to re-filter
-    startNewChat(currentBuddy); // Automatically create a new chat
-    setMatchedBuddy(currentBuddy);
-    setShowMatchDialog(true);
+    
+    setSwipeState('right');
+
+    setTimeout(() => {
+        addBuddy(currentBuddy);
+        startNewChat(currentBuddy);
+        setMatchedBuddy(currentBuddy);
+        setShowMatchDialog(true);
+        setSwipeState(null);
+    }, 300); // Animation duration
   };
   
   const handleReject = () => {
-     if (suggestionQueue.length === 0) return;
+     if (suggestionQueue.length === 0 || swipeState) return;
      const rejectedBuddy = suggestionQueue[0];
      
-     // Update the declined IDs state, which will trigger the useEffect to re-filter
-     setDeclinedBuddyIds(prev => {
-        const newDeclinedIds = new Set(prev);
-        newDeclinedIds.add(rejectedBuddy.id);
-        // Persist the new set to localStorage
-        localStorage.setItem('declinedBuddyIds', JSON.stringify(Array.from(newDeclinedIds)));
-        return newDeclinedIds;
-     });
+     setSwipeState('left');
+
+     setTimeout(() => {
+        setDeclinedBuddyIds(prev => {
+            const newDeclinedIds = new Set(prev);
+            newDeclinedIds.add(rejectedBuddy.id);
+            localStorage.setItem('declinedBuddyIds', JSON.stringify(Array.from(newDeclinedIds)));
+            return newDeclinedIds;
+        });
+        setSwipeState(null);
+     }, 300); // Animation duration
   }
 
   const handleChat = () => {
@@ -113,60 +121,78 @@ export default function PartnerFindenPage() {
 
   return (
     <>
-      <div className="h-full flex flex-col justify-center items-center py-8">
-        <div className="w-full max-w-xl">
-          <h1 className="text-3xl font-bold mb-8 text-foreground">Buddies finden</h1>
-            <Card className="bg-transparent border-none shadow-none">
-              <CardHeader className="text-center">
-                <CardTitle>Buddies entdecken</CardTitle>
-                <CardDescription>Wische durch Profile oder nutze die Buttons.</CardDescription>
-              </CardHeader>
-              <CardContent className="flex flex-col items-center">
-                {suggestionQueue.length > 0 ? (
-                  <div className="relative w-full max-w-xs h-[450px] md:h-[500px]">
-                    {suggestionQueue.map((buddy, index) => (
-                      <Card 
-                        key={buddy.id} 
-                        className="absolute w-full h-full rounded-xl overflow-hidden shadow-2xl transition-all duration-300 ease-out"
-                        style={{ 
-                          zIndex: suggestionQueue.length - index,
-                          transform: `translateY(${index * 10}px) scale(${1 - index * 0.05})`,
-                          opacity: index === 0 ? 1 : (index < 2 ? 0.7 : 0) // Show top 2 cards
-                        }}
-                      >
-                        <Image src={buddy.image} alt={buddy.name} layout="fill" objectFit="cover" data-ai-hint={buddy.dataAiHint}/>
-                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 text-white">
-                          <h3 className="text-xl font-bold">{buddy.name}</h3>
-                          <p className="text-sm">{buddy.studiengang}</p>
-                          <p className="text-xs mt-1">Interessen: {buddy.mutualInterests.join(', ')}</p>
-                        </div>
-                      </Card>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center justify-center text-center h-[450px] md:h-[500px] bg-secondary rounded-xl w-full max-w-xs p-4">
-                      <CardTitle>Keine weiteren Vorschläge</CardTitle>
-                      <CardDescription className="mt-2">Du hast alle aktuellen Vorschläge gesehen. <br/> Komme später wieder!</CardDescription>
-                      <Button onClick={handleResetSuggestions} variant="link" className="mt-4">
-                        Vorschläge zurücksetzen
-                      </Button>
-                  </div>
-                )}
-                {suggestionQueue.length > 0 && (
-                  <div className="flex justify-center space-x-6 mt-8">
-                    <Button onClick={handleReject} variant="outline" size="icon" className="rounded-full h-16 w-16 border-destructive text-destructive hover:bg-destructive/10">
-                      <X className="h-8 w-8" />
-                      <span className="sr-only">Ablehnen</span>
+      <div className="flex flex-col items-center py-8 h-full">
+          <div className="text-center mb-8">
+             <h1 className="text-3xl font-bold text-foreground">Buddies entdecken</h1>
+             <p className="text-muted-foreground">Wische durch Profile oder nutze die Buttons unten.</p>
+          </div>
+        
+          <div className="flex-grow flex flex-col items-center justify-center w-full">
+            <div className="relative w-full max-w-xs h-[450px] md:h-[500px] mb-8">
+              {suggestionQueue.length > 0 ? (
+                suggestionQueue.map((buddy, index) => {
+                  const isTopCard = index === 0;
+                  return (
+                    <Card 
+                      key={buddy.id} 
+                      className={cn(
+                        "absolute w-full h-full rounded-2xl overflow-hidden shadow-2xl transition-all duration-300 ease-in-out",
+                        isTopCard && swipeState === 'left' && "transform -translate-x-[150%] rotate-[-15deg]",
+                        isTopCard && swipeState === 'right' && "transform translate-x-[150%] rotate-[15deg]"
+                      )}
+                      style={{ 
+                        zIndex: suggestionQueue.length - index,
+                        transform: `translateY(${index * -8}px) scale(${1 - index * 0.05})`,
+                        opacity: index < 2 ? 1 : 0, // Show top 2 cards
+                      }}
+                    >
+                      <Image src={buddy.image} alt={buddy.name} layout="fill" objectFit="cover" data-ai-hint={buddy.dataAiHint}/>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent" />
+                      <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+                        <h3 className="text-2xl font-bold drop-shadow-md">{buddy.name}</h3>
+                        <p className="text-sm opacity-90 drop-shadow-sm">{buddy.studiengang}</p>
+                        <p className="text-xs mt-2 opacity-80 drop-shadow-sm">Gemeinsame Interessen: {buddy.mutualInterests.join(', ')}</p>
+                      </div>
+                    </Card>
+                  )
+                })
+              ) : (
+                <div className="flex flex-col items-center justify-center text-center h-full bg-secondary rounded-2xl w-full max-w-xs p-4 shadow-inner">
+                    <Users className="h-16 w-16 text-muted-foreground/50 mb-4" />
+                    <CardTitle>Keine weiteren Vorschläge</CardTitle>
+                    <CardDescription className="mt-2">Du hast alle aktuellen Vorschläge gesehen. <br/> Komme später wieder!</CardDescription>
+                    <Button onClick={handleResetSuggestions} variant="link" className="mt-4">
+                      Vorschläge zurücksetzen
                     </Button>
-                    <Button onClick={handleInterest} variant="outline" size="icon" className="rounded-full h-16 w-16 border-green-500 text-green-500 hover:bg-green-500/10">
-                      <Heart className="h-8 w-8" />
-                      <span className="sr-only">Interesse zeigen</span>
-                    </Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-        </div>
+                </div>
+              )}
+            </div>
+
+            {suggestionQueue.length > 0 && (
+              <div className="flex justify-center space-x-6">
+                <Button 
+                  onClick={handleReject} 
+                  variant="outline" 
+                  size="icon" 
+                  className="rounded-full h-20 w-20 bg-card shadow-lg border-2 border-destructive/50 text-destructive hover:bg-destructive/10 transition-transform duration-200 hover:scale-110 active:scale-95"
+                  disabled={!!swipeState}
+                >
+                  <X className="h-10 w-10" />
+                  <span className="sr-only">Ablehnen</span>
+                </Button>
+                <Button 
+                  onClick={handleInterest} 
+                  variant="outline" 
+                  size="icon" 
+                  className="rounded-full h-20 w-20 bg-card shadow-lg border-2 border-green-500/50 text-green-500 hover:bg-green-500/10 transition-transform duration-200 hover:scale-110 active:scale-95"
+                  disabled={!!swipeState}
+                >
+                  <Heart className="h-10 w-10" />
+                  <span className="sr-only">Interesse zeigen</span>
+                </Button>
+              </div>
+            )}
+          </div>
       </div>
       <AlertDialog open={showMatchDialog} onOpenChange={setShowMatchDialog}>
         <AlertDialogContent>
@@ -174,7 +200,7 @@ export default function PartnerFindenPage() {
             <CheckCircle className="h-16 w-16 text-green-500 mb-2" />
             <AlertDialogTitle className="text-2xl">Buddy gefunden!</AlertDialogTitle>
             <AlertDialogDescription>
-              Super! Du und {matchedBuddy?.name} habt Interesse aneinander. Starte doch gleich ein Gespräch oder suche weiter.
+              Super! {matchedBuddy?.name} wurde zu deinen Buddies hinzugefügt. Starte doch gleich ein Gespräch.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-col sm:flex-row gap-2">
