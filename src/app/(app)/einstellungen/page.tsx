@@ -1,7 +1,7 @@
 'use client';
 
 import { Card, CardContent } from '@/components/ui/card';
-import { Bell, Palette, Shield, Info, ChevronRight, Moon, Sun } from 'lucide-react';
+import { Bell, Palette, Shield, Info, ChevronRight, Moon, Sun, Mail } from 'lucide-react';
 import Link from 'next/link';
 import React from 'react';
 import { useTheme } from 'next-themes';
@@ -10,6 +10,12 @@ import { PRIVACY_POLICY_URL } from '@/lib/constants';
 
 
 const settingsOptions = [
+  {
+    id: 'feedback',
+    title: 'Feedback',
+    icon: Mail,
+    href: '/einstellungen/feedback',
+  },
   {
     id: 'notifications',
     title: 'Benachrichtigungen',
