@@ -67,7 +67,7 @@ export default function GroupDetailPage() {
         // router.push('/gruppen');
       });
     }
-  }, [groupId, router, toast]);
+  }, [groupId, toast]);
 
   const handleInviteMember = () => {
     if (!inviteEmail) {
