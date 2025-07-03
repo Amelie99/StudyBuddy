@@ -38,7 +38,7 @@ const fetchUserDetails = async (userId: string) => {
       studiengang: "Master Elektrotechnik",
       semester: "3",
       photoURL: "https://placehold.co/128x128.png",
-      dataAiHint: "man student",
+      dataAiHint: "man library",
       ueberMich: "Fokussiert auf meine Masterarbeit. Suche einen Sparringspartner für wöchentliche Fortschritts-Checks und zur Diskussion von Fachartikeln.",
       lerninteressen: ["tiefverstaendnis", "projektarbeit"],
       lernstil: "visuell",
