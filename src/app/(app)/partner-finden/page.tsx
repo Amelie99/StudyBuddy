@@ -23,12 +23,13 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useBuddies, type SuggestedBuddy } from "@/contexts/PartnersContext";
 import Link from "next/link";
+import { useChats } from "@/contexts/ChatsContext";
 
-// Mock data for swipe cards
+// Mock data for swipe cards - IDs updated to be unique
 const initialBuddies: SuggestedBuddy[] = [
-  { id: 1, name: "Anna Kurz", studiengang: "Informatik, 3. Sem.", image: "https://placehold.co/300x400.png", dataAiHint:"woman programmer", mutualInterests: ["Web-Entwicklung", "Python"] },
-  { id: 2, name: "Markus Lang", studiengang: "BWL, 5. Sem.", image: "https://placehold.co/300x400.png", dataAiHint: "man business", mutualInterests: ["Marketing", "Statistik"] },
-  { id: 3, name: "Julia Klein", studiengang: "Soziale Arbeit, 1. Sem.", image: "https://placehold.co/300x400.png", dataAiHint:"woman social", mutualInterests: ["Grundlagen Psychologie"] },
+  { id: 101, name: "Anna Kurz", studiengang: "Informatik, 3. Sem.", image: "https://placehold.co/300x400.png", dataAiHint:"woman programmer", mutualInterests: ["Web-Entwicklung", "Python"] },
+  { id: 102, name: "Markus Lang", studiengang: "BWL, 5. Sem.", image: "https://placehold.co/300x400.png", dataAiHint: "man business", mutualInterests: ["Marketing", "Statistik"] },
+  { id: 103, name: "Julia Klein", studiengang: "Soziale Arbeit, 1. Sem.", image: "https://placehold.co/300x400.png", dataAiHint:"woman social", mutualInterests: ["Grundlagen Psychologie"] },
 ];
 
 export default function PartnerFindenPage() {
@@ -36,6 +37,7 @@ export default function PartnerFindenPage() {
   const [showMatchDialog, setShowMatchDialog] = useState(false);
   const [matchedBuddy, setMatchedBuddy] = useState<SuggestedBuddy | null>(null);
   const { addBuddy } = useBuddies();
+  const { startNewChat } = useChats();
   const router = useRouter();
 
   const advanceQueueAndClose = () => {
@@ -51,6 +53,7 @@ export default function PartnerFindenPage() {
     if (buddies.length === 0) return;
     const currentBuddy = buddies[0];
     addBuddy(currentBuddy); // Automatically add buddy to the user's list
+    startNewChat(currentBuddy); // Automatically create a new chat
     setMatchedBuddy(currentBuddy);
     setShowMatchDialog(true);
   };

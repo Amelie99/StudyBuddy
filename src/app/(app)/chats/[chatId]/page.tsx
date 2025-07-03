@@ -12,96 +12,35 @@ import React, { useEffect, useState, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-
-// Mock data - replace with actual data fetching
-const fetchChatDetails = async (chatId: string) => {
-  console.log("Fetching chat details for: ", chatId);
-  await new Promise(resolve => setTimeout(resolve, 300)); // Simulate API call
-  
-  const chats: {[key: string]: any} = {
-    "1": { // Lisa Schmidt
-      id: "1",
-      name: "Lisa Schmidt",
-      avatar: "https://placehold.co/100x100.png", dataAiHint: "woman student",
-      type: "user",
-      messages: [
-        { id: "m1", senderId: "user1", text: "Hallo, hast du Zeit für die Matheaufgaben?", timestamp: "10:30", self: false },
-        { id: "m2", senderId: "currentUser", text: "Hey! Ja, klar. Wann passt es dir?", timestamp: "10:31", self: true },
-        { id: "m3", senderId: "user1", text: "Super, danke dir!", timestamp: "11:45", self: false },
-      ]
-    },
-    "2": { // David Meier
-      id: "2",
-      name: "David Meier",
-      avatar: "https://placehold.co/100x100.png", dataAiHint: "man student",
-      type: "user",
-      messages: [
-        { id: "dm1", senderId: "user2", text: "Können wir uns morgen treffen?", timestamp: "10:30", self: false },
-      ]
-    },
-    "3": { // Sarah Chen
-      id: "3",
-      name: "Sarah Chen",
-      avatar: "https://placehold.co/100x100.png", dataAiHint: "woman smiling",
-      type: "user",
-      messages: [
-        { id: "sc1", senderId: "user3", text: "Danke für die Hilfe :)", timestamp: "Mo", self: false },
-      ]
-    },
-    "group-1": { // Mathe Profis
-      id: "group-1",
-      name: "Mathe Profis WS23/24",
-      avatar: "https://placehold.co/100x100.png", dataAiHint: "group icon",
-      type: "group",
-      membersCount: 5,
-      messages: [
-        { id: "gm1", senderId: "user2", senderName: "Lisa", text: "Hat jemand die Lösungen für Blatt 3?", timestamp: "Gestern 14:00", self: false },
-        { id: "gm2", senderId: "currentUser", text: "Ich schau mal nach.", timestamp: "Gestern 14:05", self: true },
-        { id: "gm3", senderId: "currentUser", senderName: "Max", text: "Ich lade die neue Version hoch.", timestamp: "Gestern", self: true },
-      ]
-    },
-    "group-2": { // SE Projekt
-      id: "group-2",
-      name: "SE Projekt 'LernApp'",
-      avatar: "https://placehold.co/100x100.png", dataAiHint: "team collaboration",
-      type: "group",
-      membersCount: 3,
-      messages: [
-        { id: "se1", senderId: "user2", senderName: "David", text: "Ich hab den neuen Sprint Plan commited.", timestamp: "18.12.", self: false },
-        { id: "se2", senderId: "currentUser", text: "Perfekt, danke!", timestamp: "18.12.", self: true },
-      ]
-    }
-  };
-  return chats[chatId] || null;
-};
-
+import { useChats, type ChatDetail } from '@/contexts/ChatsContext';
 
 export default function ChatDetailPage() {
   const params = useParams();
   const chatId = params.chatId as string;
   const router = useRouter();
   const { toast } = useToast();
-  const [chatDetails, setChatDetails] = useState<any>(null);
+  const { getChatDetails, addMessageToChat } = useChats();
+  const [chatDetails, setChatDetails] = useState<ChatDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [newMessage, setNewMessage] = useState('');
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const emojis = ['😊', '👍', '😂', '🙏', '❤️'];
 
-  // Mock current user ID
   const currentUserId = "currentUser"; 
 
   useEffect(() => {
     if (chatId) {
-      fetchChatDetails(chatId).then(data => {
+      setLoading(true);
+      const data = getChatDetails(chatId);
+      if (data) {
         setChatDetails(data);
-        setLoading(false);
-      }).catch(err => {
-        console.error("Failed to fetch chat details", err);
-        toast({ title: "Fehler", description: "Chat nicht gefunden.", variant: "destructive" });
-        setLoading(false);
-      });
+      } else {
+        // This can happen briefly while context loads or if chat is invalid
+        // We show a loader and if it persists, the user can navigate away.
+      }
+      setLoading(false);
     }
-  }, [chatId, toast]);
+  }, [chatId, getChatDetails]);
 
   useEffect(() => {
     // Scroll to bottom when new messages are added or chat loads
@@ -111,23 +50,19 @@ export default function ChatDetailPage() {
   }, [chatDetails?.messages]);
 
   const handleSendMessage = () => {
-    if (!newMessage.trim()) return;
-    // Simulate sending message
+    if (!newMessage.trim() || !chatId) return;
+    
     const message = {
-      id: `msg-${Date.now()}`,
       senderId: currentUserId,
       text: newMessage,
-      timestamp: new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
       self: true,
-      ...(chatDetails.type === 'group' && { senderName: 'Ich' }) // Add senderName for group chats
+      ...(chatDetails?.type === 'group' && { senderName: 'Ich' })
     };
-    setChatDetails((prev: any) => ({
-      ...prev,
-      messages: [...prev.messages, message]
-    }));
+    
+    addMessageToChat(chatId, message);
+    
     setNewMessage('');
   };
-
 
   if (loading) {
     return <div className="flex justify-center items-center h-screen"><Loader2 className="h-12 w-12 animate-spin text-primary" /></div>;
@@ -136,7 +71,8 @@ export default function ChatDetailPage() {
   if (!chatDetails) {
     return (
       <div className="container mx-auto py-8 text-center">
-        <h1 className="text-2xl font-bold">Chat nicht gefunden</h1>
+        <h1 className="text-2xl font-bold">Chat wird geladen...</h1>
+        <p className="text-muted-foreground">Wenn der Chat nicht erscheint, gehe zurück und versuche es erneut.</p>
         <Button onClick={() => router.push('/chats')} className="mt-4">Zurück zu Chats</Button>
       </div>
     );

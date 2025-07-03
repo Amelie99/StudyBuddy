@@ -1,3 +1,5 @@
+'use client';
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -5,16 +7,11 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { MessageSquarePlus, Search } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-
-const conversations = [
-  { id: "1", name: "Lisa Schmidt", lastMessage: "Super, danke dir!", timestamp: "11:45", unread: 1, avatar: "https://placehold.co/100x100.png", dataAiHint: "woman student" },
-  { id: "2", name: "David Meier", lastMessage: "Können wir uns morgen treffen?", timestamp: "10:30", unread: 0, avatar: "https://placehold.co/100x100.png", dataAiHint: "man student" },
-  { id: "group-1", name: "Mathe Profis WS23/24", lastMessage: "Max: Ich lade die neue Version hoch.", timestamp: "Gestern", unread: 3, avatar: "https://placehold.co/100x100.png", dataAiHint: "group icon" },
-  { id: "group-2", name: "SE Projekt 'LernApp'", lastMessage: "Perfekt, danke!", timestamp: "18.12.", unread: 0, avatar: "https://placehold.co/100x100.png", dataAiHint: "team collaboration" },
-  { id: "3", name: "Sarah Chen", lastMessage: "Danke für die Hilfe :)", timestamp: "Mo", unread: 0, avatar: "https://placehold.co/100x100.png", dataAiHint: "woman smiling" },
-];
+import { useChats } from "@/contexts/ChatsContext";
 
 export default function ChatsPage() {
+  const { conversations } = useChats();
+
   return (
     <div className="container mx-auto h-[calc(100vh-var(--header-height,8rem))] flex flex-col py-8"> {/* Adjust header height if you have a fixed one */}
       <div className="flex justify-between items-center mb-6">
