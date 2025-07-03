@@ -137,7 +137,7 @@ export default function ProfilErstellenPage() {
 
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-primary/10 via-background to-background p-4">
+    <div className="min-h-screen flex flex-col items-center justify-center p-4">
       <Card className="w-full max-w-2xl shadow-xl">
         <CardHeader className="items-center text-center">
           <HochschuleLogo className="h-12 w-auto mb-4 text-primary" />
