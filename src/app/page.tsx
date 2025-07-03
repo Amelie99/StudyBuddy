@@ -7,7 +7,7 @@ export default function HomePage() {
   // AuthContext will handle redirection from '/', so this page
   // will likely only show briefly or if AuthContext is still loading.
   return (
-    <div className="flex h-screen w-full items-center justify-center bg-transparent">
+    <div className="flex h-screen w-full items-center justify-center">
       <Loader2 className="h-12 w-12 animate-spin text-primary" />
     </div>
   );
