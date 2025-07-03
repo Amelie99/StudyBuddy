@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Calendar } from "@/components/ui/calendar"; // ShadCN Calendar
 import { PlusCircle, ListChecks, Clock, CalendarDays, Loader2 } from "lucide-react";
 import Link from "next/link";
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { de } from 'date-fns/locale';
 import { format } from 'date-fns';
 import { useCalendar } from "@/contexts/CalendarContext";
@@ -14,14 +14,26 @@ import { useCalendar } from "@/contexts/CalendarContext";
 export default function KalenderPage() {
   const [date, setDate] = useState<Date | undefined>(new Date());
   const { events, loading } = useCalendar();
+  const [initialRender, setInitialRender] = useState(true);
+
+  useEffect(() => {
+    // This effect runs once on the client to ensure dates are client-side only initially
+    // and avoids hydration mismatch for `new Date()`
+    setInitialRender(false);
+  }, []);
 
   // Memoize sorted events to prevent re-sorting on every render
   const sortedEvents = useMemo(() => {
+    if (loading || initialRender) return [];
     return [...events].sort((a, b) => a.date.getTime() - b.date.getTime());
-  }, [events]);
-
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  }, [events, loading, initialRender]);
+  
+  const today = useMemo(() => {
+    if (initialRender) return new Date(); // Temporary server-side value
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }, [initialRender]);
 
   // Filter events for the selected day in the calendar
   const selectedDayEvents = date ? sortedEvents.filter(event => {
@@ -31,9 +43,9 @@ export default function KalenderPage() {
   }) : [];
 
    // Filter for sessions that are upcoming.
-  const upcomingEvents = sortedEvents.filter(event => new Date(event.date) >= today);
+  const upcomingEvents = useMemo(() => sortedEvents.filter(event => new Date(event.date) >= today), [sortedEvents, today]);
 
-  if (loading) {
+  if (loading || initialRender) {
       return (
           <div className="container mx-auto py-8 space-y-8 flex justify-center items-center h-[60vh]">
               <Loader2 className="h-12 w-12 animate-spin text-primary" />
@@ -72,7 +84,7 @@ export default function KalenderPage() {
                 eventDay: "font-bold"
               }}
               classNames={{
-                day_selected: "border-2 border-primary bg-transparent text-primary rounded-md",
+                day_selected: "bg-secondary text-secondary-foreground",
                 day_today: "border-2 border-primary rounded-md",
               }}
             />
