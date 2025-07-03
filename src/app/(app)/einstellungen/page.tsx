@@ -11,12 +11,6 @@ import { PRIVACY_POLICY_URL } from '@/lib/constants';
 
 const settingsOptions = [
   {
-    id: 'feedback',
-    title: 'Feedback',
-    icon: Mail,
-    href: '/einstellungen/feedback',
-  },
-  {
     id: 'notifications',
     title: 'Benachrichtigungen',
     icon: Bell,
@@ -33,6 +27,12 @@ const settingsOptions = [
     title: 'Datenschutz',
     icon: Shield,
     href: PRIVACY_POLICY_URL,
+  },
+  {
+    id: 'feedback',
+    title: 'Feedback',
+    icon: Mail,
+    href: '/einstellungen/feedback',
   },
   {
     id: 'about',
