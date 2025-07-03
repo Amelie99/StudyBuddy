@@ -43,21 +43,43 @@ export default function PartnerFindenPage() {
   const { buddies: myBuddies, addBuddy } = useBuddies();
   const { startNewChat } = useChats();
   const router = useRouter();
+  const [declinedBuddyIds, setDeclinedBuddyIds] = useState<Set<number>>(new Set());
 
-  // Filter out buddies that the user has already added.
+  // Load declined IDs from localStorage on initial render
   useEffect(() => {
-    const myBuddyIds = new Set(myBuddies.map(b => b.id));
+    const storedDeclinedIds = localStorage.getItem('declinedBuddyIds');
+    if (storedDeclinedIds) {
+        try {
+            // Attempt to parse the stored data
+            const parsedIds = JSON.parse(storedDeclinedIds);
+            if (Array.isArray(parsedIds)) {
+                setDeclinedBuddyIds(new Set(parsedIds));
+            } else {
+                localStorage.removeItem('declinedBuddyIds');
+            }
+        } catch (error) {
+            console.error("Error parsing declined IDs from localStorage", error);
+            localStorage.removeItem('declinedBuddyIds'); // Clear invalid data
+        }
+    }
+  }, []); // Empty dependency array ensures this runs only once on mount
+
+  // Filter out buddies that the user has already added or declined.
+  useEffect(() => {
+    // Ensure myBuddies IDs are numbers for consistent comparison
+    const myBuddyIds = new Set(myBuddies.map(b => parseInt(b.id, 10)));
+    
     const filteredSuggestions = allSuggestedBuddies.filter(
-      suggested => !myBuddyIds.has(suggested.id.toString())
+      suggested => !myBuddyIds.has(suggested.id) && !declinedBuddyIds.has(suggested.id)
     );
     setSuggestionQueue(filteredSuggestions);
-  }, [myBuddies]); // Re-filter whenever the user's buddy list changes.
+  }, [myBuddies, declinedBuddyIds]); // Re-filter whenever the user's buddy list or declined list changes.
 
   const advanceQueueAndClose = () => {
     setShowMatchDialog(false);
-    // Use a timeout to allow the dialog to close before the card disappears
+    // Use a timeout to allow the dialog to close gracefully before the card disappears.
+    // The suggestion queue will update automatically via the useEffect hook.
     setTimeout(() => {
-        setSuggestionQueue(currentQueue => currentQueue.slice(1));
         setMatchedBuddy(null);
     }, 150);
   };
@@ -65,7 +87,7 @@ export default function PartnerFindenPage() {
   const handleInterest = () => {
     if (suggestionQueue.length === 0) return;
     const currentBuddy = suggestionQueue[0];
-    addBuddy(currentBuddy); // Automatically add buddy to the user's list
+    addBuddy(currentBuddy); // Automatically add buddy, triggering the useEffect to re-filter
     startNewChat(currentBuddy); // Automatically create a new chat
     setMatchedBuddy(currentBuddy);
     setShowMatchDialog(true);
@@ -73,7 +95,16 @@ export default function PartnerFindenPage() {
   
   const handleReject = () => {
      if (suggestionQueue.length === 0) return;
-     setSuggestionQueue(currentQueue => currentQueue.slice(1));
+     const rejectedBuddy = suggestionQueue[0];
+     
+     // Update the declined IDs state, which will trigger the useEffect to re-filter
+     setDeclinedBuddyIds(prev => {
+        const newDeclinedIds = new Set(prev);
+        newDeclinedIds.add(rejectedBuddy.id);
+        // Persist the new set to localStorage
+        localStorage.setItem('declinedBuddyIds', JSON.stringify(Array.from(newDeclinedIds)));
+        return newDeclinedIds;
+     });
   }
 
   const handleChat = () => {
