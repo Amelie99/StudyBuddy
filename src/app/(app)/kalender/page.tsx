@@ -13,12 +13,8 @@ import { format } from 'date-fns';
 export default function KalenderPage() {
   const [date, setDate] = React.useState<Date | undefined>(new Date());
   
-  // Define mock data inside the component to get a dynamic "tomorrow" date
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  
   const allUpcomingSessions = [
-    { id: 1, date: tomorrow, title: "Mathe II Lerngruppe", time: "10:00 Uhr" },
+    { id: 1, date: new Date(2024, 6, 4), title: "Mathe II Lerngruppe", time: "10:00 Uhr" },
     { id: 'se-abgabe', date: new Date(2024, 6, 15), title: "Abgabe SE Projekt", time: "23:59 Uhr" },
     { id: 'thesis-david', date: new Date(2024, 6, 18), title: "Diskussion Thesis David", time: "14:00 Uhr" },
     { id: 2, date: new Date(new Date().getFullYear(), 11, 25), title: "Projektbesprechung SE", time: "14:30 Uhr" }, // Dec 25
