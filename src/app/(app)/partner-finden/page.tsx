@@ -106,6 +106,11 @@ export default function PartnerFindenPage() {
     advanceQueueAndClose();
   };
 
+  const handleResetSuggestions = () => {
+    localStorage.removeItem('declinedBuddyIds');
+    setDeclinedBuddyIds(new Set());
+  };
+
   return (
     <>
       <div className="h-full flex flex-col justify-center items-center py-8">
@@ -139,9 +144,12 @@ export default function PartnerFindenPage() {
                     ))}
                   </div>
                 ) : (
-                  <div className="flex flex-col items-center justify-center text-center h-[450px] md:h-[500px] bg-secondary rounded-xl w-full max-w-xs">
+                  <div className="flex flex-col items-center justify-center text-center h-[450px] md:h-[500px] bg-secondary rounded-xl w-full max-w-xs p-4">
                       <CardTitle>Keine weiteren Vorschläge</CardTitle>
                       <CardDescription className="mt-2">Du hast alle aktuellen Vorschläge gesehen. <br/> Komme später wieder!</CardDescription>
+                      <Button onClick={handleResetSuggestions} variant="link" className="mt-4">
+                        Vorschläge zurücksetzen
+                      </Button>
                   </div>
                 )}
                 {suggestionQueue.length > 0 && (
