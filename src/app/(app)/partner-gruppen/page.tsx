@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Button } from "@/components/ui/button";
@@ -39,13 +40,13 @@ export default function PartnerAndGroupsPage() {
             {myBuddies.length > 0 ? (
               myBuddies.map(buddy => (
                 <Card key={buddy.id} className="hover:shadow-lg hover:border-primary/50 transition-all">
-                  <CardContent className="flex items-center space-x-4 p-4">
-                    <Link href={`/profil/${buddy.id}`} className="flex items-center space-x-4 flex-1 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+                  <CardContent className="flex items-center justify-between space-x-4 p-4">
+                    <Link href={`/profil/${buddy.id}`} className="flex items-center space-x-4 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
                       <Avatar className="h-14 w-14">
                         <AvatarImage src={buddy.avatar} alt={buddy.name} data-ai-hint={buddy.dataAiHint} />
                         <AvatarFallback>{buddy.name.substring(0, 2).toUpperCase()}</AvatarFallback>
                       </Avatar>
-                      <div className="flex-1">
+                      <div>
                         <p className="font-semibold text-lg">{buddy.name}</p>
                         <p className="text-sm text-muted-foreground">{buddy.course}</p>
                       </div>
@@ -84,13 +85,13 @@ export default function PartnerAndGroupsPage() {
             {myGroups.length > 0 ? (
               myGroups.map(group => (
                  <Card key={group.id} className="hover:shadow-lg hover:border-primary/50 transition-all">
-                    <CardContent className="flex items-center space-x-4 p-4">
-                        <Link href={`/gruppen/${group.id}`} className="flex items-center space-x-4 flex-1 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+                    <CardContent className="flex items-center justify-between space-x-4 p-4">
+                        <Link href={`/gruppen/${group.id}`} className="flex items-center space-x-4 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
                             <Avatar className="h-14 w-14">
                                 <AvatarImage src={group.image} alt={group.name} data-ai-hint={group.dataAiHint}/>
                                 <AvatarFallback>{group.name.substring(0, 2).toUpperCase()}</AvatarFallback>
                             </Avatar>
-                            <div className="flex-1">
+                            <div>
                                 <p className="font-semibold text-lg">{group.name}</p>
                                 <div className="flex items-center text-sm text-muted-foreground">
                                     <Users className="mr-2 h-4 w-4" />
