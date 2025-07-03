@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Card, CardContent } from '@/components/ui/card';
@@ -7,6 +6,7 @@ import Link from 'next/link';
 import React from 'react';
 import { useTheme } from 'next-themes';
 import { Switch } from '@/components/ui/switch';
+import { PRIVACY_POLICY_URL } from '@/lib/constants';
 
 
 const settingsOptions = [
@@ -26,7 +26,7 @@ const settingsOptions = [
     id: 'privacy',
     title: 'Datenschutz',
     icon: Shield,
-    href: '#',
+    href: PRIVACY_POLICY_URL,
   },
   {
     id: 'about',
@@ -79,7 +79,11 @@ export default function EinstellungenPage() {
             {settingsOptions.map((option) => (
                 <li key={option.id}>
                     {option.href ? (
-                         <Link href={option.href} className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-background">
+                         <Link 
+                            href={option.href} 
+                            target={option.href.startsWith('http') ? '_blank' : undefined}
+                            rel={option.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+                            className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-background">
                             <div className="flex items-center p-4 hover:bg-accent/50 transition-colors cursor-pointer rounded-lg">
                                 <option.icon className="h-5 w-5 mr-4 text-muted-foreground" />
                                 <div className="flex-grow">
