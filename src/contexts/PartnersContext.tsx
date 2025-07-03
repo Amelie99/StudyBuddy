@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useCallback, useMemo } from 'react';
 
 // Consistent Buddy type for use across the app
 export interface Buddy {
@@ -46,28 +46,31 @@ export function useBuddies() {
 export const BuddiesProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [buddies, setBuddies] = useState<Buddy[]>(initialBuddies);
 
-    const addBuddy = (suggestedBuddy: SuggestedBuddy) => {
+    const addBuddy = useCallback((suggestedBuddy: SuggestedBuddy) => {
         const buddyId = suggestedBuddy.id.toString();
-        // Check if buddy already exists
-        if (buddies.some(p => p.id === buddyId)) {
-            return;
-        }
+        
+        setBuddies(prevBuddies => {
+            // Check if buddy already exists inside the updater to get the latest state
+            if (prevBuddies.some(p => p.id === buddyId)) {
+                return prevBuddies;
+            }
 
-        const newBuddy: Buddy = {
-            id: buddyId,
-            name: suggestedBuddy.name,
-            course: suggestedBuddy.studiengang,
-            // Adjust image size from swipe card to list view avatar
-            avatar: suggestedBuddy.image.replace('300x400', '100x100'),
-            dataAiHint: suggestedBuddy.dataAiHint,
-        };
-        setBuddies(prevBuddies => [...prevBuddies, newBuddy]);
-    };
+            const newBuddy: Buddy = {
+                id: buddyId,
+                name: suggestedBuddy.name,
+                course: suggestedBuddy.studiengang,
+                avatar: suggestedBuddy.image.replace('300x400', '100x100'),
+                dataAiHint: suggestedBuddy.dataAiHint,
+            };
+            return [...prevBuddies, newBuddy];
+        });
+    }, []); // No dependencies needed for setBuddies
 
-    const value = {
+    const value = useMemo(() => ({
         buddies,
         addBuddy,
-    };
+    }), [buddies, addBuddy]);
+
 
     return (
         <BuddiesContext.Provider value={value}>
