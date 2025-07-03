@@ -18,6 +18,7 @@ export const NAV_ITEMS_CONFIG: NavItem[] = [
   { href: '/chats', label: 'Chats', icon: MessageSquare, matchSubpaths: true },
   { href: '/kalender', label: 'Kalender', icon: CalendarDays, matchSubpaths: true },
   { href: '/mein-profil', label: 'Mein Profil', icon: UserCircle, matchSubpaths: false },
+  { href: '/einstellungen', label: 'Einstellungen', icon: Settings, matchSubpaths: true },
 ];
 
 export const lerninteressenOptions = [
