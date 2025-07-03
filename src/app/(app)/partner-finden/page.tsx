@@ -121,7 +121,15 @@ export default function PartnerFindenPage() {
 
   return (
     <>
-      <div className="flex flex-col items-center py-8 h-full">
+      <div className="relative flex flex-col items-center py-8 h-full overflow-hidden">
+          <Image 
+            src="https://placehold.co/1920x1080.png" 
+            alt="University campus background" 
+            layout="fill" 
+            objectFit="cover" 
+            className="absolute inset-0 z-[-1] opacity-10 blur-sm"
+            data-ai-hint="university campus"
+          />
           <div className="text-center mb-8">
              <h1 className="text-3xl font-bold text-foreground">Buddies entdecken</h1>
              <p className="text-muted-foreground">Wische durch Profile oder nutze die Buttons unten.</p>
