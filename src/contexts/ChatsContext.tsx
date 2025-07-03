@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, ReactNode, useCallback } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useCallback, useMemo } from 'react';
 import type { SuggestedBuddy } from './PartnersContext';
 
 export interface Conversation {
@@ -149,7 +149,7 @@ export const ChatsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         );
     }, []);
 
-    const value = { conversations, getChatDetails, startNewChat, addMessageToChat, markChatAsRead };
+    const value = useMemo(() => ({ conversations, getChatDetails, startNewChat, addMessageToChat, markChatAsRead }), [conversations, getChatDetails, startNewChat, addMessageToChat, markChatAsRead]);
 
     return (
         <ChatsContext.Provider value={value}>

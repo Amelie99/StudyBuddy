@@ -2,7 +2,7 @@
 'use client';
 
 import type { User as FirebaseUser } from 'firebase/auth';
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useMemo, useCallback } from 'react';
 import { auth } from '@/config/firebase'; // Using mocked auth
 import type { AppUser } from '@/lib/types';
 import { useRouter, usePathname } from 'next/navigation';
@@ -88,7 +88,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [currentUser, loading, router, pathname]);
 
-  const updateAuthContextUser = (updatedData: Partial<AppUser>) => {
+  const updateAuthContextUser = useCallback((updatedData: Partial<AppUser>) => {
     setCurrentUser(prevUser => {
       if (!prevUser) return null;
       const newUser = { ...prevUser, ...updatedData };
@@ -99,36 +99,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       return newUser;
     });
-  };
+  }, []);
 
-  // These functions call the mock firebase auth functions
-  const login = async (email: string, pass: string) => {
+  const login = useCallback(async (email: string, pass: string) => {
     // @ts-ignore
     return auth.signInWithEmailAndPassword(email, pass);
-  };
+  }, []);
 
-  const register = async (email: string, pass: string) => {
+  const register = useCallback(async (email: string, pass: string) => {
     // @ts-ignore
     return auth.createUserWithEmailAndPassword(email, pass);
-  };
+  }, []);
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
      // @ts-ignore
     await auth.signOut();
     setCurrentUser(null); 
-    router.replace('/anmelden'); // Manually redirect to login
-  };
+    router.replace('/anmelden');
+  }, [router]);
 
-  const sendPasswordReset = async (email: string) => {
+  const sendPasswordReset = useCallback(async (email: string) => {
      // @ts-ignore
     return auth.sendPasswordResetEmail(email);
-  };
+  }, []);
 
-  const isHochschuleEmail = (email: string) => {
+  const isHochschuleEmail = useCallback((email: string) => {
     return email.endsWith('@stud.haw-landshut.de');
-  };
+  }, []);
 
-  const value = {
+  const value = useMemo(() => ({
     currentUser,
     loading,
     login,
@@ -137,7 +136,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     sendPasswordReset,
     isHochschuleEmail,
     updateAuthContextUser,
-  };
+  }), [currentUser, loading, login, register, logout, sendPasswordReset, isHochschuleEmail, updateAuthContextUser]);
+
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

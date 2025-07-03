@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, ReactNode, useCallback, useEffect } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useCallback, useEffect, useMemo } from 'react';
 
 export interface CalendarEvent {
     id: string;
@@ -56,11 +56,11 @@ export const CalendarProvider: React.FC<{ children: ReactNode }> = ({ children }
         setEvents(prevEvents => [...prevEvents, newEvent].sort((a,b) => a.date.getTime() - b.date.getTime()));
     }, []);
 
-    const value = {
+    const value = useMemo(() => ({
         events,
         addEvent,
         loading,
-    };
+    }), [events, addEvent, loading]);
 
     return (
         <CalendarContext.Provider value={value}>

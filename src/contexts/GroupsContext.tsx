@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useCallback, useMemo } from 'react';
 
 // This is the shape of a group object used in the display pages
 export interface Group {
@@ -43,7 +43,7 @@ export function useGroups() {
 export const GroupsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [groups, setGroups] = useState<Group[]>(initialGroups);
 
-    const addGroup = (newGroupData: NewGroupData) => {
+    const addGroup = useCallback((newGroupData: NewGroupData) => {
         const newGroup: Group = {
             id: `group-${Date.now()}`,
             name: newGroupData.name,
@@ -53,12 +53,12 @@ export const GroupsProvider: React.FC<{ children: ReactNode }> = ({ children }) 
             dataAiHint: "new study group"
         };
         setGroups(prevGroups => [...prevGroups, newGroup]);
-    };
+    }, []);
 
-    const value = {
+    const value = useMemo(() => ({
         groups,
         addGroup,
-    };
+    }), [groups, addGroup]);
 
     return (
         <GroupsContext.Provider value={value}>
