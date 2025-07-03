@@ -73,7 +73,7 @@ export default function KalenderPage() {
                 cell: "[&:has([aria-selected])]:bg-transparent",
                 day_selected: "border-2 border-primary bg-transparent text-primary rounded-md",
                 day_today: "border-2 border-primary rounded-md",
-                eventDay: "text-primary font-bold"
+                day_eventDay: "font-bold"
               }}
             />
           </CardContent>
