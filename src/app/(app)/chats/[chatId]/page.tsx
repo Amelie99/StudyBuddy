@@ -156,7 +156,7 @@ export default function ChatDetailPage() {
               <DialogHeader>
                 <DialogTitle>Datei anhängen</DialogTitle>
                 <DialogDescription>
-                  Füge deiner Nachricht eine Datei hinzu. Diese Funktion ist ein Mock-up.
+                  Füge deiner Nachricht eine Datei hinzu.
                 </DialogDescription>
               </DialogHeader>
               <div className="py-4">
