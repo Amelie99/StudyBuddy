@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -16,9 +17,6 @@ export default function ChatsPage() {
     <div className="container mx-auto h-[calc(100vh-var(--header-height,8rem))] flex flex-col py-8"> {/* Adjust header height if you have a fixed one */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-foreground">Chats</h1>
-        <Button variant="outline">
-          <MessageSquarePlus className="mr-2 h-5 w-5" /> Neuer Chat
-        </Button>
       </div>
       
       <div className="relative mb-4">
@@ -60,10 +58,14 @@ export default function ChatsPage() {
             <CardHeader>
               <MessageSquarePlus className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
               <CardTitle>Keine Chats vorhanden</CardTitle>
-              <CardDescription>Starte eine neue Konversation oder finde Buddies.</CardDescription>
+              <CardDescription>Starte eine neue Konversation, indem du Buddies findest.</CardDescription>
             </CardHeader>
             <CardContent>
-                <Button>Neuen Chat starten</Button>
+                <Button asChild>
+                  <Link href="/partner-finden">
+                    <Search className="mr-2 h-4 w-4" /> Buddies finden
+                  </Link>
+                </Button>
             </CardContent>
         </Card>
       )}
