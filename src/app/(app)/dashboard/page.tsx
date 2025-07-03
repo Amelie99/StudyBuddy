@@ -63,11 +63,11 @@ export default function DashboardPage() {
             <div className="grid gap-4">
               <div className="space-y-2">
                 <h4 className="font-medium leading-none">Benachrichtigungen</h4>
-                <p className="text-sm text-muted-foreground mb-2">
+                <p className="text-sm text-muted-foreground">
                   Du hast {unreadCount} ungelesene {unreadCount === 1 ? 'Nachricht' : 'Nachrichten'}.
                 </p>
                 <Button variant="link" size="sm" className="h-auto p-0 text-xs justify-start" onClick={handleMarkAllRead} disabled={unreadCount === 0}>
-                    Alle als gelesen markieren
+                   Alle als gelesen markieren
                 </Button>
               </div>
               <Separator />
@@ -201,8 +201,8 @@ export default function DashboardPage() {
               </Card>
             )}
           
-          <Card className="border-dashed">
-            <CardContent className="p-4 text-center">
+          <Card>
+            <CardContent className="p-4 text-center border-dashed">
               <p className="text-sm text-muted-foreground">Hier könnte Ihre Werbung stehen!</p>
             </CardContent>
           </Card>
