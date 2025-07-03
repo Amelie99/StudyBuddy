@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Button } from "@/components/ui/button";
@@ -29,7 +30,7 @@ export default function GruppenPage() {
               <CardHeader>
                 {group.image && (
                   <div className="relative h-40 w-full mb-4 rounded-t-lg overflow-hidden">
-                    <Image src={group.image} alt={group.name} layout="fill" objectFit="cover" data-ai-hint={group.dataAiHint} />
+                    <Image src={group.image} alt={group.name} fill className="object-cover" data-ai-hint={group.dataAiHint} />
                   </div>
                 )}
                 <CardTitle>{group.name}</CardTitle>

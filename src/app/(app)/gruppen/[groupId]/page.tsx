@@ -102,7 +102,7 @@ export default function GroupDetailPage() {
       <Card className="overflow-hidden shadow-xl">
         {group.image && (
           <div className="relative h-48 md:h-64 w-full">
-            <Image src={group.image} alt={group.name} layout="fill" objectFit="cover" data-ai-hint={group.dataAiHint} />
+            <Image src={group.image} alt={group.name} fill className="object-cover" data-ai-hint={group.dataAiHint} />
             <div className="absolute inset-0 bg-black/30" />
           </div>
         )}

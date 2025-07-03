@@ -125,9 +125,8 @@ export default function PartnerFindenPage() {
           <Image 
             src="https://placehold.co/1920x1080.png" 
             alt="University campus background" 
-            layout="fill" 
-            objectFit="cover" 
-            className="absolute inset-0 z-[-1] opacity-10 blur-sm"
+            fill
+            className="absolute inset-0 z-[-1] object-cover opacity-10 blur-sm"
             data-ai-hint="university campus"
           />
           <div className="text-center mb-8">
@@ -154,7 +153,7 @@ export default function PartnerFindenPage() {
                         opacity: index < 2 ? 1 : 0, // Show top 2 cards
                       }}
                     >
-                      <Image src={buddy.image} alt={buddy.name} layout="fill" objectFit="cover" data-ai-hint={buddy.dataAiHint}/>
+                      <Image src={buddy.image} alt={buddy.name} fill className="object-cover" data-ai-hint={buddy.dataAiHint}/>
                       <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent" />
                       <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
                         <h3 className="text-2xl font-bold drop-shadow-md">{buddy.name}</h3>
