@@ -6,51 +6,32 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Calendar } from "@/components/ui/calendar"; // ShadCN Calendar
 import { PlusCircle, ListChecks, Clock, CalendarDays, Loader2 } from "lucide-react";
 import Link from "next/link";
-import React, { useState, useEffect } from "react";
+import React, { useState, useMemo } from "react";
 import { de } from 'date-fns/locale';
 import { format } from 'date-fns';
-
+import { useCalendar } from "@/contexts/CalendarContext";
 
 export default function KalenderPage() {
-  const [date, setDate] = useState<Date | undefined>(undefined);
-  const [allUpcomingSessions, setAllUpcomingSessions] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [date, setDate] = useState<Date | undefined>(new Date());
+  const { events, loading } = useCalendar();
 
-  useEffect(() => {
-    // This function runs only on the client, after the page has loaded.
-    // This is the correct way to use 'new Date()' to avoid server/client mismatches.
-    const getFutureDate = (days: number) => {
-      const future = new Date();
-      future.setDate(future.getDate() + days);
-      return future;
-    };
-    
-    // Set initial selected date and events on client mount
-    setDate(new Date()); 
-    setAllUpcomingSessions([
-        { id: 1, date: getFutureDate(2), title: "Mathe II Lerngruppe", time: "10:00 Uhr" },
-        { id: 'se-abgabe', date: getFutureDate(10), title: "Abgabe SE Projekt", time: "23:59 Uhr" },
-        { id: 'thesis-david', date: getFutureDate(15), title: "Diskussion Thesis David", time: "14:00 Uhr" },
-        { id: 2, date: getFutureDate(20), title: "Projektbesprechung SE", time: "14:30 Uhr" },
-        { id: 'bwl-klausur', date: getFutureDate(25), title: "Klausur BWL Grundlagen", time: "09:00 Uhr" },
-    ]);
-    setLoading(false);
-  }, []); // Empty dependency array ensures this runs once on mount
-  
+  // Memoize sorted events to prevent re-sorting on every render
+  const sortedEvents = useMemo(() => {
+    return [...events].sort((a, b) => a.date.getTime() - b.date.getTime());
+  }, [events]);
+
   const today = new Date();
-  today.setHours(0,0,0,0); // Normalize today's date
+  today.setHours(0, 0, 0, 0);
 
   // Filter events for the selected day in the calendar
-  const selectedDayEvents = date ? allUpcomingSessions.filter(event => {
+  const selectedDayEvents = date ? sortedEvents.filter(event => {
     const eventDate = new Date(event.date);
-    eventDate.setHours(0,0,0,0); // Normalize event date
-    return eventDate.getTime() === new Date(date).setHours(0,0,0,0);
+    eventDate.setHours(0, 0, 0, 0);
+    return eventDate.getTime() === new Date(date).setHours(0, 0, 0, 0);
   }) : [];
 
-   // Filter for sessions that have a numeric ID and are upcoming.
-  const linkableUpcomingSessions = allUpcomingSessions
-    .filter(session => typeof session.id === 'number' && new Date(session.date) >= today)
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+   // Filter for sessions that are upcoming.
+  const upcomingEvents = sortedEvents.filter(event => new Date(event.date) >= today);
 
   if (loading) {
       return (
@@ -71,7 +52,6 @@ export default function KalenderPage() {
         </Button>
       </div>
 
-      {/* Top section with Calendar and selected day's events */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className="md:col-span-2 shadow-lg">
           <CardHeader>
@@ -86,13 +66,14 @@ export default function KalenderPage() {
               onSelect={setDate}
               className="rounded-md border p-0"
               modifiers={{ 
-                eventDay: allUpcomingSessions.map(e => e.date),
+                eventDay: events.map(e => e.date),
+              }}
+              modifiersClassNames={{
+                eventDay: "font-bold"
               }}
               classNames={{
-                cell: "[&:has([aria-selected])]:bg-transparent",
                 day_selected: "border-2 border-primary bg-transparent text-primary rounded-md",
                 day_today: "border-2 border-primary rounded-md",
-                day_eventDay: "font-bold"
               }}
             />
           </CardContent>
@@ -108,11 +89,11 @@ export default function KalenderPage() {
           <CardContent>
             {selectedDayEvents.length > 0 ? (
               <ul className="space-y-3">
-                {selectedDayEvents.sort((a,b) => a.time.localeCompare(b.time)).map((event, index) => (
-                  <li key={index} className="p-3 bg-secondary/50 rounded-lg">
+                {selectedDayEvents.map((event) => (
+                  <li key={event.id} className="p-3 bg-secondary/50 rounded-lg">
                     <p className="font-semibold">{event.title}</p>
                     <p className="text-sm text-muted-foreground flex items-center">
-                      <Clock className="mr-1.5 h-4 w-4" /> {event.time}
+                      <Clock className="mr-1.5 h-4 w-4" /> {format(event.date, "HH:mm", { locale: de })} Uhr
                     </p>
                   </li>
                 ))}
@@ -126,7 +107,6 @@ export default function KalenderPage() {
         </Card>
       </div>
       
-      {/* New section for all upcoming sessions */}
       <Card className="shadow-lg">
         <CardHeader>
           <CardTitle className="flex items-center">
@@ -136,19 +116,17 @@ export default function KalenderPage() {
           <CardDescription>Eine Übersicht aller deiner geplanten Lernsitzungen und Termine.</CardDescription>
         </CardHeader>
         <CardContent>
-          {linkableUpcomingSessions.length > 0 ? (
+          {upcomingEvents.length > 0 ? (
             <ul className="space-y-4">
-              {linkableUpcomingSessions.map(session => (
+              {upcomingEvents.map(session => (
                 <li key={session.id} className="flex items-center justify-between p-3 bg-secondary/50 rounded-lg flex-wrap gap-4">
                   <div>
                     <p className="font-semibold">{session.title}</p>
-                    <p className="text-sm text-muted-foreground">{format(session.date, "EEEE, d. MMMM yyyy", { locale: de })} - {session.time}</p>
+                    <p className="text-sm text-muted-foreground">{format(session.date, "EEEE, d. MMMM yyyy - HH:mm 'Uhr'", { locale: de })}</p>
                   </div>
-                  {typeof session.id === 'number' && (
-                    <Button variant="outline" size="sm" asChild>
-                        <Link href={`/kalender/${session.id}`}>Details</Link>
-                    </Button>
-                  )}
+                  <Button variant="outline" size="sm" asChild>
+                      <Link href={`/kalender/${session.id}`}>Details</Link>
+                  </Button>
                 </li>
               ))}
             </ul>

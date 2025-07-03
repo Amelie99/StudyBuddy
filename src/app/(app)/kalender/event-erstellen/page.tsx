@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -14,10 +15,11 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, CalendarPlus, Clock, Users, MapPin } from 'lucide-react';
+import { Loader2, CalendarPlus, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
+import { useCalendar } from '@/contexts/CalendarContext';
 
 
 const eventSchema = z.object({
@@ -45,6 +47,7 @@ export default function EventErstellenPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
+  const { addEvent } = useCalendar();
 
   const chatIdParam = searchParams.get('chatId'); // For pre-filling attendees or linking back
 
@@ -71,22 +74,17 @@ export default function EventErstellenPage() {
       // Combine date and time
       const startDateTime = new Date(data.date);
       const [startHours, startMinutes] = data.startTime.split(':').map(Number);
-      startDateTime.setHours(startHours, startMinutes);
+      startDateTime.setHours(startHours, startMinutes, 0, 0);
 
-      const endDateTime = new Date(data.date);
-      const [endHours, endMinutes] = data.endTime.split(':').map(Number);
-      endDateTime.setHours(endHours, endMinutes);
-      
       const eventData = {
-        ...data,
-        start: startDateTime,
-        end: endDateTime,
-        createdBy: currentUser.uid,
+        title: data.title,
+        date: startDateTime,
+        description: data.description,
+        location: `${data.location || 'N/A'} (${data.startTime} - ${data.endTime})`,
+        type: 'Einzel' as const,
       };
-      delete (eventData as any).date; // remove original date, startTime, endTime
 
-      console.log('Neuer Termin erstellen:', eventData);
-      // In a real app, save to Firestore
+      addEvent(eventData);
       
       toast({
         title: 'Termin erstellt!',
@@ -163,4 +161,3 @@ export default function EventErstellenPage() {
     </div>
   );
 }
-

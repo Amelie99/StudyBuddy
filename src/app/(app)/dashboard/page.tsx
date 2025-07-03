@@ -8,14 +8,12 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useBuddies } from "@/contexts/PartnersContext";
+import { useCalendar } from "@/contexts/CalendarContext";
+import { formatDistanceToNow } from 'date-fns';
+import { de } from 'date-fns/locale';
 
-// Mock data
-const upcomingSessions = [
-  { id: 1, title: "Mathe II Lerngruppe", time: "Morgen, 10:00 Uhr", type: "Gruppe" },
-  { id: 2, title: "Projektbesprechung SE", time: "25. Dez, 14:30 Uhr", type: "Einzel" },
-];
 
 const initialNotifications = [
     { id: 1, title: "Update: Mathe II Lerngruppe", description: "Der Treffpunkt wurde auf Raum E0.04 geändert.", time: "vor 5 Min.", read: false },
@@ -28,6 +26,22 @@ export default function DashboardPage() {
   const [notifications, setNotifications] = useState(initialNotifications);
   const [isProfileProgressVisible, setProfileProgressVisible] = useState(true);
   const { buddies } = useBuddies();
+  const { events } = useCalendar();
+
+  const upcomingSessions = useMemo(() => {
+    const now = new Date();
+    return [...events]
+      .filter(event => event.date >= now)
+      .sort((a, b) => a.date.getTime() - b.date.getTime())
+      .slice(0, 3)
+      .map(event => ({
+        id: event.id,
+        title: event.title,
+        time: formatDistanceToNow(event.date, { addSuffix: true, locale: de }),
+        type: event.type
+      }));
+  }, [events]);
+
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
