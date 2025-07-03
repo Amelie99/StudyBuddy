@@ -2,32 +2,68 @@
 'use client';
 
 import { Card, CardContent } from '@/components/ui/card';
-import { Bell, Palette, Shield, Info, ChevronRight } from 'lucide-react';
+import { Bell, Palette, Shield, Info, ChevronRight, Moon, Sun } from 'lucide-react';
 import Link from 'next/link';
 import React from 'react';
+import { useTheme } from 'next-themes';
+import { Switch } from '@/components/ui/switch';
+
 
 const settingsOptions = [
   {
+    id: 'notifications',
     title: 'Benachrichtigungen',
     icon: Bell,
     href: '#',
   },
   {
+    id: 'design',
     title: 'Design',
     icon: Palette,
-    href: '#',
+    href: null, // Indicates it's not a link
   },
   {
+    id: 'privacy',
     title: 'Datenschutz',
     icon: Shield,
     href: '#',
   },
   {
+    id: 'about',
     title: 'Über uns',
     icon: Info,
     href: '#',
   },
 ];
+
+function ThemeSwitch() {
+    const { theme, setTheme } = useTheme();
+    const [isMounted, setIsMounted] = React.useState(false);
+
+    React.useEffect(() => {
+        setIsMounted(true);
+    }, []);
+
+    if (!isMounted) {
+        return null;
+    }
+
+    const isDark = theme === 'dark';
+
+    return (
+         <div className="flex items-center space-x-2">
+            <Sun className={`h-5 w-5 transition-colors ${!isDark ? 'text-primary' : 'text-muted-foreground'}`}/>
+            <Switch
+                id="theme-switch"
+                checked={isDark}
+                onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
+                aria-label="Theme-Schalter"
+            />
+            <Moon className={`h-5 w-5 transition-colors ${isDark ? 'text-primary' : 'text-muted-foreground'}`}/>
+        </div>
+    )
+}
+
 
 export default function EinstellungenPage() {
   return (
@@ -41,16 +77,26 @@ export default function EinstellungenPage() {
         <CardContent className="p-0">
           <ul className="divide-y divide-border">
             {settingsOptions.map((option) => (
-                <li key={option.title}>
-                    <Link href={option.href} className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-background">
-                        <div className="flex items-center p-4 hover:bg-accent/50 transition-colors cursor-pointer rounded-lg">
+                <li key={option.id}>
+                    {option.href ? (
+                         <Link href={option.href} className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-background">
+                            <div className="flex items-center p-4 hover:bg-accent/50 transition-colors cursor-pointer rounded-lg">
+                                <option.icon className="h-5 w-5 mr-4 text-muted-foreground" />
+                                <div className="flex-grow">
+                                    <p className="font-medium">{option.title}</p>
+                                </div>
+                                <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                            </div>
+                        </Link>
+                    ) : (
+                         <div className="flex items-center p-4">
                             <option.icon className="h-5 w-5 mr-4 text-muted-foreground" />
                             <div className="flex-grow">
                                 <p className="font-medium">{option.title}</p>
                             </div>
-                            <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                            {option.id === 'design' && <ThemeSwitch />}
                         </div>
-                    </Link>
+                    )}
                 </li>
             ))}
           </ul>

@@ -4,6 +4,7 @@ import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
+import { ThemeProvider } from '@/components/layout/ThemeProvider';
 
 export const metadata: Metadata = {
   title: 'StudyBuddy HS Landshut',
@@ -21,13 +22,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="de">
+    <html lang="de" suppressHydrationWarning>
       <head />
       <body className={cn("font-body antialiased min-h-screen flex flex-col", inter.variable)}>
-        <AuthProvider>
-          {children}
-          <Toaster />
-        </AuthProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <AuthProvider>
+            {children}
+            <Toaster />
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
