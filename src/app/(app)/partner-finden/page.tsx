@@ -50,6 +50,7 @@ export default function PartnerFindenPage() {
   // It re-runs if myBuddies changes (e.g., buddy added in another tab).
   useEffect(() => {
     setIsLoading(true);
+    // Logic now runs only on the client, where localStorage is available.
     const myBuddyIds = new Set(myBuddies.map(b => parseInt(b.id, 10)));
     let declinedIds = new Set<number>();
     try {
