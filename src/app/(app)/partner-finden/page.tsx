@@ -49,8 +49,7 @@ export default function PartnerFindenPage() {
   // This effect runs to initialize and filter the suggestion queue.
   // It re-runs if myBuddies changes (e.g., buddy added in another tab).
   useEffect(() => {
-    setIsLoading(true);
-    // Logic now runs only on the client, where localStorage is available.
+    // This logic now runs only on the client, where localStorage is available.
     const myBuddyIds = new Set(myBuddies.map(b => parseInt(b.id, 10)));
     let declinedIds = new Set<number>();
     try {
@@ -63,12 +62,13 @@ export default function PartnerFindenPage() {
       }
     } catch (error) {
         console.error("Error parsing declined IDs from localStorage", error);
-        localStorage.removeItem('declinedBuddyIds');
+        localStorage.removeItem('declinedBuddyIds'); // Clear potentially corrupted data
     }
     
     const filteredSuggestions = allSuggestedBuddies.filter(
       suggested => !myBuddyIds.has(suggested.id) && !declinedIds.has(suggested.id)
     );
+    
     setSuggestionQueue(filteredSuggestions);
     setIsLoading(false);
   }, [myBuddies]);
@@ -122,7 +122,7 @@ export default function PartnerFindenPage() {
     setTimeout(() => {
       setMatchedBuddy(null);
       advanceQueue();
-    }, 300);
+    }, 300); // Delay to allow dialog to close before card disappears
   };
 
   const handleChat = () => {
@@ -174,7 +174,7 @@ export default function PartnerFindenPage() {
                 })
               ) : (
                 <div className="flex flex-col items-center justify-center text-center h-full bg-card/80 backdrop-blur-sm rounded-2xl w-full max-w-xs p-4 shadow-inner">
-                    <Users className="h-16 w-16 text-muted-foreground mb-4" />
+                    <Users className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
                     <CardTitle>Keine weiteren Vorschläge</CardTitle>
                     <CardDescription className="mt-2">
                         Du hast alle aktuellen Vorschläge gesehen.
@@ -211,7 +211,7 @@ export default function PartnerFindenPage() {
             )}
           </div>
       </div>
-      <AlertDialog open={showMatchDialog} onOpenChange={advanceQueueAndCloseDialog}>
+      <AlertDialog open={showMatchDialog} onOpenChange={setShowMatchDialog}>
         <AlertDialogContent>
           <AlertDialogHeader className="items-center text-center">
             <CheckCircle className="h-16 w-16 text-green-500 mb-2" />
