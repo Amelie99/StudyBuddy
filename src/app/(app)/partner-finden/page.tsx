@@ -1,10 +1,11 @@
+
 'use client';
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Heart, X, CheckCircle, MessageSquare, Users } from "lucide-react";
+import { Heart, X, CheckCircle, MessageSquare, Users, Loader2 } from "lucide-react";
 import Image from "next/image";
 import {
   AlertDialog,
@@ -32,48 +33,44 @@ const allSuggestedBuddies: SuggestedBuddy[] = [
 
 export default function PartnerFindenPage() {
   const [suggestionQueue, setSuggestionQueue] = useState<SuggestedBuddy[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [showMatchDialog, setShowMatchDialog] = useState(false);
   const [matchedBuddy, setMatchedBuddy] = useState<SuggestedBuddy | null>(null);
   const { buddies: myBuddies, addBuddy } = useBuddies();
   const { startNewChat } = useChats();
   const router = useRouter();
-  const [declinedBuddyIds, setDeclinedBuddyIds] = useState<Set<number>>(new Set());
   const [swipeState, setSwipeState] = useState<'left' | 'right' | null>(null);
 
-  // Load declined IDs from localStorage on initial render
+  // This effect runs to initialize and filter the suggestion queue.
+  // It re-runs if myBuddies changes (e.g., buddy added in another tab).
   useEffect(() => {
+    setIsLoading(true);
+    const myBuddyIds = new Set(myBuddies.map(b => parseInt(b.id, 10)));
+    let declinedIds = new Set<number>();
     const storedDeclinedIds = localStorage.getItem('declinedBuddyIds');
     if (storedDeclinedIds) {
         try {
             const parsedIds = JSON.parse(storedDeclinedIds);
             if (Array.isArray(parsedIds)) {
-                setDeclinedBuddyIds(new Set(parsedIds));
-            } else {
-                localStorage.removeItem('declinedBuddyIds');
+                declinedIds = new Set(parsedIds);
             }
         } catch (error) {
             console.error("Error parsing declined IDs from localStorage", error);
             localStorage.removeItem('declinedBuddyIds');
         }
     }
-  }, []);
-
-  // Filter out buddies that the user has already added or declined.
-  useEffect(() => {
-    const myBuddyIds = new Set(myBuddies.map(b => parseInt(b.id, 10)));
     
     const filteredSuggestions = allSuggestedBuddies.filter(
-      suggested => !myBuddyIds.has(suggested.id) && !declinedBuddyIds.has(suggested.id)
+      suggested => !myBuddyIds.has(suggested.id) && !declinedIds.has(suggested.id)
     );
     setSuggestionQueue(filteredSuggestions);
-  }, [myBuddies, declinedBuddyIds]);
+    setIsLoading(false);
+  }, [myBuddies]);
 
-  const advanceQueueAndClose = () => {
-    setShowMatchDialog(false);
-    setTimeout(() => {
-        setMatchedBuddy(null);
-    }, 150);
-  };
+  const advanceQueue = useCallback(() => {
+    setSwipeState(null);
+    setSuggestionQueue(prevQueue => prevQueue.slice(1));
+  }, []);
 
   const handleInterest = () => {
     if (suggestionQueue.length === 0 || swipeState) return;
@@ -86,7 +83,6 @@ export default function PartnerFindenPage() {
         startNewChat(currentBuddy);
         setMatchedBuddy(currentBuddy);
         setShowMatchDialog(true);
-        setSwipeState(null);
     }, 300); // Animation duration
   };
   
@@ -97,25 +93,39 @@ export default function PartnerFindenPage() {
      setSwipeState('left');
 
      setTimeout(() => {
-        setDeclinedBuddyIds(prev => {
-            const newDeclinedIds = new Set(prev);
-            newDeclinedIds.add(rejectedBuddy.id);
-            localStorage.setItem('declinedBuddyIds', JSON.stringify(Array.from(newDeclinedIds)));
-            return newDeclinedIds;
-        });
-        setSwipeState(null);
+        const storedDeclinedIds = localStorage.getItem('declinedBuddyIds');
+        let declinedIds: number[] = [];
+        if (storedDeclinedIds) {
+            try {
+                const parsed = JSON.parse(storedDeclinedIds);
+                if (Array.isArray(parsed)) declinedIds = parsed;
+            } catch {}
+        }
+        if (!declinedIds.includes(rejectedBuddy.id)) {
+            declinedIds.push(rejectedBuddy.id);
+            localStorage.setItem('declinedBuddyIds', JSON.stringify(declinedIds));
+        }
+        advanceQueue();
      }, 300); // Animation duration
   }
+
+  const advanceQueueAndCloseDialog = () => {
+    setShowMatchDialog(false);
+    setTimeout(() => {
+      setMatchedBuddy(null);
+      advanceQueue();
+    }, 300);
+  };
 
   const handleChat = () => {
     if (!matchedBuddy) return;
     router.push(`/chats/${matchedBuddy.id}`);
-    advanceQueueAndClose();
+    advanceQueueAndCloseDialog();
   };
 
   const handleResetSuggestions = () => {
     localStorage.removeItem('declinedBuddyIds');
-    setDeclinedBuddyIds(new Set());
+    window.location.reload(); // Simple way to force re-initialization
   };
 
   return (
@@ -127,8 +137,12 @@ export default function PartnerFindenPage() {
           </div>
         
           <div className="flex-grow flex flex-col items-center justify-center w-full">
-            <div className="relative w-full max-w-xs h-[450px] md:h-[500px] mb-8">
-              {suggestionQueue.length > 0 ? (
+             <div className="relative w-full max-w-xs h-[450px] md:h-[500px] mb-8">
+              {isLoading ? (
+                 <div className="flex flex-col items-center justify-center text-center h-full w-full">
+                    <Loader2 className="h-16 w-16 text-primary animate-spin" />
+                 </div>
+              ) : suggestionQueue.length > 0 ? (
                 suggestionQueue.map((buddy, index) => {
                   const isTopCard = index === 0;
                   return (
@@ -167,7 +181,7 @@ export default function PartnerFindenPage() {
               )}
             </div>
 
-            {suggestionQueue.length > 0 && (
+            {suggestionQueue.length > 0 && !isLoading && (
               <div className="flex justify-center space-x-6">
                 <Button 
                   onClick={handleReject} 
@@ -193,7 +207,7 @@ export default function PartnerFindenPage() {
             )}
           </div>
       </div>
-      <AlertDialog open={showMatchDialog} onOpenChange={setShowMatchDialog}>
+      <AlertDialog open={showMatchDialog} onOpenChange={(isOpen) => !isOpen && advanceQueueAndCloseDialog()}>
         <AlertDialogContent>
           <AlertDialogHeader className="items-center text-center">
             <CheckCircle className="h-16 w-16 text-green-500 mb-2" />
@@ -203,7 +217,7 @@ export default function PartnerFindenPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-col sm:flex-row gap-2">
-            <Button onClick={advanceQueueAndClose} className="w-full sm:w-auto" variant="outline">Suche weiter</Button>
+            <Button onClick={advanceQueueAndCloseDialog} className="w-full sm:w-auto" variant="outline">Suche weiter</Button>
             <Button onClick={handleChat} className="w-full sm:w-auto">
               <MessageSquare className="mr-2 h-4 w-4" />
               Chat starten
