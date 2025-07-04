@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from "react";
@@ -120,96 +119,98 @@ export default function PartnerFindenPage() {
   };
 
   return (
-    <div className="flex flex-col items-center py-8 h-full overflow-hidden">
-        <div className="text-center mb-8">
-           <h1 className="text-3xl font-bold text-foreground">Buddies entdecken</h1>
-           <p className="text-muted-foreground">Wische durch Profile oder nutze die Buttons unten.</p>
-        </div>
-      
-        <div className="flex-grow flex flex-col items-center justify-center w-full">
-          <div className="relative w-full max-w-xs h-[450px] md:h-[500px] mb-8">
-            {suggestionQueue.length > 0 ? (
-              suggestionQueue.map((buddy, index) => {
-                const isTopCard = index === 0;
-                return (
-                  <Card 
-                    key={buddy.id} 
-                    className={cn(
-                      "absolute w-full h-full rounded-2xl overflow-hidden shadow-2xl transition-all duration-300 ease-in-out",
-                      isTopCard && swipeState === 'left' && "transform -translate-x-[150%] rotate-[-15deg]",
-                      isTopCard && swipeState === 'right' && "transform translate-x-[150%] rotate-[15deg]"
-                    )}
-                    style={{ 
-                      zIndex: suggestionQueue.length - index,
-                      transform: `translateY(${index * -8}px) scale(${1 - index * 0.05})`,
-                      opacity: index < 2 ? 1 : 0, // Show top 2 cards
-                    }}
-                  >
-                    <Image src={buddy.image} alt={buddy.name} fill className="object-cover" data-ai-hint={buddy.dataAiHint}/>
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent" />
-                    <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-                      <h3 className="text-2xl font-bold drop-shadow-md">{buddy.name}</h3>
-                      <p className="text-sm opacity-90 drop-shadow-sm">{buddy.studiengang}</p>
-                      <p className="text-xs mt-2 opacity-80 drop-shadow-sm">Gemeinsame Interessen: {buddy.mutualInterests.join(', ')}</p>
-                    </div>
-                  </Card>
-                )
-              })
-            ) : (
-              <div className="flex flex-col items-center justify-center text-center h-full bg-secondary/80 backdrop-blur-sm rounded-2xl w-full max-w-xs p-4 shadow-inner">
-                  <Users className="h-16 w-16 text-muted-foreground/50 mb-4" />
-                  <CardTitle>Keine weiteren Vorschläge</CardTitle>
-                  <CardDescription className="mt-2">Du hast alle aktuellen Vorschläge gesehen. <br/> Komme später wieder!</CardDescription>
-                  <Button onClick={handleResetSuggestions} variant="link" className="mt-4">
-                    Vorschläge zurücksetzen
-                  </Button>
+    <>
+      <div className="flex flex-col items-center py-8 h-full overflow-hidden">
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold text-foreground">Buddies entdecken</h1>
+            <p className="text-muted-foreground">Wische durch Profile oder nutze die Buttons unten.</p>
+          </div>
+        
+          <div className="flex-grow flex flex-col items-center justify-center w-full">
+            <div className="relative w-full max-w-xs h-[450px] md:h-[500px] mb-8">
+              {suggestionQueue.length > 0 ? (
+                suggestionQueue.map((buddy, index) => {
+                  const isTopCard = index === 0;
+                  return (
+                    <Card 
+                      key={buddy.id} 
+                      className={cn(
+                        "absolute w-full h-full rounded-2xl overflow-hidden shadow-2xl transition-all duration-300 ease-in-out",
+                        isTopCard && swipeState === 'left' && "transform -translate-x-[150%] rotate-[-15deg]",
+                        isTopCard && swipeState === 'right' && "transform translate-x-[150%] rotate-[15deg]"
+                      )}
+                      style={{ 
+                        zIndex: suggestionQueue.length - index,
+                        transform: `translateY(${index * -8}px) scale(${1 - index * 0.05})`,
+                        opacity: index < 2 ? 1 : 0, // Show top 2 cards
+                      }}
+                    >
+                      <Image src={buddy.image} alt={buddy.name} fill className="object-cover" data-ai-hint={buddy.dataAiHint}/>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent" />
+                      <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+                        <h3 className="text-2xl font-bold drop-shadow-md">{buddy.name}</h3>
+                        <p className="text-sm opacity-90 drop-shadow-sm">{buddy.studiengang}</p>
+                        <p className="text-xs mt-2 opacity-80 drop-shadow-sm">Gemeinsame Interessen: {buddy.mutualInterests.join(', ')}</p>
+                      </div>
+                    </Card>
+                  )
+                })
+              ) : (
+                <div className="flex flex-col items-center justify-center text-center h-full bg-secondary/80 backdrop-blur-sm rounded-2xl w-full max-w-xs p-4 shadow-inner">
+                    <Users className="h-16 w-16 text-muted-foreground/50 mb-4" />
+                    <CardTitle>Keine weiteren Vorschläge</CardTitle>
+                    <CardDescription className="mt-2">Du hast alle aktuellen Vorschläge gesehen. <br/> Komme später wieder!</CardDescription>
+                    <Button onClick={handleResetSuggestions} variant="link" className="mt-4">
+                      Vorschläge zurücksetzen
+                    </Button>
+                </div>
+              )}
+            </div>
+
+            {suggestionQueue.length > 0 && (
+              <div className="flex justify-center space-x-6">
+                <Button 
+                  onClick={handleReject} 
+                  variant="outline" 
+                  size="icon" 
+                  className="rounded-full h-20 w-20 bg-card shadow-lg border-2 border-destructive/50 text-destructive hover:bg-destructive/10 transition-transform duration-200 hover:scale-110 active:scale-95"
+                  disabled={!!swipeState}
+                >
+                  <X className="h-10 w-10" />
+                  <span className="sr-only">Ablehnen</span>
+                </Button>
+                <Button 
+                  onClick={handleInterest} 
+                  variant="outline" 
+                  size="icon" 
+                  className="rounded-full h-20 w-20 bg-card shadow-lg border-2 border-green-500/50 text-green-500 hover:bg-green-500/10 transition-transform duration-200 hover:scale-110 active:scale-95"
+                  disabled={!!swipeState}
+                >
+                  <Heart className="h-10 w-10" />
+                  <span className="sr-only">Interesse zeigen</span>
+                </Button>
               </div>
             )}
           </div>
-
-          {suggestionQueue.length > 0 && (
-            <div className="flex justify-center space-x-6">
-              <Button 
-                onClick={handleReject} 
-                variant="outline" 
-                size="icon" 
-                className="rounded-full h-20 w-20 bg-card shadow-lg border-2 border-destructive/50 text-destructive hover:bg-destructive/10 transition-transform duration-200 hover:scale-110 active:scale-95"
-                disabled={!!swipeState}
-              >
-                <X className="h-10 w-10" />
-                <span className="sr-only">Ablehnen</span>
-              </Button>
-              <Button 
-                onClick={handleInterest} 
-                variant="outline" 
-                size="icon" 
-                className="rounded-full h-20 w-20 bg-card shadow-lg border-2 border-green-500/50 text-green-500 hover:bg-green-500/10 transition-transform duration-200 hover:scale-110 active:scale-95"
-                disabled={!!swipeState}
-              >
-                <Heart className="h-10 w-10" />
-                <span className="sr-only">Interesse zeigen</span>
-              </Button>
-            </div>
-          )}
-        </div>
-    </div>
-    <AlertDialog open={showMatchDialog} onOpenChange={setShowMatchDialog}>
-      <AlertDialogContent>
-        <AlertDialogHeader className="items-center text-center">
-          <CheckCircle className="h-16 w-16 text-green-500 mb-2" />
-          <AlertDialogTitle className="text-2xl">Buddy gefunden!</AlertDialogTitle>
-          <AlertDialogDescription>
-            Super! {matchedBuddy?.name} wurde zu deinen Buddies hinzugefügt. Starte doch gleich ein Gespräch.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter className="flex-col sm:flex-row gap-2">
-          <Button onClick={advanceQueueAndClose} className="w-full sm:w-auto" variant="outline">Suche weiter</Button>
-          <Button onClick={handleChat} className="w-full sm:w-auto">
-             <MessageSquare className="mr-2 h-4 w-4" />
-             Chat starten
-          </Button>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+      </div>
+      <AlertDialog open={showMatchDialog} onOpenChange={setShowMatchDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader className="items-center text-center">
+            <CheckCircle className="h-16 w-16 text-green-500 mb-2" />
+            <AlertDialogTitle className="text-2xl">Buddy gefunden!</AlertDialogTitle>
+            <AlertDialogDescription>
+              Super! {matchedBuddy?.name} wurde zu deinen Buddies hinzugefügt. Starte doch gleich ein Gespräch.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+            <Button onClick={advanceQueueAndClose} className="w-full sm:w-auto" variant="outline">Suche weiter</Button>
+            <Button onClick={handleChat} className="w-full sm:w-auto">
+              <MessageSquare className="mr-2 h-4 w-4" />
+              Chat starten
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
