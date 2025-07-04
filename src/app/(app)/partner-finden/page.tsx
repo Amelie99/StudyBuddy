@@ -24,7 +24,7 @@ const allSuggestedBuddies: SuggestedBuddy[] = [
   { id: 101, name: "Anna Kurz", studiengang: "Informatik, 3. Sem.", image: "https://placehold.co/300x400.png", dataAiHint:"woman programmer", mutualInterests: ["Web-Entwicklung", "Python"] },
   { id: 102, name: "Markus Lang", studiengang: "BWL, 5. Sem.", image: "https://i.imgur.com/umNyodm.jpeg", avatar: "https://i.imgur.com/hlTMgKi.jpeg", dataAiHint: "man business", mutualInterests: ["Marketing", "Statistik"] },
   { id: 103, name: "Julia Klein", studiengang: "Soziale Arbeit, 1. Sem.", image: "https://placehold.co/300x400.png", dataAiHint:"woman social", mutualInterests: ["Grundlagen Psychologie"] },
-  { id: 104, name: "Jonas Huber", studiengang: "Wirtschaftsingenieurwesen, 4. Sem.", image: "https://placehold.co/300x400.png", dataAiHint: "man engineer", mutualInterests: ["Logistik", "Projektarbeit"] },
+  { id: 104, name: "Atal Vajpayee", studiengang: "Wirtschaftsingenieurwesen, 4. Sem.", image: "https://i.imgur.com/4yHyOzV.jpeg", avatar: "https://i.imgur.com/xJZT5sW.jpeg", dataAiHint: "man engineer", mutualInterests: ["Logistik", "Projektarbeit"] },
   { id: 105, name: "Sophie Becker", studiengang: "Maschinenbau, 6. Sem.", image: "https://placehold.co/300x400.png", dataAiHint: "woman smiling", mutualInterests: ["Thermodynamik", "Bachelorarbeit"] },
   { id: 106, name: "Felix Schmidt", studiengang: "Informatik, 2. Sem.", image: "https://i.imgur.com/bJa3doH.jpeg", avatar: "https://i.imgur.com/gqj9hH1.jpeg", dataAiHint: "man coding", mutualInterests: ["Java", "Algorithmen"] },
   { id: 107, name: "Lena Wolf", studiengang: "BWL, 2. Sem.", image: "https://placehold.co/300x400.png", dataAiHint: "woman student", mutualInterests: ["Controlling", "Rechnungswesen"] },
@@ -207,7 +207,7 @@ export default function PartnerFindenPage() {
             )}
           </div>
       </div>
-      <AlertDialog open={showMatchDialog} onOpenChange={(isOpen) => !isOpen && advanceQueueAndCloseDialog()}>
+      <AlertDialog open={showMatchDialog} onOpenChange={advanceQueueAndCloseDialog}>
         <AlertDialogContent>
           <AlertDialogHeader className="items-center text-center">
             <CheckCircle className="h-16 w-16 text-green-500 mb-2" />
