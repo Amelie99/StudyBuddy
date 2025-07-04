@@ -126,11 +126,10 @@ export default function PartnerFindenPage() {
           src="https://i.imgur.com/xYZjI54.jpeg"
           alt="Partner finden background"
           fill
-          className="object-cover opacity-10 saturate-50"
+          className="object-cover opacity-15 saturate-50"
           data-ai-hint="students talking"
           priority
         />
-        <div className="absolute inset-0 bg-background/80" />
       </div>
       <div className="relative z-10">
         <div className="relative flex flex-col items-center py-8 h-full overflow-hidden">
@@ -169,7 +168,7 @@ export default function PartnerFindenPage() {
                     )
                   })
                 ) : (
-                  <div className="flex flex-col items-center justify-center text-center h-full bg-secondary rounded-2xl w-full max-w-xs p-4 shadow-inner">
+                  <div className="flex flex-col items-center justify-center text-center h-full bg-secondary/80 backdrop-blur-sm rounded-2xl w-full max-w-xs p-4 shadow-inner">
                       <Users className="h-16 w-16 text-muted-foreground/50 mb-4" />
                       <CardTitle>Keine weiteren Vorschläge</CardTitle>
                       <CardDescription className="mt-2">Du hast alle aktuellen Vorschläge gesehen. <br/> Komme später wieder!</CardDescription>

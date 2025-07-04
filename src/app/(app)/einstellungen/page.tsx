@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Card, CardContent } from '@/components/ui/card';
@@ -89,11 +90,10 @@ export default function EinstellungenPage() {
           src="https://i.imgur.com/FimLWSb.jpeg"
           alt="Einstellungen background"
           fill
-          className="object-cover opacity-10 saturate-50"
+          className="object-cover opacity-15 saturate-50"
           data-ai-hint="gears settings"
           priority
         />
-        <div className="absolute inset-0 bg-background/80" />
       </div>
        <div className="relative z-10">
         <div className="container mx-auto py-8">
@@ -102,7 +102,7 @@ export default function EinstellungenPage() {
           <p className="text-muted-foreground">Verwalten Sie Ihre Konto- und App-Einstellungen.</p>
          </div>
 
-        <Card className="max-w-2xl">
+        <Card className="max-w-2xl bg-card/80 backdrop-blur-sm">
           <CardContent className="p-0">
             <ul className="divide-y divide-border">
               {settingsOptions.map((option) => (

@@ -22,11 +22,10 @@ export default function PartnerAndGroupsPage() {
           src="https://i.imgur.com/t05wynC.jpeg"
           alt="Partner und Gruppen background"
           fill
-          className="object-cover opacity-10 saturate-50"
+          className="object-cover opacity-15 saturate-50"
           data-ai-hint="group discussion"
           priority
         />
-        <div className="absolute inset-0 bg-background/80" />
       </div>
       <div className="relative z-10">
         <div className="container mx-auto py-8">
@@ -53,7 +52,7 @@ export default function PartnerAndGroupsPage() {
               <div className="space-y-4">
                 {myBuddies.length > 0 ? (
                   myBuddies.map(buddy => (
-                    <Card key={buddy.id} className="hover:shadow-lg hover:border-primary/50 transition-all">
+                    <Card key={buddy.id} className="hover:shadow-lg hover:border-primary/50 transition-all bg-card/80 backdrop-blur-sm">
                       <CardContent className="flex items-center justify-between space-x-4 p-4">
                         <Link href={`/profil/${buddy.id}`} className="flex items-center space-x-4 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
                           <Avatar className="h-14 w-14">
@@ -74,7 +73,7 @@ export default function PartnerAndGroupsPage() {
                     </Card>
                   ))
                 ) : (
-                  <Card className="text-center py-12 border-dashed">
+                  <Card className="text-center py-12 border-dashed bg-card/80 backdrop-blur-sm">
                     <CardHeader>
                       <User className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
                       <CardTitle>Keine Buddies</CardTitle>
@@ -98,7 +97,7 @@ export default function PartnerAndGroupsPage() {
               <div className="space-y-4">
                 {myGroups.length > 0 ? (
                   myGroups.map(group => (
-                     <Card key={group.id} className="hover:shadow-lg hover:border-primary/50 transition-all">
+                     <Card key={group.id} className="hover:shadow-lg hover:border-primary/50 transition-all bg-card/80 backdrop-blur-sm">
                         <CardContent className="flex items-center justify-between space-x-4 p-4">
                             <Link href={`/gruppen/${group.id}`} className="flex items-center space-x-4 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
                                 <Avatar className="h-14 w-14">
@@ -122,7 +121,7 @@ export default function PartnerAndGroupsPage() {
                     </Card>
                   ))
                 ) : (
-                  <Card className="text-center py-12 border-dashed">
+                  <Card className="text-center py-12 border-dashed bg-card/80 backdrop-blur-sm">
                     <CardHeader>
                       <Users className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
                       <CardTitle>Keine Gruppen</CardTitle>

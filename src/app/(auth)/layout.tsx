@@ -1,3 +1,4 @@
+
 import React from 'react';
 import Image from 'next/image';
 
@@ -17,8 +18,7 @@ export default function AuthLayout({
           data-ai-hint="university modern"
           priority
         />
-        <div className="absolute inset-0 bg-black/40" />
-        <div className="absolute inset-0 bg-background/60 backdrop-blur-[2px]" />
+        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
       </div>
       <div className="relative z-10 w-full max-w-md">
         {children}

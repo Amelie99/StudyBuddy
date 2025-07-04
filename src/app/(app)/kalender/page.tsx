@@ -61,11 +61,10 @@ export default function KalenderPage() {
           src="https://i.imgur.com/g1x3mbW.jpeg"
           alt="Kalender background"
           fill
-          className="object-cover opacity-10 saturate-50"
+          className="object-cover opacity-15 saturate-50"
           data-ai-hint="calendar planner"
           priority
         />
-        <div className="absolute inset-0 bg-background/80" />
       </div>
       <div className="relative z-10">
         <div className="container mx-auto py-8 space-y-8">
@@ -79,7 +78,7 @@ export default function KalenderPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card className="md:col-span-2 shadow-lg">
+            <Card className="md:col-span-2 shadow-lg bg-card/80 backdrop-blur-sm">
               <CardHeader>
                 <CardTitle>Kalenderansicht</CardTitle>
                 <CardDescription>Wähle einen Tag, um Termine anzuzeigen.</CardDescription>
@@ -105,7 +104,7 @@ export default function KalenderPage() {
               </CardContent>
             </Card>
 
-            <Card className="md:col-span-1 shadow-lg">
+            <Card className="md:col-span-1 shadow-lg bg-card/80 backdrop-blur-sm">
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <ListChecks className="mr-2 h-5 w-5 text-primary" />
@@ -133,7 +132,7 @@ export default function KalenderPage() {
             </Card>
           </div>
           
-          <Card className="shadow-lg">
+          <Card className="shadow-lg bg-card/80 backdrop-blur-sm">
             <CardHeader>
               <CardTitle className="flex items-center">
                 <CalendarDays className="mr-2 h-5 w-5 text-primary" />

@@ -1,3 +1,4 @@
+
 'use client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
@@ -57,11 +58,10 @@ export default function DashboardPage() {
           src="https://i.imgur.com/Ita7025.jpeg"
           alt="Dashboard background"
           fill
-          className="object-cover opacity-10 saturate-50"
+          className="object-cover opacity-15 saturate-50"
           data-ai-hint="students studying"
           priority
         />
-        <div className="absolute inset-0 bg-background/80" />
       </div>
       <div className="relative z-10">
         <div className="container mx-auto py-8 px-4 md:px-0">
@@ -134,7 +134,7 @@ export default function DashboardPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Main content area - can be 2/3 and sidebar 1/3 or full width */}
             <div className="md:col-span-2 space-y-6">
-              <Card>
+              <Card className="bg-card/80 backdrop-blur-sm">
                 <CardHeader>
                   <CardTitle className="flex items-center">
                     <CalendarClock className="mr-2 h-5 w-5 text-primary" />
@@ -163,7 +163,7 @@ export default function DashboardPage() {
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="bg-card/80 backdrop-blur-sm">
                 <CardHeader>
                   <CardTitle className="flex items-center">
                     <Users className="mr-2 h-5 w-5 text-primary" />
@@ -176,7 +176,7 @@ export default function DashboardPage() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       {buddies.map(buddy => (
                         <Link key={buddy.id} href={`/profil/${buddy.id}`} className="block rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
-                            <div className="flex items-center space-x-3 p-3 border rounded-lg hover:shadow-md transition-shadow h-full">
+                            <div className="flex items-center space-x-3 p-3 border rounded-lg hover:shadow-md transition-shadow h-full bg-background/50">
                               <Image src={buddy.avatar} alt={buddy.name} width={40} height={40} className="rounded-full" data-ai-hint={buddy.dataAiHint} />
                               <div>
                                 <p className="font-semibold">{buddy.name}</p>
@@ -227,13 +227,13 @@ export default function DashboardPage() {
                   </Card>
                 )}
               
-              <Card>
+              <Card className="bg-card/80 backdrop-blur-sm">
                 <CardContent className="p-4 text-center border-dashed">
                   <p className="text-sm text-muted-foreground">Hier könnte Ihre Werbung stehen!</p>
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="bg-card/80 backdrop-blur-sm">
                 <CardHeader>
                   <CardTitle>Schnellzugriff</CardTitle>
                 </CardHeader>

@@ -21,11 +21,10 @@ export default function ChatsPage() {
           src="https://i.imgur.com/LVT7Do1.jpeg"
           alt="Chats background"
           fill
-          className="object-cover opacity-10 saturate-50"
+          className="object-cover opacity-15 saturate-50"
           data-ai-hint="modern building"
           priority
         />
-        <div className="absolute inset-0 bg-background/80" />
       </div>
       <div className="relative z-10">
         <div className="container mx-auto h-[calc(100vh-var(--header-height,8rem))] flex flex-col py-8"> {/* Adjust header height if you have a fixed one */}
@@ -39,7 +38,7 @@ export default function ChatsPage() {
           </div>
 
           {conversations.length > 0 ? (
-          <ScrollArea className="flex-grow rounded-md border bg-card">
+          <ScrollArea className="flex-grow rounded-md border bg-card/80 backdrop-blur-sm">
             <div className="p-2 space-y-1">
               {conversations.map(chat => (
                 <Link href={`/chats/${chat.id}`} key={chat.id} className="block hover:bg-accent/50 rounded-lg transition-colors">
@@ -68,7 +67,7 @@ export default function ChatsPage() {
             </div>
           </ScrollArea>
           ) : (
-            <Card className="flex-grow flex flex-col items-center justify-center text-center border-dashed">
+            <Card className="flex-grow flex flex-col items-center justify-center text-center border-dashed bg-card/80 backdrop-blur-sm">
                 <CardHeader>
                   <MessageSquarePlus className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
                   <CardTitle>Keine Chats vorhanden</CardTitle>

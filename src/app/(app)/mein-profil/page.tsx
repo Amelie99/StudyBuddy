@@ -1,3 +1,4 @@
+
 'use client';
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
@@ -115,15 +116,14 @@ export default function MeinProfilPage() {
           src="https://i.imgur.com/FKZyONv.jpeg"
           alt="Mein Profil background"
           fill
-          className="object-cover opacity-10 saturate-50"
+          className="object-cover opacity-15 saturate-50"
           data-ai-hint="personal notebook"
           priority
         />
-        <div className="absolute inset-0 bg-background/80" />
       </div>
       <div className="relative z-10">
         <div className="container mx-auto py-8">
-          <Card className="max-w-3xl mx-auto">
+          <Card className="max-w-3xl mx-auto bg-card/80 backdrop-blur-sm">
             <CardHeader className="text-center">
                 <div className="relative mx-auto mb-4 w-32 h-32">
                      <Avatar className="w-32 h-32 border-4 border-primary shadow-lg">
