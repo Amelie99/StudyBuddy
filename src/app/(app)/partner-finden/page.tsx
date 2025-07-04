@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useCallback } from "react";
@@ -51,17 +52,17 @@ export default function PartnerFindenPage() {
     setIsLoading(true);
     const myBuddyIds = new Set(myBuddies.map(b => parseInt(b.id, 10)));
     let declinedIds = new Set<number>();
-    const storedDeclinedIds = localStorage.getItem('declinedBuddyIds');
-    if (storedDeclinedIds) {
-        try {
-            const parsedIds = JSON.parse(storedDeclinedIds);
-            if (Array.isArray(parsedIds)) {
-                declinedIds = new Set(parsedIds);
-            }
-        } catch (error) {
-            console.error("Error parsing declined IDs from localStorage", error);
-            localStorage.removeItem('declinedBuddyIds');
+    try {
+      const storedDeclinedIds = localStorage.getItem('declinedBuddyIds');
+      if (storedDeclinedIds) {
+        const parsedIds = JSON.parse(storedDeclinedIds);
+        if (Array.isArray(parsedIds)) {
+            declinedIds = new Set(parsedIds);
         }
+      }
+    } catch (error) {
+        console.error("Error parsing declined IDs from localStorage", error);
+        localStorage.removeItem('declinedBuddyIds');
     }
     
     const filteredSuggestions = allSuggestedBuddies.filter(
@@ -97,17 +98,19 @@ export default function PartnerFindenPage() {
      setSwipeState('left');
 
      setTimeout(() => {
-        const storedDeclinedIds = localStorage.getItem('declinedBuddyIds');
-        let declinedIds: number[] = [];
-        if (storedDeclinedIds) {
-            try {
+        try {
+            const storedDeclinedIds = localStorage.getItem('declinedBuddyIds');
+            let declinedIds: number[] = [];
+            if (storedDeclinedIds) {
                 const parsed = JSON.parse(storedDeclinedIds);
                 if (Array.isArray(parsed)) declinedIds = parsed;
-            } catch {}
-        }
-        if (!declinedIds.includes(rejectedBuddy.id)) {
-            declinedIds.push(rejectedBuddy.id);
-            localStorage.setItem('declinedBuddyIds', JSON.stringify(declinedIds));
+            }
+            if (!declinedIds.includes(rejectedBuddy.id)) {
+                declinedIds.push(rejectedBuddy.id);
+                localStorage.setItem('declinedBuddyIds', JSON.stringify(declinedIds));
+            }
+        } catch (error) {
+            console.error("Error updating localStorage", error);
         }
         advanceQueue();
      }, 300); // Animation duration
@@ -155,7 +158,7 @@ export default function PartnerFindenPage() {
                       style={{ 
                         zIndex: suggestionQueue.length - index,
                         transform: `translateY(${index * -8}px) scale(${1 - index * 0.05})`,
-                        opacity: index < 2 ? 1 : 0, // Show top 2 cards
+                        opacity: index < 3 ? 1 : 0, // Show top 3 cards for better stacking illusion
                       }}
                     >
                       <Image src={buddy.image} alt={buddy.name} fill sizes="320px" className="object-cover" data-ai-hint={buddy.dataAiHint}/>
@@ -169,8 +172,8 @@ export default function PartnerFindenPage() {
                   )
                 })
               ) : (
-                <div className="flex flex-col items-center justify-center text-center h-full bg-secondary/80 backdrop-blur-sm rounded-2xl w-full max-w-xs p-4 shadow-inner">
-                    <Users className="h-16 w-16 text-muted-foreground/50 mb-4" />
+                <div className="flex flex-col items-center justify-center text-center h-full bg-card/80 backdrop-blur-sm rounded-2xl w-full max-w-xs p-4 shadow-inner">
+                    <Users className="h-16 w-16 text-muted-foreground mb-4" />
                     <CardTitle>Keine weiteren Vorschläge</CardTitle>
                     <CardDescription className="mt-2">
                         Du hast alle aktuellen Vorschläge gesehen.
@@ -181,7 +184,7 @@ export default function PartnerFindenPage() {
               )}
             </div>
 
-            {suggestionQueue.length > 0 && !isLoading && (
+            {!isLoading && suggestionQueue.length > 0 && (
               <div className="flex justify-center space-x-6">
                 <Button 
                   onClick={handleReject} 
