@@ -100,6 +100,6 @@ export const dummyUserSeeds: DummyUserSeed[] = [
     lerninteressen: ["Klausurvorbereitung", "Sprachaustausch"],
     lernstil: "Diskussion",
     kurse: ["Marketing", "Controlling", "International Management"],
-    photoURL: "https://placehold.co/400x400.png",
+    photoURL: "https://i.imgur.com/NkY3Ovh.jpeg",
   },
 ];

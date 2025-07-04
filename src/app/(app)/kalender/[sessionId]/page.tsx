@@ -27,7 +27,7 @@ const fetchSessionDetails = async (sessionId: string) => {
             organizer: { name: "Max Mustermann", avatar: "https://placehold.co/100x100.png", dataAiHint: "man student" },
             attendees: [
                 { id: "user1", name: "Lisa Schmidt", avatar: "https://i.imgur.com/PKtZX0C.jpeg", dataAiHint: "woman student" },
-                { id: "user2", name: "Sarah Chen", avatar: "https://placehold.co/100x100.png", dataAiHint: "woman smiling" },
+                { id: "user2", name: "Sarah Chen", avatar: "https://i.imgur.com/NkY3Ovh.jpeg", dataAiHint: "woman smiling" },
                 { id: "user3", name: "Du", avatar: "https://placehold.co/100x100.png", dataAiHint: "person icon" },
             ]
         },
