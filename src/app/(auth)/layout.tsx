@@ -10,11 +10,11 @@ export default function AuthLayout({
     <main className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden p-4">
       <div className="absolute inset-0 z-0">
         <Image
-          src="https://i.imgur.com/TWlczaF.jpeg"
+          src="https://i.imgur.com/D267ZyT.jpeg"
           alt="Hochschule Landshut campus background"
           fill
           className="object-cover"
-          data-ai-hint="university campus"
+          data-ai-hint="university modern"
           priority
         />
         <div className="absolute inset-0 bg-black/40" />
