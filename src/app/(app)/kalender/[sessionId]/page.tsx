@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
@@ -38,7 +39,7 @@ const fetchSessionDetails = async (sessionId: string) => {
             location: "Online - Zoom (Link im Chat)",
             type: "Einzel",
             description: "Finale Abstimmung der Meilensteine für den Prototypen. Agenda: 1. Review letzter Sprint, 2. Planung nächster Sprint, 3. Offene Punkte.",
-            organizer: { name: "David Meier", avatar: "https://placehold.co/100x100.png", dataAiHint: "man library" },
+            organizer: { name: "David Meier", avatar: "https://i.imgur.com/ZiKvLxU.jpeg", dataAiHint: "man portrait" },
             attendees: [
                 { id: "user4", name: "Du", avatar: "https://placehold.co/100x100.png", dataAiHint: "person icon" },
             ]

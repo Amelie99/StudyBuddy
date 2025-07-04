@@ -1,3 +1,4 @@
+
 export interface AppUser {
   uid: string;
   email: string;
@@ -88,7 +89,7 @@ export const dummyUserSeeds: DummyUserSeed[] = [
     lerninteressen: ["Tiefgehendes Verständnis", "Projektarbeit"],
     lernstil: "Visuell",
     kurse: ["Regelungstechnik II", "Simulationstechnik", "Projektseminar"],
-    photoURL: "https://placehold.co/400x400.png",
+    photoURL: "https://i.imgur.com/ZiKvLxU.jpeg",
   },
   {
     fullName: "Sarah Chen",
