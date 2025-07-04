@@ -1,8 +1,8 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import HochschuleLogo from '@/components/layout/HochschuleLogo';
 import { NAV_ITEMS_CONFIG, type NavItem } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -36,9 +36,25 @@ export function DesktopSidebar() {
       <SidebarHeader className="p-4 flex flex-col items-center group-data-[state=collapsed]:p-1 transition-all duration-200">
         <Link href="/dashboard" className="mb-4 block h-12 w-full flex items-center justify-start group-data-[state=collapsed]:justify-center">
           {/* Expanded Logo */}
-          <HochschuleLogo className="h-10 w-40 group-data-[state=collapsed]:hidden" />
+          <div className="relative w-40 h-10 group-data-[state=collapsed]:hidden">
+            <Image 
+              src="https://i.imgur.com/TcVJosu.png"
+              alt="HAW Landshut Logo"
+              fill
+              priority
+              className="object-contain"
+            />
+          </div>
           {/* Collapsed Logo */}
-          <HochschuleLogo iconOnly className="h-8 w-8 hidden group-data-[state=collapsed]:block" />
+          <div className="relative w-8 h-8 hidden group-data-[state=collapsed]:block">
+             <Image 
+              src="https://i.imgur.com/TcVJosu.png"
+              alt="HAW Landshut Logo"
+              fill
+              priority
+              className="object-contain"
+            />
+          </div>
         </Link>
         <div className="w-full flex justify-start group-data-[state=collapsed]:justify-center">
            <SidebarTrigger />
