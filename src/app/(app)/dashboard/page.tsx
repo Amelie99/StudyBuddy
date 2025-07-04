@@ -51,13 +51,7 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="relative">
-      <Image
-        src="https://i.imgur.com/39JmYhO.jpeg"
-        alt="Hochschule Landshut campus background"
-        fill
-        className="object-cover -z-10 opacity-10 saturate-50"
-      />
+    <div>
       <div className="container mx-auto py-8 px-4 md:px-0">
         <header className="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center">
           <div>
