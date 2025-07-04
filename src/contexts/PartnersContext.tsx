@@ -18,6 +18,7 @@ export interface SuggestedBuddy {
     name: string;
     studiengang: string;
     image: string;
+    avatar?: string;
     dataAiHint: string;
     mutualInterests: string[];
 }
@@ -60,7 +61,7 @@ export const BuddiesProvider: React.FC<{ children: ReactNode }> = ({ children })
                 id: buddyId,
                 name: suggestedBuddy.name,
                 course: suggestedBuddy.studiengang,
-                avatar: suggestedBuddy.image.replace('300x400', '100x100'),
+                avatar: suggestedBuddy.avatar || suggestedBuddy.image.replace('300x400', '100x100'),
                 dataAiHint: suggestedBuddy.dataAiHint,
             };
             return [...prevBuddies, newBuddy];
