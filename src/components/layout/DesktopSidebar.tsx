@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -36,11 +37,12 @@ export function DesktopSidebar() {
       <SidebarHeader className="p-2 flex flex-col group-data-[state=collapsed]:items-center group-data-[state=collapsed]:p-1 transition-all duration-200">
         <Link href="/dashboard" className="mb-4 block h-auto w-full flex items-center justify-start pl-2 group-data-[state=collapsed]:pl-0 group-data-[state=collapsed]:justify-center">
           {/* Expanded Logo */}
-          <div className="relative w-full h-36 group-data-[state=collapsed]:hidden">
+          <div className="relative w-full h-16 group-data-[state=collapsed]:hidden">
             <Image 
               src="https://i.imgur.com/TcVJosu.png"
               alt="HAW Landshut Logo"
               fill
+              sizes="200px"
               className="object-contain object-left"
             />
           </div>
@@ -50,6 +52,7 @@ export function DesktopSidebar() {
               src="https://i.imgur.com/TcVJosu.png"
               alt="HAW Landshut Logo"
               fill
+              sizes="32px"
               className="object-contain"
             />
           </div>

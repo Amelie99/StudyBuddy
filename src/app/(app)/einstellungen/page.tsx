@@ -8,9 +8,12 @@ import React from 'react';
 import { useTheme } from 'next-themes';
 import { Switch } from '@/components/ui/switch';
 import { PRIVACY_POLICY_URL } from '@/lib/constants';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import Image from "next/image";
+import dynamic from 'next/dynamic';
+
+const DialogContent = dynamic(() => import('@/components/ui/dialog').then(mod => mod.DialogContent));
 
 
 const settingsOptions = [

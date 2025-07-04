@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -20,7 +21,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           className="object-cover"
           data-ai-hint="university campus"
         />
-        <div className="absolute inset-0 bg-background/80" />
+        <div className="absolute inset-0 bg-background/90" />
       </div>
       <div className="relative z-10">
         <CalendarProvider>

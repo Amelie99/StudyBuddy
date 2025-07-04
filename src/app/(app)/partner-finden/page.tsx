@@ -44,7 +44,7 @@ export default function PartnerFindenPage() {
   const { buddies: myBuddies, addBuddy } = useBuddies();
   const { startNewChat } = useChats();
   const router = useRouter();
-  const [swipeState, setSwipeState]<'left' | 'right' | null>(null);
+  const [swipeState, setSwipeState] = useState<'left' | 'right' | null>(null);
 
   // This effect runs to initialize and filter the suggestion queue.
   // It re-runs if myBuddies changes (e.g., buddy added in another tab).

@@ -15,7 +15,13 @@ const GroupCard = memo(function GroupCard({ group }: { group: Group }) {
       <CardHeader>
         {group.image && (
           <div className="relative h-40 w-full mb-4 rounded-t-lg overflow-hidden">
-            <Image src={group.image} alt={group.name} fill className="object-cover" data-ai-hint={group.dataAiHint} />
+            <Image 
+              src={group.image} 
+              alt={group.name} 
+              fill 
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              className="object-cover" 
+              data-ai-hint={group.dataAiHint} />
           </div>
         )}
         <CardTitle>{group.name}</CardTitle>

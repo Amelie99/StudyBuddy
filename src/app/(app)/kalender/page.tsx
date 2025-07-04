@@ -3,7 +3,6 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar } from "@/components/ui/calendar"; // ShadCN Calendar
 import { PlusCircle, ListChecks, Clock, CalendarDays, Loader2 } from "lucide-react";
 import Link from "next/link";
 import React, { useState, useMemo, useEffect, memo } from "react";
@@ -11,6 +10,9 @@ import { de } from 'date-fns/locale';
 import { format } from 'date-fns';
 import { useCalendar, type CalendarEvent } from "@/contexts/CalendarContext";
 import Image from "next/image";
+import dynamic from "next/dynamic";
+
+const Calendar = dynamic(() => import('@/components/ui/calendar').then(mod => mod.Calendar));
 
 const UpcomingEventItem = memo(function UpcomingEventItem({ session }: { session: CalendarEvent }) {
   return (
