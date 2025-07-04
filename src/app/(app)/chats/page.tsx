@@ -15,75 +15,61 @@ export default function ChatsPage() {
   const { conversations } = useChats();
 
   return (
-    <div className="relative">
-      <div className="absolute inset-0 z-0">
-        <Image
-          src="https://i.imgur.com/LVT7Do1.jpeg"
-          alt="Chats background"
-          fill
-          className="object-cover opacity-15 saturate-50"
-          data-ai-hint="modern building"
-          priority
-        />
+    <div className="container mx-auto h-[calc(100vh-var(--header-height,8rem))] flex flex-col py-8"> {/* Adjust header height if you have a fixed one */}
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold text-foreground">Chats</h1>
       </div>
-      <div className="relative z-10">
-        <div className="container mx-auto h-[calc(100vh-var(--header-height,8rem))] flex flex-col py-8"> {/* Adjust header height if you have a fixed one */}
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-3xl font-bold text-foreground">Chats</h1>
-          </div>
-          
-          <div className="relative mb-4">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-            <Input placeholder="Chats durchsuchen..." className="pl-10" />
-          </div>
+      
+      <div className="relative mb-4">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+        <Input placeholder="Chats durchsuchen..." className="pl-10" />
+      </div>
 
-          {conversations.length > 0 ? (
-          <ScrollArea className="flex-grow rounded-md border bg-card/80 backdrop-blur-sm">
-            <div className="p-2 space-y-1">
-              {conversations.map(chat => (
-                <Link href={`/chats/${chat.id}`} key={chat.id} className="block hover:bg-accent/50 rounded-lg transition-colors">
-                  <div className="flex items-center p-3 space-x-3">
-                    <Avatar className="h-12 w-12">
-                      <AvatarImage src={chat.avatar} alt={chat.name} data-ai-hint={chat.dataAiHint} />
-                      <AvatarFallback>{chat.name.substring(0, 2).toUpperCase()}</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex justify-between items-center">
-                        <p className="font-semibold truncate">{chat.name}</p>
-                        <span className="text-xs text-muted-foreground">{chat.timestamp}</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <p className="text-sm text-muted-foreground truncate">{chat.lastMessage}</p>
-                        {chat.unread > 0 && (
-                          <span className="ml-2 bg-primary text-primary-foreground text-xs font-bold px-2 py-0.5 rounded-full">
-                            {chat.unread}
-                          </span>
-                        )}
-                      </div>
-                    </div>
+      {conversations.length > 0 ? (
+      <ScrollArea className="flex-grow rounded-md border bg-card/80 backdrop-blur-sm">
+        <div className="p-2 space-y-1">
+          {conversations.map(chat => (
+            <Link href={`/chats/${chat.id}`} key={chat.id} className="block hover:bg-accent/50 rounded-lg transition-colors">
+              <div className="flex items-center p-3 space-x-3">
+                <Avatar className="h-12 w-12">
+                  <AvatarImage src={chat.avatar} alt={chat.name} data-ai-hint={chat.dataAiHint} />
+                  <AvatarFallback>{chat.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0">
+                  <div className="flex justify-between items-center">
+                    <p className="font-semibold truncate">{chat.name}</p>
+                    <span className="text-xs text-muted-foreground">{chat.timestamp}</span>
                   </div>
-                </Link>
-              ))}
-            </div>
-          </ScrollArea>
-          ) : (
-            <Card className="flex-grow flex flex-col items-center justify-center text-center border-dashed bg-card/80 backdrop-blur-sm">
-                <CardHeader>
-                  <MessageSquarePlus className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
-                  <CardTitle>Keine Chats vorhanden</CardTitle>
-                  <CardDescription>Starte eine neue Konversation, indem du Buddies findest.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <Button asChild>
-                      <Link href="/partner-finden">
-                        <Search className="mr-2 h-4 w-4" /> Buddies finden
-                      </Link>
-                    </Button>
-                </CardContent>
-            </Card>
-          )}
+                  <div className="flex justify-between items-center">
+                    <p className="text-sm text-muted-foreground truncate">{chat.lastMessage}</p>
+                    {chat.unread > 0 && (
+                      <span className="ml-2 bg-primary text-primary-foreground text-xs font-bold px-2 py-0.5 rounded-full">
+                        {chat.unread}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </Link>
+          ))}
         </div>
-      </div>
+      </ScrollArea>
+      ) : (
+        <Card className="flex-grow flex flex-col items-center justify-center text-center border-dashed bg-card/80 backdrop-blur-sm">
+            <CardHeader>
+              <MessageSquarePlus className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
+              <CardTitle>Keine Chats vorhanden</CardTitle>
+              <CardDescription>Starte eine neue Konversation, indem du Buddies findest.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <Button asChild>
+                  <Link href="/partner-finden">
+                    <Search className="mr-2 h-4 w-4" /> Buddies finden
+                  </Link>
+                </Button>
+            </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

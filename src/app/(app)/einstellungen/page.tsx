@@ -84,88 +84,74 @@ function ThemeSwitch() {
 
 export default function EinstellungenPage() {
   return (
-    <div className="relative">
-      <div className="absolute inset-0 z-0">
-        <Image
-          src="https://i.imgur.com/FimLWSb.jpeg"
-          alt="Einstellungen background"
-          fill
-          className="object-cover opacity-15 saturate-50"
-          data-ai-hint="gears settings"
-          priority
-        />
-      </div>
-       <div className="relative z-10">
-        <div className="container mx-auto py-8">
-         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground">Einstellungen</h1>
-          <p className="text-muted-foreground">Verwalten Sie Ihre Konto- und App-Einstellungen.</p>
-         </div>
+    <div className="container mx-auto py-8">
+     <div className="mb-8">
+      <h1 className="text-3xl font-bold text-foreground">Einstellungen</h1>
+      <p className="text-muted-foreground">Verwalten Sie Ihre Konto- und App-Einstellungen.</p>
+     </div>
 
-        <Card className="max-w-2xl bg-card/80 backdrop-blur-sm">
-          <CardContent className="p-0">
-            <ul className="divide-y divide-border">
-              {settingsOptions.map((option) => (
-                  <li key={option.id}>
-                      {option.id === 'about' ? (
-                          <Dialog>
-                              <DialogTrigger asChild>
-                                  <div className="flex items-center p-4 hover:bg-accent/50 transition-colors cursor-pointer rounded-lg w-full">
-                                      <option.icon className="h-5 w-5 mr-4 text-muted-foreground" />
-                                      <div className="flex-grow">
-                                          <p className="font-medium">{option.title}</p>
-                                      </div>
-                                      <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                                  </div>
-                              </DialogTrigger>
-                              <DialogContent className="sm:max-w-md">
-                                  <DialogHeader>
-                                      <DialogTitle className="text-center text-2xl">Über uns</DialogTitle>
-                                      <DialogDescription className="text-center pt-4 text-base text-foreground">
-                                      Von Amelie Braun und Annemarie Korber
-                                      <br />
-                                      Hochschule für angewandte Wissenschaften Landshut
-                                      </DialogDescription>
-                                  </DialogHeader>
-                                  <div className="flex justify-center items-center pt-4 gap-4">
-                                      <Button variant="default" size="icon" className="rounded-full h-12 w-12"><Instagram className="h-6 w-6" /></Button>
-                                      <Button variant="default" size="icon" className="rounded-full h-12 w-12"><TikTokIcon className="h-6 w-6" /></Button>
-                                      <Button variant="default" size="icon" className="rounded-full h-12 w-12"><Youtube className="h-6 w-6" /></Button>
-                                      <Button variant="default" size="icon" className="rounded-full h-12 w-12"><Linkedin className="h-6 w-6" /></Button>
-                                      <Button variant="default" size="icon" className="rounded-full h-12 w-12"><Facebook className="h-6 w-6" /></Button>
-                                  </div>
-                              </DialogContent>
-                          </Dialog>
-                      ) : option.href ? (
-                           <Link 
-                              href={option.href} 
-                              target={option.href.startsWith('http') ? '_blank' : undefined}
-                              rel={option.href.startsWith('http') ? 'noopener noreferrer' : undefined}
-                              className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-background">
-                              <div className="flex items-center p-4 hover:bg-accent/50 transition-colors cursor-pointer rounded-lg">
+    <Card className="max-w-2xl bg-card/80 backdrop-blur-sm">
+      <CardContent className="p-0">
+        <ul className="divide-y divide-border">
+          {settingsOptions.map((option) => (
+              <li key={option.id}>
+                  {option.id === 'about' ? (
+                      <Dialog>
+                          <DialogTrigger asChild>
+                              <div className="flex items-center p-4 hover:bg-accent/50 transition-colors cursor-pointer rounded-lg w-full">
                                   <option.icon className="h-5 w-5 mr-4 text-muted-foreground" />
                                   <div className="flex-grow">
                                       <p className="font-medium">{option.title}</p>
                                   </div>
                                   <ChevronRight className="h-5 w-5 text-muted-foreground" />
                               </div>
-                          </Link>
-                      ) : (
-                           <div className="flex items-center p-4">
+                          </DialogTrigger>
+                          <DialogContent className="sm:max-w-md">
+                              <DialogHeader>
+                                  <DialogTitle className="text-center text-2xl">Über uns</DialogTitle>
+                                  <DialogDescription className="text-center pt-4 text-base text-foreground">
+                                  Von Amelie Braun und Annemarie Korber
+                                  <br />
+                                  Hochschule für angewandte Wissenschaften Landshut
+                                  </DialogDescription>
+                              </DialogHeader>
+                              <div className="flex justify-center items-center pt-4 gap-4">
+                                  <Button variant="default" size="icon" className="rounded-full h-12 w-12"><Instagram className="h-6 w-6" /></Button>
+                                  <Button variant="default" size="icon" className="rounded-full h-12 w-12"><TikTokIcon className="h-6 w-6" /></Button>
+                                  <Button variant="default" size="icon" className="rounded-full h-12 w-12"><Youtube className="h-6 w-6" /></Button>
+                                  <Button variant="default" size="icon" className="rounded-full h-12 w-12"><Linkedin className="h-6 w-6" /></Button>
+                                  <Button variant="default" size="icon" className="rounded-full h-12 w-12"><Facebook className="h-6 w-6" /></Button>
+                              </div>
+                          </DialogContent>
+                      </Dialog>
+                  ) : option.href ? (
+                       <Link 
+                          href={option.href} 
+                          target={option.href.startsWith('http') ? '_blank' : undefined}
+                          rel={option.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+                          className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-background">
+                          <div className="flex items-center p-4 hover:bg-accent/50 transition-colors cursor-pointer rounded-lg">
                               <option.icon className="h-5 w-5 mr-4 text-muted-foreground" />
                               <div className="flex-grow">
                                   <p className="font-medium">{option.title}</p>
                               </div>
-                              {option.id === 'design' && <ThemeSwitch />}
+                              <ChevronRight className="h-5 w-5 text-muted-foreground" />
                           </div>
-                      )}
-                  </li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
-      </div>
-      </div>
-    </div>
+                      </Link>
+                  ) : (
+                       <div className="flex items-center p-4">
+                          <option.icon className="h-5 w-5 mr-4 text-muted-foreground" />
+                          <div className="flex-grow">
+                              <p className="font-medium">{option.title}</p>
+                          </div>
+                          {option.id === 'design' && <ThemeSwitch />}
+                      </div>
+                  )}
+              </li>
+          ))}
+        </ul>
+      </CardContent>
+    </Card>
+  </div>
   );
 }
