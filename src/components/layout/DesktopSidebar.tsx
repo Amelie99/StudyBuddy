@@ -34,9 +34,9 @@ export function DesktopSidebar() {
   return (
     <Sidebar collapsible="icon" className="border-r">
       <SidebarHeader className="p-4 flex flex-col items-center group-data-[state=collapsed]:p-1 transition-all duration-200">
-        <Link href="/dashboard" className="mb-4 block h-12 w-full flex items-center justify-start group-data-[state=collapsed]:justify-center">
+        <Link href="/dashboard" className="mb-4 block h-8 w-full flex items-center justify-start group-data-[state=collapsed]:justify-center">
           {/* Expanded Logo */}
-          <div className="relative w-40 h-10 group-data-[state=collapsed]:hidden">
+          <div className="relative w-32 h-7 group-data-[state=collapsed]:hidden">
             <Image 
               src="https://i.imgur.com/TcVJosu.png"
               alt="HAW Landshut Logo"
