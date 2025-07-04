@@ -17,8 +17,8 @@ export default function AuthLayout({
           data-ai-hint="university campus"
           priority
         />
-        <div className="absolute inset-0 bg-black/50" />
-        <div className="absolute inset-0 bg-background/70 backdrop-blur-sm" />
+        <div className="absolute inset-0 bg-black/40" />
+        <div className="absolute inset-0 bg-background/60 backdrop-blur-[2px]" />
       </div>
       <div className="relative z-10 w-full max-w-md">
         {children}
