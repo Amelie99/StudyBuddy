@@ -41,7 +41,6 @@ export function DesktopSidebar() {
               src="https://i.imgur.com/TcVJosu.png"
               alt="HAW Landshut Logo"
               fill
-              priority
               className="object-contain object-left"
             />
           </div>
@@ -51,7 +50,6 @@ export function DesktopSidebar() {
               src="https://i.imgur.com/TcVJosu.png"
               alt="HAW Landshut Logo"
               fill
-              priority
               className="object-contain"
             />
           </div>
