@@ -14,9 +14,9 @@ export default function AuthLayout({
           src="https://i.imgur.com/D267ZyT.jpeg"
           alt="Hochschule Landshut campus background"
           fill
+          sizes="100vw"
           className="object-cover"
           data-ai-hint="university modern"
-          priority
         />
         <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
       </div>

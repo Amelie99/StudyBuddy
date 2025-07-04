@@ -9,7 +9,6 @@ import { Heart, X, CheckCircle, MessageSquare, Users, Loader2 } from "lucide-rea
 import Image from "next/image";
 import {
   AlertDialog,
-  AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
@@ -18,6 +17,10 @@ import {
 import { useBuddies, type SuggestedBuddy } from "@/contexts/PartnersContext";
 import { useChats } from "@/contexts/ChatsContext";
 import { cn } from "@/lib/utils";
+import dynamic from "next/dynamic";
+
+const AlertDialogContent = dynamic(() => import('@/components/ui/alert-dialog').then(mod => mod.AlertDialogContent));
+
 
 // The master list of all possible suggestions
 const allSuggestedBuddies: SuggestedBuddy[] = [
@@ -161,7 +164,7 @@ export default function PartnerFindenPage() {
                         opacity: index < 2 ? 1 : 0, // Show top 2 cards
                       }}
                     >
-                      <Image src={buddy.image} alt={buddy.name} fill className="object-cover" data-ai-hint={buddy.dataAiHint}/>
+                      <Image src={buddy.image} alt={buddy.name} fill sizes="320px" className="object-cover" data-ai-hint={buddy.dataAiHint}/>
                       <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent" />
                       <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
                         <h3 className="text-2xl font-bold drop-shadow-md">{buddy.name}</h3>

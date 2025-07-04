@@ -8,8 +8,37 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { MessageSquarePlus, Search } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { useChats } from "@/contexts/ChatsContext";
+import { useChats, type Conversation } from "@/contexts/ChatsContext";
 import Image from "next/image";
+import { memo } from "react";
+
+const ConversationItem = memo(function ConversationItem({ chat }: { chat: Conversation }) {
+  return (
+    <Link href={`/chats/${chat.id}`} className="block hover:bg-accent/50 rounded-lg transition-colors">
+      <div className="flex items-center p-3 space-x-3">
+        <Avatar className="h-12 w-12">
+          <AvatarImage src={chat.avatar} alt={chat.name} data-ai-hint={chat.dataAiHint} />
+          <AvatarFallback>{chat.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+        </Avatar>
+        <div className="flex-1 min-w-0">
+          <div className="flex justify-between items-center">
+            <p className="font-semibold truncate">{chat.name}</p>
+            <span className="text-xs text-muted-foreground">{chat.timestamp}</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <p className="text-sm text-muted-foreground truncate">{chat.lastMessage}</p>
+            {chat.unread > 0 && (
+              <span className="ml-2 bg-primary text-primary-foreground text-xs font-bold px-2 py-0.5 rounded-full">
+                {chat.unread}
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+    </Link>
+  );
+});
+
 
 export default function ChatsPage() {
   const { conversations } = useChats();
@@ -29,28 +58,7 @@ export default function ChatsPage() {
       <ScrollArea className="flex-grow rounded-md border bg-card/80 backdrop-blur-sm">
         <div className="p-2 space-y-1">
           {conversations.map(chat => (
-            <Link href={`/chats/${chat.id}`} key={chat.id} className="block hover:bg-accent/50 rounded-lg transition-colors">
-              <div className="flex items-center p-3 space-x-3">
-                <Avatar className="h-12 w-12">
-                  <AvatarImage src={chat.avatar} alt={chat.name} data-ai-hint={chat.dataAiHint} />
-                  <AvatarFallback>{chat.name.substring(0, 2).toUpperCase()}</AvatarFallback>
-                </Avatar>
-                <div className="flex-1 min-w-0">
-                  <div className="flex justify-between items-center">
-                    <p className="font-semibold truncate">{chat.name}</p>
-                    <span className="text-xs text-muted-foreground">{chat.timestamp}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <p className="text-sm text-muted-foreground truncate">{chat.lastMessage}</p>
-                    {chat.unread > 0 && (
-                      <span className="ml-2 bg-primary text-primary-foreground text-xs font-bold px-2 py-0.5 rounded-full">
-                        {chat.unread}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </Link>
+            <ConversationItem key={chat.id} chat={chat} />
           ))}
         </div>
       </ScrollArea>

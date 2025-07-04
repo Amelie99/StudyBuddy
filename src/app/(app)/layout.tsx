@@ -16,6 +16,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           src="https://i.imgur.com/t05wynC.jpeg"
           alt="Campus background"
           fill
+          sizes="100vw"
           className="object-cover opacity-60"
           data-ai-hint="university campus"
         />

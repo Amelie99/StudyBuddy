@@ -6,10 +6,61 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { PlusCircle, Users, MessageSquare, User, Search } from "lucide-react";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useGroups } from "@/contexts/GroupsContext";
-import { useBuddies } from "@/contexts/PartnersContext";
+import { useGroups, type Group } from "@/contexts/GroupsContext";
+import { useBuddies, type Buddy } from "@/contexts/PartnersContext";
 import Image from "next/image";
+import { memo } from "react";
 
+const BuddyCard = memo(function BuddyCard({ buddy }: { buddy: Buddy }) {
+  return (
+    <Card className="hover:shadow-lg hover:border-primary/50 transition-all bg-card/80 backdrop-blur-sm">
+      <CardContent className="flex items-center justify-between space-x-4 p-4">
+        <Link href={`/profil/${buddy.id}`} className="flex items-center space-x-4 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+          <Avatar className="h-14 w-14">
+            <AvatarImage src={buddy.avatar} alt={buddy.name} data-ai-hint={buddy.dataAiHint} />
+            <AvatarFallback>{buddy.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+          </Avatar>
+          <div>
+            <p className="font-semibold text-lg">{buddy.name}</p>
+            <p className="text-sm text-muted-foreground">{buddy.course}</p>
+          </div>
+        </Link>
+         <Button variant="outline" size="sm" asChild>
+            <Link href={`/chats/${buddy.id}`}>
+              <MessageSquare className="mr-2 h-4 w-4" /> Chat
+            </Link>
+          </Button>
+      </CardContent>
+    </Card>
+  );
+});
+
+const GroupCard = memo(function GroupCard({ group }: { group: Group }) {
+  return (
+    <Card className="hover:shadow-lg hover:border-primary/50 transition-all bg-card/80 backdrop-blur-sm">
+      <CardContent className="flex items-center justify-between space-x-4 p-4">
+          <Link href={`/gruppen/${group.id}`} className="flex items-center space-x-4 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+              <Avatar className="h-14 w-14">
+                  <AvatarImage src={group.image} alt={group.name} data-ai-hint={group.dataAiHint}/>
+                  <AvatarFallback>{group.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+              </Avatar>
+              <div>
+                  <p className="font-semibold text-lg">{group.name}</p>
+                  <div className="flex items-center text-sm text-muted-foreground">
+                      <Users className="mr-2 h-4 w-4" />
+                      <span>{group.members} Mitglieder</span>
+                  </div>
+              </div>
+          </Link>
+          <Button variant="outline" size="sm" asChild>
+              <Link href={`/chats/group-${group.id}`}> 
+                  <MessageSquare className="mr-2 h-4 w-4" /> Chat
+              </Link>
+          </Button>
+      </CardContent>
+    </Card>
+  );
+});
 
 export default function PartnerAndGroupsPage() {
   const { groups: myGroups } = useGroups();
@@ -40,25 +91,7 @@ export default function PartnerAndGroupsPage() {
           <div className="space-y-4">
             {myBuddies.length > 0 ? (
               myBuddies.map(buddy => (
-                <Card key={buddy.id} className="hover:shadow-lg hover:border-primary/50 transition-all bg-card/80 backdrop-blur-sm">
-                  <CardContent className="flex items-center justify-between space-x-4 p-4">
-                    <Link href={`/profil/${buddy.id}`} className="flex items-center space-x-4 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
-                      <Avatar className="h-14 w-14">
-                        <AvatarImage src={buddy.avatar} alt={buddy.name} data-ai-hint={buddy.dataAiHint} />
-                        <AvatarFallback>{buddy.name.substring(0, 2).toUpperCase()}</AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <p className="font-semibold text-lg">{buddy.name}</p>
-                        <p className="text-sm text-muted-foreground">{buddy.course}</p>
-                      </div>
-                    </Link>
-                     <Button variant="outline" size="sm" asChild>
-                        <Link href={`/chats/${buddy.id}`}>
-                          <MessageSquare className="mr-2 h-4 w-4" /> Chat
-                        </Link>
-                      </Button>
-                  </CardContent>
-                </Card>
+                <BuddyCard key={buddy.id} buddy={buddy} />
               ))
             ) : (
               <Card className="text-center py-12 border-dashed bg-card/80 backdrop-blur-sm">
@@ -85,28 +118,7 @@ export default function PartnerAndGroupsPage() {
           <div className="space-y-4">
             {myGroups.length > 0 ? (
               myGroups.map(group => (
-                 <Card key={group.id} className="hover:shadow-lg hover:border-primary/50 transition-all bg-card/80 backdrop-blur-sm">
-                    <CardContent className="flex items-center justify-between space-x-4 p-4">
-                        <Link href={`/gruppen/${group.id}`} className="flex items-center space-x-4 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
-                            <Avatar className="h-14 w-14">
-                                <AvatarImage src={group.image} alt={group.name} data-ai-hint={group.dataAiHint}/>
-                                <AvatarFallback>{group.name.substring(0, 2).toUpperCase()}</AvatarFallback>
-                            </Avatar>
-                            <div>
-                                <p className="font-semibold text-lg">{group.name}</p>
-                                <div className="flex items-center text-sm text-muted-foreground">
-                                    <Users className="mr-2 h-4 w-4" />
-                                    <span>{group.members} Mitglieder</span>
-                                </div>
-                            </div>
-                        </Link>
-                        <Button variant="outline" size="sm" asChild>
-                            <Link href={`/chats/group-${group.id}`}> 
-                                <MessageSquare className="mr-2 h-4 w-4" /> Chat
-                            </Link>
-                        </Button>
-                    </CardContent>
-                </Card>
+                 <GroupCard key={group.id} group={group} />
               ))
             ) : (
               <Card className="text-center py-12 border-dashed bg-card/80 backdrop-blur-sm">

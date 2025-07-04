@@ -10,9 +10,14 @@ import { ArrowLeft, Send, CalendarPlus, Smile, Paperclip, Loader2, UploadCloud }
 import Link from 'next/link';
 import React, { useEffect, useState, useRef } from 'react';
 import { cn } from '@/lib/utils';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Popover, PopoverTrigger } from '@/components/ui/popover';
+import { Dialog, DialogTrigger, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useChats, type ChatDetail } from '@/contexts/ChatsContext';
+import dynamic from 'next/dynamic';
+
+const PopoverContent = dynamic(() => import('@/components/ui/popover').then(mod => mod.PopoverContent));
+const DialogContent = dynamic(() => import('@/components/ui/dialog').then(mod => mod.DialogContent));
+
 
 export default function ChatDetailPage() {
   const params = useParams();

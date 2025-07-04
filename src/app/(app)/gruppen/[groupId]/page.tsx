@@ -4,7 +4,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogTrigger, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
@@ -13,6 +13,9 @@ import { Users, MessageSquare, UserPlus, Settings, CalendarPlus, Trash2, Edit, L
 import Image from 'next/image';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
+import dynamic from 'next/dynamic';
+
+const DialogContent = dynamic(() => import('@/components/ui/dialog').then(mod => mod.DialogContent));
 
 // Mock data - replace with actual data fetching
 const fetchGroupDetails = async (groupId: string) => {
@@ -101,7 +104,7 @@ export default function GroupDetailPage() {
       <Card className="overflow-hidden shadow-xl">
         {group.image && (
           <div className="relative h-48 md:h-64 w-full">
-            <Image src={group.image} alt={group.name} fill className="object-cover" data-ai-hint={group.dataAiHint} />
+            <Image src={group.image} alt={group.name} fill sizes="(max-width: 768px) 100vw, 768px" className="object-cover" data-ai-hint={group.dataAiHint} />
             <div className="absolute inset-0 bg-black/30" />
           </div>
         )}

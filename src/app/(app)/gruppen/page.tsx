@@ -6,7 +6,42 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { PlusCircle, Users, MessageSquare, Settings } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useGroups } from "@/contexts/GroupsContext";
+import { useGroups, type Group } from "@/contexts/GroupsContext";
+import { memo } from "react";
+
+const GroupCard = memo(function GroupCard({ group }: { group: Group }) {
+  return (
+    <Card key={group.id} className="flex flex-col">
+      <CardHeader>
+        {group.image && (
+          <div className="relative h-40 w-full mb-4 rounded-t-lg overflow-hidden">
+            <Image src={group.image} alt={group.name} fill className="object-cover" data-ai-hint={group.dataAiHint} />
+          </div>
+        )}
+        <CardTitle>{group.name}</CardTitle>
+        <CardDescription>{group.description}</CardDescription>
+      </CardHeader>
+      <CardContent className="flex-grow">
+        <div className="flex items-center text-sm text-muted-foreground">
+          <Users className="mr-2 h-4 w-4" />
+          <span>{group.members} Mitglieder</span>
+        </div>
+      </CardContent>
+      <CardFooter className="flex justify-between">
+        <Button variant="outline" size="sm" asChild>
+          <Link href={`/chats/group-${group.id}`}> 
+            <MessageSquare className="mr-2 h-4 w-4" /> Chat
+          </Link>
+        </Button>
+        <Button variant="default" size="sm" asChild>
+          <Link href={`/gruppen/${group.id}`}>
+            <Settings className="mr-2 h-4 w-4" /> Verwalten
+          </Link>
+        </Button>
+      </CardFooter>
+    </Card>
+  );
+});
 
 
 export default function GruppenPage() {
@@ -26,35 +61,7 @@ export default function GruppenPage() {
       {myGroups.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {myGroups.map(group => (
-            <Card key={group.id} className="flex flex-col">
-              <CardHeader>
-                {group.image && (
-                  <div className="relative h-40 w-full mb-4 rounded-t-lg overflow-hidden">
-                    <Image src={group.image} alt={group.name} fill className="object-cover" data-ai-hint={group.dataAiHint} />
-                  </div>
-                )}
-                <CardTitle>{group.name}</CardTitle>
-                <CardDescription>{group.description}</CardDescription>
-              </CardHeader>
-              <CardContent className="flex-grow">
-                <div className="flex items-center text-sm text-muted-foreground">
-                  <Users className="mr-2 h-4 w-4" />
-                  <span>{group.members} Mitglieder</span>
-                </div>
-              </CardContent>
-              <CardFooter className="flex justify-between">
-                <Button variant="outline" size="sm" asChild>
-                  <Link href={`/chats/group-${group.id}`}> 
-                    <MessageSquare className="mr-2 h-4 w-4" /> Chat
-                  </Link>
-                </Button>
-                <Button variant="default" size="sm" asChild>
-                  <Link href={`/gruppen/${group.id}`}>
-                    <Settings className="mr-2 h-4 w-4" /> Verwalten
-                  </Link>
-                </Button>
-              </CardFooter>
-            </Card>
+            <GroupCard key={group.id} group={group} />
           ))}
         </div>
       ) : (

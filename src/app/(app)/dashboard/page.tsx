@@ -6,19 +6,50 @@ import { Bell, CheckCircle, Users, CalendarClock, Info, CheckCheck, X } from "lu
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Popover, PopoverTrigger } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
-import { useState, useMemo } from "react";
+import { useState, useMemo, memo } from "react";
 import { useBuddies } from "@/contexts/PartnersContext";
 import { useCalendar } from "@/contexts/CalendarContext";
 import { formatDistanceToNow } from 'date-fns';
 import { de } from 'date-fns/locale';
+import dynamic from "next/dynamic";
+
+const PopoverContent = dynamic(() => import('@/components/ui/popover').then(mod => mod.PopoverContent));
 
 
 const initialNotifications = [
     { id: 1, title: "Update: Mathe II Lerngruppe", description: "Der Treffpunkt wurde auf Raum E0.04 geändert.", time: "vor 5 Min.", read: false },
     { id: 2, title: "Info: Projektbesprechung SE", description: "Lisa hat neue Dokumente für das Treffen hochgeladen.", time: "vor 1 Std.", read: false },
 ];
+
+const BuddyItem = memo(function BuddyItem({ buddy }: { buddy: any }) {
+  return (
+    <Link href={`/profil/${buddy.id}`} className="block rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+        <div className="flex items-center space-x-3 p-3 border rounded-lg hover:shadow-md transition-shadow h-full bg-background/50">
+          <Image src={buddy.avatar} alt={buddy.name} width={40} height={40} className="rounded-full" data-ai-hint={buddy.dataAiHint} />
+          <div>
+            <p className="font-semibold">{buddy.name}</p>
+            <p className="text-xs text-muted-foreground">{buddy.course}</p>
+          </div>
+        </div>
+    </Link>
+  );
+});
+
+const UpcomingSessionItem = memo(function UpcomingSessionItem({ session }: { session: any }) {
+  return (
+    <li className="flex items-center justify-between p-3 bg-secondary/50 rounded-lg">
+      <div>
+        <p className="font-semibold">{session.title}</p>
+        <p className="text-sm text-muted-foreground">{session.time} - {session.type}</p>
+      </div>
+      <Button variant="outline" size="sm" asChild>
+        <Link href={`/kalender/${session.id}`}>Details</Link>
+      </Button>
+    </li>
+  );
+});
 
 
 export default function DashboardPage() {
@@ -134,15 +165,7 @@ export default function DashboardPage() {
               {upcomingSessions.length > 0 ? (
                 <ul className="space-y-4">
                   {upcomingSessions.map(session => (
-                    <li key={session.id} className="flex items-center justify-between p-3 bg-secondary/50 rounded-lg">
-                      <div>
-                        <p className="font-semibold">{session.title}</p>
-                        <p className="text-sm text-muted-foreground">{session.time} - {session.type}</p>
-                      </div>
-                      <Button variant="outline" size="sm" asChild>
-                        <Link href={`/kalender/${session.id}`}>Details</Link>
-                      </Button>
-                    </li>
+                    <UpcomingSessionItem key={session.id} session={session} />
                   ))}
                 </ul>
               ) : (
@@ -163,15 +186,7 @@ export default function DashboardPage() {
               {buddies.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {buddies.map(buddy => (
-                    <Link key={buddy.id} href={`/profil/${buddy.id}`} className="block rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
-                        <div className="flex items-center space-x-3 p-3 border rounded-lg hover:shadow-md transition-shadow h-full bg-background/50">
-                          <Image src={buddy.avatar} alt={buddy.name} width={40} height={40} className="rounded-full" data-ai-hint={buddy.dataAiHint} />
-                          <div>
-                            <p className="font-semibold">{buddy.name}</p>
-                            <p className="text-xs text-muted-foreground">{buddy.course}</p>
-                          </div>
-                        </div>
-                    </Link>
+                    <BuddyItem key={buddy.id} buddy={buddy} />
                   ))}
                 </div>
               ) : (

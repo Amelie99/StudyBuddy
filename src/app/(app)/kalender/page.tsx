@@ -6,11 +6,25 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Calendar } from "@/components/ui/calendar"; // ShadCN Calendar
 import { PlusCircle, ListChecks, Clock, CalendarDays, Loader2 } from "lucide-react";
 import Link from "next/link";
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, memo } from "react";
 import { de } from 'date-fns/locale';
 import { format } from 'date-fns';
-import { useCalendar } from "@/contexts/CalendarContext";
+import { useCalendar, type CalendarEvent } from "@/contexts/CalendarContext";
 import Image from "next/image";
+
+const UpcomingEventItem = memo(function UpcomingEventItem({ session }: { session: CalendarEvent }) {
+  return (
+    <li className="flex items-center justify-between p-3 bg-secondary/50 rounded-lg flex-wrap gap-4">
+      <div>
+        <p className="font-semibold">{session.title}</p>
+        <p className="text-sm text-muted-foreground">{format(session.date, "EEEE, d. MMMM yyyy - HH:mm 'Uhr'", { locale: de })}</p>
+      </div>
+      <Button variant="outline" size="sm" asChild>
+          <Link href={`/kalender/${session.id}`}>Details</Link>
+      </Button>
+    </li>
+  );
+});
 
 export default function KalenderPage() {
   const [date, setDate] = useState<Date | undefined>(new Date());
@@ -132,15 +146,7 @@ export default function KalenderPage() {
           {upcomingEvents.length > 0 ? (
             <ul className="space-y-4">
               {upcomingEvents.map(session => (
-                <li key={session.id} className="flex items-center justify-between p-3 bg-secondary/50 rounded-lg flex-wrap gap-4">
-                  <div>
-                    <p className="font-semibold">{session.title}</p>
-                    <p className="text-sm text-muted-foreground">{format(session.date, "EEEE, d. MMMM yyyy - HH:mm 'Uhr'", { locale: de })}</p>
-                  </div>
-                  <Button variant="outline" size="sm" asChild>
-                      <Link href={`/kalender/${session.id}`}>Details</Link>
-                  </Button>
-                </li>
+                <UpcomingEventItem key={session.id} session={session} />
               ))}
             </ul>
           ) : (
