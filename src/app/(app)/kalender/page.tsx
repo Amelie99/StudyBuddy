@@ -10,6 +10,7 @@ import React, { useState, useMemo, useEffect } from "react";
 import { de } from 'date-fns/locale';
 import { format } from 'date-fns';
 import { useCalendar } from "@/contexts/CalendarContext";
+import Image from "next/image";
 
 export default function KalenderPage() {
   const [date, setDate] = useState<Date | undefined>(new Date());
@@ -54,99 +55,114 @@ export default function KalenderPage() {
   }
 
   return (
-    <div className="container mx-auto py-8 space-y-8">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
-        <h1 className="text-3xl font-bold text-foreground mb-4 sm:mb-0">Mein Lernkalender</h1>
-        <Button asChild>
-          <Link href="/kalender/event-erstellen">
-            <PlusCircle className="mr-2 h-5 w-5" /> Termin erstellen
-          </Link>
-        </Button>
+    <div className="relative">
+      <div className="absolute inset-0 z-0">
+        <Image
+          src="https://i.imgur.com/g1x3mbW.jpeg"
+          alt="Kalender background"
+          fill
+          className="object-cover opacity-10 saturate-50"
+          data-ai-hint="calendar planner"
+          priority
+        />
+        <div className="absolute inset-0 bg-background/80" />
       </div>
+      <div className="relative z-10">
+        <div className="container mx-auto py-8 space-y-8">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
+            <h1 className="text-3xl font-bold text-foreground mb-4 sm:mb-0">Mein Lernkalender</h1>
+            <Button asChild>
+              <Link href="/kalender/event-erstellen">
+                <PlusCircle className="mr-2 h-5 w-5" /> Termin erstellen
+              </Link>
+            </Button>
+          </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="md:col-span-2 shadow-lg">
-          <CardHeader>
-            <CardTitle>Kalenderansicht</CardTitle>
-            <CardDescription>Wähle einen Tag, um Termine anzuzeigen.</CardDescription>
-          </CardHeader>
-          <CardContent className="flex justify-center">
-            <Calendar
-              locale={de}
-              mode="single"
-              selected={date}
-              onSelect={setDate}
-              className="rounded-md border p-0"
-              modifiers={{ 
-                eventDay: events.map(e => e.date),
-              }}
-              modifiersClassNames={{
-                eventDay: "font-bold"
-              }}
-              classNames={{
-                day_selected: "bg-secondary text-secondary-foreground",
-                day_today: "border-2 border-primary rounded-md",
-              }}
-            />
-          </CardContent>
-        </Card>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Card className="md:col-span-2 shadow-lg">
+              <CardHeader>
+                <CardTitle>Kalenderansicht</CardTitle>
+                <CardDescription>Wähle einen Tag, um Termine anzuzeigen.</CardDescription>
+              </CardHeader>
+              <CardContent className="flex justify-center">
+                <Calendar
+                  locale={de}
+                  mode="single"
+                  selected={date}
+                  onSelect={setDate}
+                  className="rounded-md border p-0"
+                  modifiers={{ 
+                    eventDay: events.map(e => e.date),
+                  }}
+                  modifiersClassNames={{
+                    eventDay: "font-bold"
+                  }}
+                  classNames={{
+                    day_selected: "bg-secondary text-secondary-foreground",
+                    day_today: "border-2 border-primary rounded-md",
+                  }}
+                />
+              </CardContent>
+            </Card>
 
-        <Card className="md:col-span-1 shadow-lg">
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <ListChecks className="mr-2 h-5 w-5 text-primary" />
-              Termine am {date ? format(date, 'd. MMMM', { locale: de }) : '...'}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {selectedDayEvents.length > 0 ? (
-              <ul className="space-y-3">
-                {selectedDayEvents.map((event) => (
-                  <li key={event.id} className="p-3 bg-secondary/50 rounded-lg">
-                    <p className="font-semibold">{event.title}</p>
-                    <p className="text-sm text-muted-foreground flex items-center">
-                      <Clock className="mr-1.5 h-4 w-4" /> {format(event.date, "HH:mm", { locale: de })} Uhr
-                    </p>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-muted-foreground text-center py-4">
-                {date ? "Keine Termine für diesen Tag." : "Wähle einen Tag im Kalender."}
-              </p>
-            )}
-          </CardContent>
-        </Card>
+            <Card className="md:col-span-1 shadow-lg">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <ListChecks className="mr-2 h-5 w-5 text-primary" />
+                  Termine am {date ? format(date, 'd. MMMM', { locale: de }) : '...'}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {selectedDayEvents.length > 0 ? (
+                  <ul className="space-y-3">
+                    {selectedDayEvents.map((event) => (
+                      <li key={event.id} className="p-3 bg-secondary/50 rounded-lg">
+                        <p className="font-semibold">{event.title}</p>
+                        <p className="text-sm text-muted-foreground flex items-center">
+                          <Clock className="mr-1.5 h-4 w-4" /> {format(event.date, "HH:mm", { locale: de })} Uhr
+                        </p>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-muted-foreground text-center py-4">
+                    {date ? "Keine Termine für diesen Tag." : "Wähle einen Tag im Kalender."}
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+          
+          <Card className="shadow-lg">
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <CalendarDays className="mr-2 h-5 w-5 text-primary" />
+                Alle anstehenden Termine
+              </CardTitle>
+              <CardDescription>Eine Übersicht aller deiner geplanten Lernsitzungen und Termine.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {upcomingEvents.length > 0 ? (
+                <ul className="space-y-4">
+                  {upcomingEvents.map(session => (
+                    <li key={session.id} className="flex items-center justify-between p-3 bg-secondary/50 rounded-lg flex-wrap gap-4">
+                      <div>
+                        <p className="font-semibold">{session.title}</p>
+                        <p className="text-sm text-muted-foreground">{format(session.date, "EEEE, d. MMMM yyyy - HH:mm 'Uhr'", { locale: de })}</p>
+                      </div>
+                      <Button variant="outline" size="sm" asChild>
+                          <Link href={`/kalender/${session.id}`}>Details</Link>
+                      </Button>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-muted-foreground text-center py-4">Keine anstehenden Lernsitzungen geplant.</p>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </div>
-      
-      <Card className="shadow-lg">
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <CalendarDays className="mr-2 h-5 w-5 text-primary" />
-            Alle anstehenden Termine
-          </CardTitle>
-          <CardDescription>Eine Übersicht aller deiner geplanten Lernsitzungen und Termine.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {upcomingEvents.length > 0 ? (
-            <ul className="space-y-4">
-              {upcomingEvents.map(session => (
-                <li key={session.id} className="flex items-center justify-between p-3 bg-secondary/50 rounded-lg flex-wrap gap-4">
-                  <div>
-                    <p className="font-semibold">{session.title}</p>
-                    <p className="text-sm text-muted-foreground">{format(session.date, "EEEE, d. MMMM yyyy - HH:mm 'Uhr'", { locale: de })}</p>
-                  </div>
-                  <Button variant="outline" size="sm" asChild>
-                      <Link href={`/kalender/${session.id}`}>Details</Link>
-                  </Button>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-muted-foreground text-center py-4">Keine anstehenden Lernsitzungen geplant.</p>
-          )}
-        </CardContent>
-      </Card>
     </div>
   );
 }
