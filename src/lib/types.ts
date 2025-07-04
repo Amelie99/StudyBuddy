@@ -78,7 +78,7 @@ export const dummyUserSeeds: DummyUserSeed[] = [
     lerninteressen: ["Hausaufgabenhilfe", "Lerngruppe finden"],
     lernstil: "Diskussion",
     kurse: ["Einführung in die Soziale Arbeit", "Wissenschaftliches Arbeiten", "Psychologie Grundlagen"],
-    photoURL: "https://placehold.co/400x400.png",
+    photoURL: "https://i.imgur.com/PKtZX0C.jpeg",
   },
   {
     fullName: "David Meier",

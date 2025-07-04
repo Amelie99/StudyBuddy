@@ -31,7 +31,6 @@ interface BuddiesContextType {
 
 // Mock initial data, consistent with the other pages
 const initialBuddies: Buddy[] = [
-  { id: "1", name: "Lisa Schmidt", course: "Soziale Arbeit", avatar: "https://placehold.co/100x100.png", dataAiHint: "woman student" },
   { id: "2", name: "David Meier", course: "Master Elektrotechnik", avatar: "https://i.imgur.com/ZiKvLxU.jpeg", dataAiHint: "man portrait" },
 ];
 

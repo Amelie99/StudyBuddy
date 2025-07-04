@@ -29,7 +29,7 @@ const fetchGroupDetails = async (groupId: string) => {
       dataAiHint: "mathematics chalkboard",
       members: [
         { id: "user1", name: "Max Mustermann", avatar: "https://placehold.co/100x100.png", dataAiHint: "man student" },
-        { id: "user2", name: "Lisa Schmidt", avatar: "https://placehold.co/100x100.png", dataAiHint: "woman student" },
+        { id: "user2", name: "Lisa Schmidt", avatar: "https://i.imgur.com/PKtZX0C.jpeg", dataAiHint: "woman student" },
         { id: "user3", name: "Admin User", avatar: "https://placehold.co/100x100.png", dataAiHint: "person icon" },
       ],
       createdBy: "user3", // Assume current user is admin for demo

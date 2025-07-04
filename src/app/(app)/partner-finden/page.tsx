@@ -21,6 +21,7 @@ import { cn } from "@/lib/utils";
 
 // The master list of all possible suggestions
 const allSuggestedBuddies: SuggestedBuddy[] = [
+  { id: 1, name: "Lisa Schmidt", studiengang: "Soziale Arbeit, 1. Sem.", image: "https://i.imgur.com/FwkjiPu.jpeg", avatar: "https://i.imgur.com/PKtZX0C.jpeg", dataAiHint: "woman student", mutualInterests: ["Wissenschaftliches Arbeiten", "Psychologie Grundlagen"] },
   { id: 101, name: "Anna Kurz", studiengang: "Informatik, 3. Sem.", image: "https://placehold.co/300x400.png", dataAiHint:"woman programmer", mutualInterests: ["Web-Entwicklung", "Python"] },
   { id: 102, name: "Markus Lang", studiengang: "BWL, 5. Sem.", image: "https://i.imgur.com/umNyodm.jpeg", avatar: "https://i.imgur.com/hlTMgKi.jpeg", dataAiHint: "man business", mutualInterests: ["Marketing", "Statistik"] },
   { id: 103, name: "Julia Klein", studiengang: "Soziale Arbeit, 1. Sem.", image: "https://i.imgur.com/FXdPVFK.jpeg", avatar: "https://i.imgur.com/Yt7EtV9.jpeg", dataAiHint:"woman social", mutualInterests: ["Grundlagen Psychologie"] },

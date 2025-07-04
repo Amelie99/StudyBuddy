@@ -24,7 +24,7 @@ const fetchUserDetails = async (userId: string) => {
       fullName: "Lisa Schmidt",
       studiengang: "Soziale Arbeit",
       semester: "2",
-      photoURL: "https://placehold.co/128x128.png",
+      photoURL: "https://i.imgur.com/PKtZX0C.jpeg",
       dataAiHint: "woman student",
       ueberMich: "Neu an der HAWL und suche Anschluss! Brauche Hilfe bei den Grundlagen in 'Wissenschaftliches Arbeiten' und würde gerne Lerngruppen für die ersten Semester gründen.",
       lerninteressen: ["hausaufgabenhilfe", "lerngruppefinden"],
