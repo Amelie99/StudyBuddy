@@ -17,9 +17,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           alt="Campus background"
           fill
           sizes="100vw"
-          className="object-cover opacity-60"
+          className="object-cover"
           data-ai-hint="university campus"
         />
+        <div className="absolute inset-0 bg-background/80" />
       </div>
       <div className="relative z-10">
         <CalendarProvider>
