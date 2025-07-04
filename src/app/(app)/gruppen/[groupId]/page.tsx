@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
@@ -25,7 +24,7 @@ const fetchGroupDetails = async (groupId: string) => {
       id: "1",
       name: "Mathe Profis WS23/24",
       description: "Vorbereitung Analysis & Lineare Algebra für Erstsemester. Wöchentliche Treffen geplant.",
-      image: "https://placehold.co/800x300.png",
+      image: "https://i.imgur.com/s4M5N0Q.png",
       dataAiHint: "mathematics chalkboard",
       members: [
         { id: "user1", name: "Max Mustermann", avatar: "https://placehold.co/100x100.png", dataAiHint: "man student" },
