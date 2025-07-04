@@ -33,10 +33,10 @@ export function DesktopSidebar() {
 
   return (
     <Sidebar collapsible="icon" className="border-r">
-      <SidebarHeader className="p-4 flex flex-col items-center group-data-[state=collapsed]:p-1 transition-all duration-200">
-        <Link href="/dashboard" className="mb-4 block h-12 w-full flex items-center justify-start group-data-[state=collapsed]:justify-center">
+      <SidebarHeader className="p-2 flex flex-col items-center group-data-[state=collapsed]:p-1 transition-all duration-200">
+        <Link href="/dashboard" className="mb-4 block h-auto w-full flex items-center justify-start pl-7 group-data-[state=collapsed]:pl-0 group-data-[state=collapsed]:justify-center">
           {/* Expanded Logo */}
-          <div className="relative w-48 h-11 group-data-[state=collapsed]:hidden">
+          <div className="relative w-full h-[150px] group-data-[state=collapsed]:hidden">
             <Image 
               src="https://i.imgur.com/TcVJosu.png"
               alt="HAW Landshut Logo"
@@ -56,7 +56,7 @@ export function DesktopSidebar() {
             />
           </div>
         </Link>
-        <div className="w-full flex justify-start group-data-[state=collapsed]:justify-center">
+        <div className="w-full flex justify-start pl-2 group-data-[state=collapsed]:pl-0 group-data-[state=collapsed]:justify-center">
            <SidebarTrigger />
         </div>
       </SidebarHeader>
@@ -92,7 +92,7 @@ export function DesktopSidebar() {
         </SidebarMenu>
       </SidebarContent>
       
-      <SidebarFooter className="p-4 mt-auto border-t group-data-[state=collapsed]:p-1 transition-all duration-200">
+      <SidebarFooter className="p-2 mt-auto border-t group-data-[state=collapsed]:p-1 transition-all duration-200">
         {currentUser && (
           <SidebarMenu>
             <SidebarMenuItem>
