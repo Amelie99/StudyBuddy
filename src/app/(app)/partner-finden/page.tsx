@@ -26,7 +26,7 @@ const allSuggestedBuddies: SuggestedBuddy[] = [
   { id: 103, name: "Julia Klein", studiengang: "Soziale Arbeit, 1. Sem.", image: "https://placehold.co/300x400.png", dataAiHint:"woman social", mutualInterests: ["Grundlagen Psychologie"] },
   { id: 104, name: "Jonas Huber", studiengang: "Wirtschaftsingenieurwesen, 4. Sem.", image: "https://placehold.co/300x400.png", dataAiHint: "man engineer", mutualInterests: ["Logistik", "Projektarbeit"] },
   { id: 105, name: "Sophie Becker", studiengang: "Maschinenbau, 6. Sem.", image: "https://placehold.co/300x400.png", dataAiHint: "woman smiling", mutualInterests: ["Thermodynamik", "Bachelorarbeit"] },
-  { id: 106, name: "Felix Schmidt", studiengang: "Informatik, 2. Sem.", image: "https://placehold.co/300x400.png", dataAiHint: "man coding", mutualInterests: ["Java", "Algorithmen"] },
+  { id: 106, name: "Felix Schmidt", studiengang: "Informatik, 2. Sem.", image: "https://i.imgur.com/bJa3doH.jpeg", avatar: "https://i.imgur.com/gqj9hH1.jpeg", dataAiHint: "man coding", mutualInterests: ["Java", "Algorithmen"] },
   { id: 107, name: "Lena Wolf", studiengang: "BWL, 2. Sem.", image: "https://placehold.co/300x400.png", dataAiHint: "woman student", mutualInterests: ["Controlling", "Rechnungswesen"] },
 ];
 
