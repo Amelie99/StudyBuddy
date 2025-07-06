@@ -16,10 +16,17 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'i.imgur.com',
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
   allowedDevOrigins: [
     'https://6000-firebase-studio-1750253978523.cluster-6vyo4gb53jczovun3dxslzjahs.cloudworkstations.dev',
+    'http://6000-firebase-studio-1750253978523.cluster-6vyo4gb53jczovun3dxslzjahs.cloudworkstations.dev',
   ],
 };
 
