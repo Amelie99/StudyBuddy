@@ -17,7 +17,8 @@ import type { AppUser } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Loader2, Edit3, Save } from 'lucide-react';
-import Image from 'next/image';
+import { Badge } from '@/components/ui/badge';
+
 
 const profileSchema = z.object({
   fullName: z.string().min(3, { message: 'Vollständiger Name ist erforderlich (mind. 3 Zeichen).' }),
@@ -115,7 +116,7 @@ export default function MeinProfilPage() {
         <CardHeader className="text-center">
             <div className="relative mx-auto mb-4 w-32 h-32">
                  <Avatar className="w-32 h-32 border-4 border-primary shadow-lg">
-                    <AvatarImage src={profilePicUrl} alt={currentUser.displayName || 'Profilbild'} data-ai-hint="person portrait" />
+                    <AvatarImage src={profilePicUrl} alt={currentUser.displayName || 'Profilbild'} data-ai-hint="person portrait" sizes="128px" />
                     <AvatarFallback className="text-4xl">
                       {currentUser.displayName ? currentUser.displayName.substring(0,2).toUpperCase() : '??'}
                     </AvatarFallback>
@@ -209,14 +210,3 @@ export default function MeinProfilPage() {
     </div>
   );
 }
-
-// ShadCN Badge (already in ui/badge.tsx)
-// For simplicity, inline Badge style for demo:
-const Badge: React.FC<{ children: React.ReactNode; variant?: 'default' | 'secondary' | 'destructive' | 'outline'; className?: string }> = ({ children, variant = 'default', className }) => (
-  <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ${
-    variant === 'secondary' ? 'border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80' : 
-    'border-transparent bg-primary text-primary-foreground hover:bg-primary/80'
-  } ${className}`}>
-    {children}
-  </span>
-);

@@ -12,7 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Users, MessageSquare, UserPlus, Settings, CalendarPlus, Trash2, Edit, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, memo } from 'react';
 import dynamic from 'next/dynamic';
 
 const DialogContent = dynamic(() => import('@/components/ui/dialog').then(mod => mod.DialogContent));
@@ -43,6 +43,27 @@ const fetchGroupDetails = async (groupId: string) => {
   }
   return null;
 };
+
+const GroupMemberItem = memo(function GroupMemberItem({ member, isAdmin }: { member: any, isAdmin: boolean }) {
+    return (
+        <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-accent/10">
+            <Avatar>
+                <AvatarImage src={member.avatar} alt={member.name} data-ai-hint={member.dataAiHint} sizes="48px" />
+                <AvatarFallback>{member.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+            </Avatar>
+            <span>{member.name} {isAdmin && <span className="text-xs text-primary ml-1">(Admin)</span>}</span>
+        </div>
+    );
+});
+
+const UpcomingGroupEventItem = memo(function UpcomingGroupEventItem({ event }: { event: any }) {
+    return (
+        <li className="p-3 bg-secondary/50 rounded-lg">
+            <p className="font-medium">{event.title}</p>
+            <p className="text-sm text-muted-foreground">{event.date}</p>
+        </li>
+    );
+});
 
 
 export default function GroupDetailPage() {
@@ -139,13 +160,7 @@ export default function GroupDetailPage() {
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
               {group.members.map((member: any) => (
-                <div key={member.id} className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-accent/10">
-                  <Avatar>
-                    <AvatarImage src={member.avatar} alt={member.name} data-ai-hint={member.dataAiHint} />
-                    <AvatarFallback>{member.name.substring(0, 2).toUpperCase()}</AvatarFallback>
-                  </Avatar>
-                  <span>{member.name} {member.id === group.createdBy && <span className="text-xs text-primary ml-1">(Admin)</span>}</span>
-                </div>
+                <GroupMemberItem key={member.id} member={member} isAdmin={member.id === group.createdBy} />
               ))}
             </div>
             {isAdmin && (
@@ -189,10 +204,7 @@ export default function GroupDetailPage() {
             {group.upcomingEvents && group.upcomingEvents.length > 0 ? (
                 <ul className="space-y-2">
                     {group.upcomingEvents.map((event:any) => (
-                        <li key={event.id} className="p-3 bg-secondary/50 rounded-lg">
-                            <p className="font-medium">{event.title}</p>
-                            <p className="text-sm text-muted-foreground">{event.date}</p>
-                        </li>
+                        <UpcomingGroupEventItem key={event.id} event={event} />
                     ))}
                 </ul>
             ): (

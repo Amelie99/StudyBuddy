@@ -17,7 +17,7 @@ const BuddyCard = memo(function BuddyCard({ buddy }: { buddy: Buddy }) {
       <CardContent className="flex items-center justify-between space-x-4 p-4">
         <Link href={`/profil/${buddy.id}`} className="flex items-center space-x-4 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
           <Avatar className="h-14 w-14">
-            <AvatarImage src={buddy.avatar} alt={buddy.name} data-ai-hint={buddy.dataAiHint} />
+            <AvatarImage src={buddy.avatar} alt={buddy.name} data-ai-hint={buddy.dataAiHint} sizes="56px" />
             <AvatarFallback>{buddy.name.substring(0, 2).toUpperCase()}</AvatarFallback>
           </Avatar>
           <div>
@@ -41,7 +41,7 @@ const GroupCard = memo(function GroupCard({ group }: { group: Group }) {
       <CardContent className="flex items-center justify-between space-x-4 p-4">
           <Link href={`/gruppen/${group.id}`} className="flex items-center space-x-4 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
               <Avatar className="h-14 w-14">
-                  <AvatarImage src={group.image} alt={group.name} data-ai-hint={group.dataAiHint}/>
+                  <AvatarImage src={group.image} alt={group.name} data-ai-hint={group.dataAiHint} sizes="56px"/>
                   <AvatarFallback>{group.name.substring(0, 2).toUpperCase()}</AvatarFallback>
               </Avatar>
               <div>

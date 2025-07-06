@@ -95,7 +95,7 @@ export default function UserProfilePage() {
             <Card className="max-w-3xl mx-auto">
                 <CardHeader className="text-center">
                     <Avatar className="w-32 h-32 border-4 border-primary shadow-lg mx-auto mb-4">
-                        <AvatarImage src={profilePicUrl} alt={user.fullName} data-ai-hint={user.dataAiHint} />
+                        <AvatarImage src={profilePicUrl} alt={user.fullName} data-ai-hint={user.dataAiHint} sizes="128px" />
                         <AvatarFallback className="text-4xl">
                             {user.fullName ? user.fullName.substring(0,2).toUpperCase() : '??'}
                         </AvatarFallback>

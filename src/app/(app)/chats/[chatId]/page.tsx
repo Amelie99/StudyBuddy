@@ -8,7 +8,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, Send, CalendarPlus, Smile, Paperclip, Loader2, UploadCloud } from 'lucide-react';
 import Link from 'next/link';
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, memo } from 'react';
 import { cn } from '@/lib/utils';
 import { Popover, PopoverTrigger } from '@/components/ui/popover';
 import { Dialog, DialogTrigger, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -17,6 +17,20 @@ import dynamic from 'next/dynamic';
 
 const PopoverContent = dynamic(() => import('@/components/ui/popover').then(mod => mod.PopoverContent));
 const DialogContent = dynamic(() => import('@/components/ui/dialog').then(mod => mod.DialogContent));
+
+const ChatMessageItem = memo(function ChatMessageItem({ msg, type }: { msg: any; type: 'user' | 'group' }) {
+    return (
+        <div className={cn("flex mb-3", msg.self ? "justify-end" : "justify-start")}>
+            <div className={cn("max-w-[70%] p-3 rounded-xl",
+                msg.self ? "bg-primary text-primary-foreground rounded-br-none" : "bg-secondary text-secondary-foreground rounded-bl-none"
+            )}>
+                {type === 'group' && !msg.self && <p className="text-xs font-semibold mb-0.5 text-primary/80">{msg.senderName || "Unbekannt"}</p>}
+                <p className="text-sm whitespace-pre-wrap">{msg.text}</p>
+                <p className="text-xs mt-1 opacity-70 text-right">{msg.timestamp}</p>
+            </div>
+        </div>
+    );
+});
 
 
 export default function ChatDetailPage() {
@@ -92,7 +106,7 @@ export default function ChatDetailPage() {
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <Avatar className="h-10 w-10 mr-3">
-          <AvatarImage src={chatDetails.avatar} alt={chatDetails.name} data-ai-hint={chatDetails.dataAiHint} />
+          <AvatarImage src={chatDetails.avatar} alt={chatDetails.name} data-ai-hint={chatDetails.dataAiHint} sizes="40px" />
           <AvatarFallback>{chatDetails.name.substring(0, 2).toUpperCase()}</AvatarFallback>
         </Avatar>
         <div className="flex-1">
@@ -112,15 +126,7 @@ export default function ChatDetailPage() {
       {/* Messages Area */}
       <ScrollArea className="flex-1 p-4 space-y-4" ref={scrollAreaRef}>
         {chatDetails.messages.map((msg: any) => (
-          <div key={msg.id} className={cn("flex mb-3", msg.self ? "justify-end" : "justify-start")}>
-            <div className={cn("max-w-[70%] p-3 rounded-xl", 
-              msg.self ? "bg-primary text-primary-foreground rounded-br-none" : "bg-secondary text-secondary-foreground rounded-bl-none"
-            )}>
-              {chatDetails.type === 'group' && !msg.self && <p className="text-xs font-semibold mb-0.5 text-primary/80">{msg.senderName || "Unbekannt"}</p>}
-              <p className="text-sm whitespace-pre-wrap">{msg.text}</p>
-              <p className="text-xs mt-1 opacity-70 text-right">{msg.timestamp}</p>
-            </div>
-          </div>
+          <ChatMessageItem key={msg.id} msg={msg} type={chatDetails.type} />
         ))}
       </ScrollArea>
 
