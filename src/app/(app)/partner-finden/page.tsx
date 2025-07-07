@@ -45,10 +45,11 @@ export default function PartnerFindenPage() {
   const { startNewChat } = useChats();
   const router = useRouter();
   const [swipeState, setSwipeState] = useState<'left' | 'right' | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   // This effect runs to initialize and filter the suggestion queue.
-  // It re-runs if myBuddies changes (e.g., buddy added in another tab).
   useEffect(() => {
+    setIsLoading(true);
     // This logic now runs only on the client, where localStorage is available.
     const myBuddyIds = new Set(myBuddies.map(b => parseInt(b.id, 10)));
     let declinedIds = new Set<number>();
@@ -70,13 +71,9 @@ export default function PartnerFindenPage() {
     );
     
     setSuggestionQueue(filteredSuggestions);
-    setIsLoading(false);
-  }, [myBuddies]);
-
-  const advanceQueue = useCallback(() => {
     setSwipeState(null);
-    setSuggestionQueue(prevQueue => prevQueue.slice(1));
-  }, []);
+    setIsLoading(false);
+  }, [myBuddies, refreshKey]);
 
   const handleInterest = useCallback(() => {
     if (suggestionQueue.length === 0 || swipeState) return;
@@ -113,22 +110,22 @@ export default function PartnerFindenPage() {
         } catch (error) {
             console.error("Error updating localStorage", error);
         }
-        advanceQueue();
+        setRefreshKey(k => k + 1);
      }, 300); // Animation duration
-  }, [suggestionQueue, swipeState, advanceQueue]);
+  }, [suggestionQueue, swipeState]);
 
-  const advanceQueueAndCloseDialog = () => {
+  const closeDialogAndContinue = () => {
     setShowMatchDialog(false);
     setTimeout(() => {
       setMatchedBuddy(null);
-      advanceQueue();
+      // The useEffect has already refreshed the queue, no need to manually advance it.
     }, 300); // Delay to allow dialog to close before card disappears
   };
 
   const handleChat = () => {
     if (!matchedBuddy) return;
     router.push(`/chats/${matchedBuddy.id}`);
-    advanceQueueAndCloseDialog();
+    closeDialogAndContinue();
   };
 
   return (
@@ -221,7 +218,7 @@ export default function PartnerFindenPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-col sm:flex-row gap-2">
-            <Button onClick={advanceQueueAndCloseDialog} className="w-full sm:w-auto" variant="outline">Suche weiter</Button>
+            <Button onClick={closeDialogAndContinue} className="w-full sm:w-auto" variant="outline">Suche weiter</Button>
             <Button onClick={handleChat} className="w-full sm:w-auto">
               <MessageSquare className="mr-2 h-4 w-4" />
               Chat starten
