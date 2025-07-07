@@ -37,8 +37,7 @@ const allSuggestedBuddies: SuggestedBuddy[] = [
 
 
 export default function PartnerFindenPage() {
-  const [suggestionQueue, setSuggestionQueue] = useState<SuggestedBuddy[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [suggestionQueue, setSuggestionQueue] = useState<SuggestedBuddy[] | null>(null);
   const [showMatchDialog, setShowMatchDialog] = useState(false);
   const [matchedBuddy, setMatchedBuddy] = useState<SuggestedBuddy | null>(null);
   const { buddies: myBuddies, addBuddy } = useBuddies();
@@ -49,7 +48,6 @@ export default function PartnerFindenPage() {
 
   // This effect runs to initialize and filter the suggestion queue.
   useEffect(() => {
-    setIsLoading(true);
     // This logic now runs only on the client, where localStorage is available.
     const myBuddyIds = new Set(myBuddies.map(b => parseInt(b.id, 10)));
     let declinedIds = new Set<number>();
@@ -72,11 +70,10 @@ export default function PartnerFindenPage() {
     
     setSuggestionQueue(filteredSuggestions);
     setSwipeState(null);
-    setIsLoading(false);
   }, [myBuddies, refreshKey]);
 
   const handleInterest = useCallback(() => {
-    if (suggestionQueue.length === 0 || swipeState) return;
+    if (!suggestionQueue || suggestionQueue.length === 0 || swipeState) return;
     const currentBuddy = suggestionQueue[0];
     
     setSwipeState('right');
@@ -90,7 +87,7 @@ export default function PartnerFindenPage() {
   }, [suggestionQueue, swipeState, addBuddy, startNewChat]);
   
   const handleReject = useCallback(() => {
-     if (suggestionQueue.length === 0 || swipeState) return;
+     if (!suggestionQueue || suggestionQueue.length === 0 || swipeState) return;
      const rejectedBuddy = suggestionQueue[0];
      
      setSwipeState('left');
@@ -116,10 +113,8 @@ export default function PartnerFindenPage() {
 
   const closeDialogAndContinue = () => {
     setShowMatchDialog(false);
-    setTimeout(() => {
-      setMatchedBuddy(null);
-      // The useEffect has already refreshed the queue, no need to manually advance it.
-    }, 300); // Delay to allow dialog to close before card disappears
+    setMatchedBuddy(null);
+    setRefreshKey(k => k + 1); // Refresh the queue
   };
 
   const handleChat = () => {
@@ -138,7 +133,7 @@ export default function PartnerFindenPage() {
         
           <div className="flex-grow flex flex-col items-center justify-center w-full">
              <div className="relative w-full max-w-xs h-[450px] md:h-[500px] mb-8">
-              {isLoading ? (
+              {suggestionQueue === null ? (
                  <div className="flex flex-col items-center justify-center text-center h-full w-full">
                     <Loader2 className="h-16 w-16 text-primary animate-spin" />
                  </div>
@@ -182,7 +177,7 @@ export default function PartnerFindenPage() {
               )}
             </div>
 
-            {!isLoading && suggestionQueue.length > 0 && (
+            {suggestionQueue && suggestionQueue.length > 0 && (
               <div className="flex justify-center space-x-6">
                 <Button 
                   onClick={handleReject} 
