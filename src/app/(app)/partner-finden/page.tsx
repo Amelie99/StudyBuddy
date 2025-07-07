@@ -35,7 +35,8 @@ const allSuggestedBuddies: SuggestedBuddy[] = [
 ];
 
 export default function PartnerFindenPage() {
-  const [suggestions, setSuggestions] = useState<SuggestedBuddy[] | null>(null);
+  const [suggestions, setSuggestions] = useState<SuggestedBuddy[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [showMatchDialog, setShowMatchDialog] = useState(false);
   const [matchedBuddy, setMatchedBuddy] = useState<SuggestedBuddy | null>(null);
   const { buddies: myBuddies, addBuddy } = useBuddies();
@@ -43,10 +44,11 @@ export default function PartnerFindenPage() {
   const router = useRouter();
   const [swipeState, setSwipeState] = useState<'left' | 'right' | null>(null);
 
-  // This effect runs to set the initial queue and re-runs if the user's buddies change.
+  // This effect runs to set the initial queue of suggestions.
   useEffect(() => {
     // This logic runs on the client where localStorage is available.
     const myBuddyIds = new Set(myBuddies.map(b => parseInt(b.id, 10)));
+    
     let declinedIds = new Set<number>();
     try {
       const storedDeclinedIds = localStorage.getItem('declinedBuddyIds');
@@ -58,6 +60,7 @@ export default function PartnerFindenPage() {
       }
     } catch (error) {
       console.error("Error parsing declined IDs from localStorage", error);
+      // If localStorage is corrupt, clear it to prevent an endless loop of no suggestions.
       localStorage.removeItem('declinedBuddyIds');
     }
     
@@ -66,11 +69,12 @@ export default function PartnerFindenPage() {
     );
     
     setSuggestions(initialSuggestions);
+    setIsLoading(false);
   }, [myBuddies]);
 
 
   const handleAction = useCallback((action: 'like' | 'reject') => {
-    if (!suggestions || suggestions.length === 0 || swipeState) return;
+    if (suggestions.length === 0 || swipeState) return;
 
     const currentBuddy = suggestions[0];
     setSwipeState(action === 'like' ? 'right' : 'left');
@@ -81,7 +85,7 @@ export default function PartnerFindenPage() {
         startNewChat(currentBuddy);
         setMatchedBuddy(currentBuddy);
         setShowMatchDialog(true);
-      } else {
+      } else { // 'reject'
         try {
           const storedDeclinedIds = localStorage.getItem('declinedBuddyIds');
           const declinedIds: number[] = storedDeclinedIds ? JSON.parse(storedDeclinedIds) : [];
@@ -94,8 +98,8 @@ export default function PartnerFindenPage() {
         }
       }
       
-      // Directly update the queue after the action
-      setSuggestions(queue => queue!.slice(1));
+      // Update the queue by removing the top card. This is the only place suggestions state is changed after init.
+      setSuggestions(queue => queue.slice(1));
       setSwipeState(null);
     }, 300); // Animation duration
   }, [suggestions, swipeState, addBuddy, startNewChat]);
@@ -112,7 +116,7 @@ export default function PartnerFindenPage() {
   };
   
   const renderContent = () => {
-    if (suggestions === null) {
+    if (isLoading) {
       return (
         <div className="flex flex-col items-center justify-center text-center h-full w-full">
           <Loader2 className="h-16 w-16 text-primary animate-spin" />
@@ -157,7 +161,7 @@ export default function PartnerFindenPage() {
               variant="outline" 
               size="icon" 
               className="rounded-full h-20 w-20 bg-card shadow-lg border-2 border-destructive/50 text-destructive hover:bg-destructive/10 transition-transform duration-200 hover:scale-110 active:scale-95"
-              disabled={!!swipeState}
+              disabled={!!swipeState || suggestions.length === 0}
             >
               <X className="h-10 w-10" />
               <span className="sr-only">Ablehnen</span>
@@ -167,7 +171,7 @@ export default function PartnerFindenPage() {
               variant="outline" 
               size="icon" 
               className="rounded-full h-20 w-20 bg-card shadow-lg border-2 border-green-500/50 text-green-500 hover:bg-green-500/10 transition-transform duration-200 hover:scale-110 active:scale-95"
-              disabled={!!swipeState}
+              disabled={!!swipeState || suggestions.length === 0}
             >
               <Heart className="h-10 w-10" />
               <span className="sr-only">Interesse zeigen</span>
