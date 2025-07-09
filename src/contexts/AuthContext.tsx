@@ -3,7 +3,7 @@
 
 import type { User as FirebaseUser } from 'firebase/auth';
 import React, { createContext, useContext, useEffect, useState, useMemo, useCallback } from 'react';
-import { auth } from '@/config/firebase'; // Using mocked auth
+import { auth, db } from '@/config/firebase'; // Using mocked auth
 import type { AppUser } from '@/lib/types';
 import { useRouter, usePathname } from 'next/navigation';
 
@@ -15,7 +15,9 @@ interface AuthContextType {
   logout: () => Promise<void>;
   sendPasswordReset: (email: string) => Promise<void>;
   isHochschuleEmail: (email: string) => boolean;
+  updateUserProfile: (profileData: Partial<AppUser>) => void;
   updateAuthContextUser: (updatedUser: Partial<AppUser>) => void;
+  deleteCurrentUser: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -101,6 +103,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   }, []);
 
+  const logout = useCallback(async () => {
+     // @ts-ignore
+    await auth.signOut();
+    setCurrentUser(null); 
+    router.replace('/anmelden');
+  }, [router]);
+
+  const updateUserProfile = useCallback((profileData: Partial<AppUser>) => {
+    if (currentUser) {
+      db.updateUserProfile(currentUser.uid, profileData);
+      updateAuthContextUser(profileData);
+    }
+  }, [currentUser, updateAuthContextUser]);
+
+  const deleteCurrentUser = useCallback(() => {
+    if (currentUser) {
+      db.deleteUserProfile(currentUser.uid);
+      logout();
+    }
+  }, [currentUser, logout]);
+
   const login = useCallback(async (email: string, pass: string) => {
     // @ts-ignore
     return auth.signInWithEmailAndPassword(email, pass);
@@ -108,15 +131,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const register = useCallback(async (email: string, pass: string) => {
     // @ts-ignore
-    return auth.createUserWithEmailAndPassword(email, pass);
+    const userCredential = await auth.createUserWithEmailAndPassword(email, pass);
+    if (userCredential.user) {
+      const { uid } = userCredential.user;
+      const initialProfile = {
+        email,
+        displayName: email.split('@')[0], 
+        profileComplete: false,
+      };
+      db.updateUserProfile(uid, initialProfile);
+    }
+    return userCredential;
   }, []);
-
-  const logout = useCallback(async () => {
-     // @ts-ignore
-    await auth.signOut();
-    setCurrentUser(null); 
-    router.replace('/anmelden');
-  }, [router]);
 
   const sendPasswordReset = useCallback(async (email: string) => {
      // @ts-ignore
@@ -135,8 +161,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     logout,
     sendPasswordReset,
     isHochschuleEmail,
+    updateUserProfile,
     updateAuthContextUser,
-  }), [currentUser, loading, login, register, logout, sendPasswordReset, isHochschuleEmail, updateAuthContextUser]);
+    deleteCurrentUser,
+  }), [currentUser, loading, login, register, logout, sendPasswordReset, isHochschuleEmail, updateUserProfile, updateAuthContextUser, deleteCurrentUser]);
 
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

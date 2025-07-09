@@ -1,7 +1,9 @@
 
 'use client';
 
-import React, { createContext, useContext, useState, ReactNode, useCallback, useMemo } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useCallback, useMemo, useEffect } from 'react';
+import { db } from '@/config/firebase'; // Import the mock database
+import { useAuth } from './AuthContext';
 
 // Consistent Buddy type for use across the app
 export interface Buddy {
@@ -30,9 +32,9 @@ interface BuddiesContextType {
 }
 
 // Mock initial data, consistent with the other pages
-const initialBuddies: Buddy[] = [
-  { id: "2", name: "David Meier", course: "Master Elektrotechnik", avatar: "https://i.imgur.com/ZiKvLxU.jpeg", dataAiHint: "man portrait" },
-];
+// const initialBuddies: Buddy[] = [
+//   { id: "2", name: "David Meier", course: "Master Elektrotechnik", avatar: "https://i.imgur.com/ZiKvLxU.jpeg", dataAiHint: "man portrait" },
+// ];
 
 const BuddiesContext = createContext<BuddiesContextType | undefined>(undefined);
 
@@ -45,7 +47,22 @@ export function useBuddies() {
 }
 
 export const BuddiesProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-    const [buddies, setBuddies] = useState<Buddy[]>(initialBuddies);
+    const [buddies, setBuddies] = useState<Buddy[]>([]);
+    const { currentUser } = useAuth();
+
+    useEffect(() => {
+        if (currentUser) {
+            const allUsers = db.getAllUsers();
+            const otherUsers = allUsers.filter(user => user.uid !== currentUser.uid).map(user => ({
+                id: user.uid,
+                name: user.displayName,
+                course: user.studiengang,
+                avatar: user.photoURL,
+                dataAiHint: 'user profile picture',
+            }));
+            setBuddies(otherUsers);
+        }
+    }, [currentUser]);
 
     const addBuddy = useCallback((suggestedBuddy: SuggestedBuddy) => {
         const buddyId = suggestedBuddy.id.toString();

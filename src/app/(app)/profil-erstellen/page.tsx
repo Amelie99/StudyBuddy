@@ -35,7 +35,7 @@ const profileSchema = z.object({
 type ProfileFormValues = z.infer<typeof profileSchema>;
 
 export default function ProfilErstellenPage() {
-  const { currentUser, loading: authLoading } = useAuth(); // Add updateUserProfile if needed
+  const { currentUser, loading: authLoading, updateUserProfile } = useAuth(); // Add updateUserProfile
   const { toast } = useToast();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
@@ -80,33 +80,20 @@ export default function ProfilErstellenPage() {
     }
     setIsLoading(true);
     try {
-      // Simulate profile update. In a real app, update Firestore and AuthContext.
-      console.log('Profil erstellt/aktualisiert:', { ...currentUser, ...data, profileComplete: true });
-      
-      // Mock update of user in AuthContext
-      // This should be replaced by a proper update function that also updates Firestore
-      // Forcing a reload or specific update method in AuthContext would be needed
-      // For now, we assume this completes the profile and AuthContext logic will redirect.
-      // @ts-ignore
-      currentUser.displayName = data.fullName;
-      // @ts-ignore
-      currentUser.studiengang = data.studiengang;
-      // @ts-ignore
-      currentUser.semester = data.semester;
-      // @ts-ignore
-      currentUser.photoURL = data.photoURL;
-      // @ts-ignore
-      currentUser.ueberMich = data.ueberMich;
-      // @ts-ignore
-      currentUser.lerninteressen = data.lerninteressen;
-      // @ts-ignore
-      currentUser.lernstil = data.lernstil;
-      // @ts-ignore
-      currentUser.kurse = data.kurse?.split(',').map(k => k.trim());
-      // @ts-ignore
-      currentUser.verfuegbarkeit = data.verfuegbarkeit;
-      // @ts-ignore
-      currentUser.profileComplete = true;
+      const updatedProfile: Partial<AppUser> = {
+        displayName: data.fullName,
+        studiengang: data.studiengang,
+        semester: data.semester,
+        photoURL: data.photoURL,
+        ueberMich: data.ueberMich,
+        lerninteressen: data.lerninteressen,
+        lernstil: data.lernstil,
+        kurse: data.kurse?.split(',').map(k => k.trim()),
+        verfuegbarkeit: data.verfuegbarkeit,
+        profileComplete: true,
+      };
+
+      updateUserProfile(updatedProfile);
 
 
       toast({

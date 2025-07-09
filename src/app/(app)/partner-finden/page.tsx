@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Heart, X, CheckCircle, MessageSquare, Users, Loader2 } from "lucide-react";
 import Image from "next/image";
@@ -13,64 +13,52 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useBuddies, type SuggestedBuddy } from "@/contexts/PartnersContext";
+import { useBuddies, type Buddy } from "@/contexts/PartnersContext";
 import { useChats } from "@/contexts/ChatsContext";
 import { cn } from "@/lib/utils";
 import dynamic from "next/dynamic";
+import { useAuth } from "@/contexts/AuthContext";
 
 const AlertDialogContent = dynamic(() => import('@/components/ui/alert-dialog').then(mod => mod.AlertDialogContent));
 
-
-// The master list of all possible suggestions
-const allSuggestedBuddies: SuggestedBuddy[] = [
-  { id: 1, name: "Lisa Schmidt", studiengang: "Soziale Arbeit, 1. Sem.", image: "https://i.imgur.com/FwkjiPu.jpeg", avatar: "https://i.imgur.com/PKtZX0C.jpeg", dataAiHint: "woman student", mutualInterests: ["Wissenschaftliches Arbeiten", "Psychologie Grundlagen"] },
-  { id: 101, name: "Anna Kurz", studiengang: "Informatik, 3. Sem.", image: "https://i.imgur.com/tfds6vN.jpeg", avatar: "https://i.imgur.com/PvGE2mz.jpeg", dataAiHint:"woman programmer", mutualInterests: ["Web-Entwicklung", "Python"] },
-  { id: 102, name: "Markus Lang", studiengang: "BWL, 5. Sem.", image: "https://i.imgur.com/umNyodm.jpeg", avatar: "https://i.imgur.com/hlTMgKi.jpeg", dataAiHint: "man business", mutualInterests: ["Marketing", "Statistik"] },
-  { id: 103, name: "Julia Klein", studiengang: "Soziale Arbeit, 1. Sem.", image: "https://i.imgur.com/FXdPVFK.jpeg", avatar: "https://i.imgur.com/Yt7EtV9.jpeg", dataAiHint:"woman social", mutualInterests: ["Grundlagen Psychologie"] },
-  { id: 104, name: "Atal Vajpayee", studiengang: "Wirtschaftsingenieurwesen, 4. Sem.", image: "https://i.imgur.com/4yHyOzV.jpeg", avatar: "https://i.imgur.com/xJZT5sW.jpeg", dataAiHint: "man engineer", mutualInterests: ["Logistik", "Projektarbeit"] },
-  { id: 105, name: "Sophie Becker", studiengang: "Maschinenbau, 6. Sem.", image: "https://i.imgur.com/m2xnjbE.jpeg", avatar: "https://i.imgur.com/Qx8BkHC.jpeg", dataAiHint: "woman smiling", mutualInterests: ["Thermodynamik", "Bachelorarbeit"] },
-  { id: 106, name: "Felix Schmidt", studiengang: "Informatik, 2. Sem.", image: "https://i.imgur.com/bJa3doH.jpeg", avatar: "https://i.imgur.com/gqj9hH1.jpeg", dataAiHint: "man coding", mutualInterests: ["Java", "Algorithmen"] },
-  { id: 107, name: "Lena Wolf", studiengang: "BWL, 2. Sem.", image: "https://i.imgur.com/MB2XPkM.jpeg", avatar: "https://i.imgur.com/13nuzOy.jpeg", dataAiHint: "woman student", mutualInterests: ["Controlling", "Rechnungswesen"] },
-  { id: 108, name: "Sarah Chen", studiengang: "BWL, 3. Sem.", image: "https://i.imgur.com/LLFzmJS.jpeg", avatar: "https://i.imgur.com/NkY3Ovh.jpeg", dataAiHint:"woman international student", mutualInterests: ["Marketing", "Sprachaustausch"] },
-];
-
 export default function PartnerFindenPage() {
-  const [suggestions, setSuggestions] = useState<SuggestedBuddy[]>([]);
+  const [suggestions, setSuggestions] = useState<Buddy[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showMatchDialog, setShowMatchDialog] = useState(false);
-  const [matchedBuddy, setMatchedBuddy] = useState<SuggestedBuddy | null>(null);
-  const { buddies: myBuddies, addBuddy } = useBuddies();
+  const [matchedBuddy, setMatchedBuddy] = useState<Buddy | null>(null);
+  const { buddies: allBuddies, addBuddy } = useBuddies();
   const { startNewChat } = useChats();
   const router = useRouter();
   const [swipeState, setSwipeState] = useState<'left' | 'right' | null>(null);
+  const { currentUser } = useAuth();
 
-  // This effect runs to set the initial queue of suggestions.
+
   useEffect(() => {
-    // This logic runs on the client where localStorage is available.
-    const myBuddyIds = new Set(myBuddies.map(b => parseInt(b.id, 10)));
+    if (currentUser) {
+        const myBuddyIds = new Set(allBuddies.map(b => b.id));
     
-    let declinedIds = new Set<number>();
-    try {
-      const storedDeclinedIds = localStorage.getItem('declinedBuddyIds');
-      if (storedDeclinedIds) {
-        const parsedIds = JSON.parse(storedDeclinedIds);
-        if (Array.isArray(parsedIds)) {
-          declinedIds = new Set(parsedIds);
+        let declinedIds = new Set<string>();
+        try {
+          const storedDeclinedIds = localStorage.getItem('declinedBuddyIds');
+          if (storedDeclinedIds) {
+            const parsedIds = JSON.parse(storedDeclinedIds);
+            if (Array.isArray(parsedIds)) {
+              declinedIds = new Set(parsedIds);
+            }
+          }
+        } catch (error) {
+          console.error("Error parsing declined IDs from localStorage", error);
+          localStorage.removeItem('declinedBuddyIds');
         }
-      }
-    } catch (error) {
-      console.error("Error parsing declined IDs from localStorage", error);
-      // If localStorage is corrupt, clear it to prevent an endless loop of no suggestions.
-      localStorage.removeItem('declinedBuddyIds');
+        
+        const initialSuggestions = allBuddies.filter(
+          suggested => suggested.id !== currentUser.uid && !myBuddyIds.has(suggested.id) && !declinedIds.has(suggested.id)
+        );
+        
+        setSuggestions(initialSuggestions);
+        setIsLoading(false);
     }
-    
-    const initialSuggestions = allSuggestedBuddies.filter(
-      suggested => !myBuddyIds.has(suggested.id) && !declinedIds.has(suggested.id)
-    );
-    
-    setSuggestions(initialSuggestions);
-    setIsLoading(false);
-  }, [myBuddies]);
+  }, [allBuddies, currentUser]);
 
 
   const handleAction = useCallback((action: 'like' | 'reject') => {
@@ -88,7 +76,7 @@ export default function PartnerFindenPage() {
       } else { // 'reject'
         try {
           const storedDeclinedIds = localStorage.getItem('declinedBuddyIds');
-          const declinedIds: number[] = storedDeclinedIds ? JSON.parse(storedDeclinedIds) : [];
+          const declinedIds: string[] = storedDeclinedIds ? JSON.parse(storedDeclinedIds) : [];
           if (!declinedIds.includes(currentBuddy.id)) {
             declinedIds.push(currentBuddy.id);
             localStorage.setItem('declinedBuddyIds', JSON.stringify(declinedIds));
@@ -98,10 +86,9 @@ export default function PartnerFindenPage() {
         }
       }
       
-      // Update the queue by removing the top card. This is the only place suggestions state is changed after init.
       setSuggestions(queue => queue.slice(1));
       setSwipeState(null);
-    }, 300); // Animation duration
+    }, 300); 
   }, [suggestions, swipeState, addBuddy, startNewChat]);
 
   const closeDialogAndContinue = () => {
@@ -144,12 +131,11 @@ export default function PartnerFindenPage() {
                     opacity: index < 3 ? 1 : 0,
                   }}
                 >
-                  <Image src={buddy.image} alt={buddy.name} fill sizes="320px" className="object-cover" data-ai-hint={buddy.dataAiHint}/>
+                  <Image src={buddy.avatar} alt={buddy.name} fill sizes="320px" className="object-cover" data-ai-hint={buddy.dataAiHint}/>
                   <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent" />
                   <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
                     <h3 className="text-2xl font-bold drop-shadow-md">{buddy.name}</h3>
-                    <p className="text-sm opacity-90 drop-shadow-sm">{buddy.studiengang}</p>
-                    <p className="text-xs mt-2 opacity-80 drop-shadow-sm">Gemeinsame Interessen: {buddy.mutualInterests.join(', ')}</p>
+                    <p className="text-sm opacity-90 drop-shadow-sm">{buddy.course}</p>
                   </div>
                 </Card>
               )
