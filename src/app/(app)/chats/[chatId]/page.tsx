@@ -38,43 +38,48 @@ const ChatMessageItem = memo(function ChatMessageItem({ msg, currentUserId, onDe
     const isSelf = msg.senderId === currentUserId;
 
     return (
-        <div className={cn("flex mb-3", isSelf ? "justify-end" : "justify-start")}>
-            <AlertDialog>
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild disabled={!isSelf}>
-                        <div className={cn("max-w-[70%] p-3 rounded-xl cursor-pointer",
-                            isSelf ? "bg-primary text-primary-foreground rounded-br-none" : "bg-secondary text-secondary-foreground rounded-bl-none"
-                        )}>
-                            <p className="text-sm whitespace-pre-wrap">{msg.text}</p>
-                            <p className="text-xs mt-1 opacity-70 text-right">{msg.timestamp}</p>
-                        </div>
-                    </DropdownMenuTrigger>
-                    {isSelf && (
-                        <DropdownMenuContent>
-                            <AlertDialogTrigger asChild>
-                                <DropdownMenuItem className="text-destructive">
-                                    <Trash2 className="mr-2 h-4 w-4" />
-                                    Löschen
-                                </DropdownMenuItem>
-                            </AlertDialogTrigger>
-                        </DropdownMenuContent>
-                    )}
-                </DropdownMenu>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>Nachricht löschen?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            Diese Aktion kann nicht rückgängig gemacht werden. Möchtest du diese Nachricht wirklich dauerhaft löschen?
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel>Abbrechen</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => onDelete(msg.id)} className="bg-destructive hover:bg-destructive/90">
-                            Löschen
-                        </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
+        <div className={cn("flex flex-col mb-3", isSelf ? "items-end" : "items-start")}>
+             <p className={cn("text-xs text-muted-foreground mb-1", isSelf ? "mr-3" : "ml-3")}>
+                {isSelf ? 'Du' : msg.senderName}
+            </p>
+            <div className={cn("flex", isSelf ? "justify-end" : "justify-start")}>
+                <AlertDialog>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild disabled={!isSelf}>
+                            <div className={cn("max-w-[70%] p-3 rounded-xl cursor-pointer",
+                                isSelf ? "bg-primary text-primary-foreground rounded-br-none" : "bg-secondary text-secondary-foreground rounded-bl-none"
+                            )}>
+                                <p className="text-sm whitespace-pre-wrap">{msg.text}</p>
+                                <p className="text-xs mt-1 opacity-70 text-right">{msg.timestamp}</p>
+                            </div>
+                        </DropdownMenuTrigger>
+                        {isSelf && (
+                            <DropdownMenuContent>
+                                <AlertDialogTrigger asChild>
+                                    <DropdownMenuItem className="text-destructive">
+                                        <Trash2 className="mr-2 h-4 w-4" />
+                                        Löschen
+                                    </DropdownMenuItem>
+                                </AlertDialogTrigger>
+                            </DropdownMenuContent>
+                        )}
+                    </DropdownMenu>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>Nachricht löschen?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                Diese Aktion kann nicht rückgängig gemacht werden. Möchtest du diese Nachricht wirklich dauerhaft löschen?
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => onDelete(msg.id)} className="bg-destructive hover:bg-destructive/90">
+                                Löschen
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+            </div>
         </div>
     );
 });

@@ -30,7 +30,7 @@ interface ChatsContextType {
     startNewChat: (otherUser: AppUser) => Promise<string | null>;
     sendMessage: (
         chatId: string,
-        message: Omit<Message, 'id' | 'timestamp' | 'self'>,
+        message: Omit<Message, 'id' | 'timestamp' | 'self' | 'senderName'>,
     ) => Promise<void>;
     deleteMessage: (chatId: string, messageId: string) => Promise<void>;
     markChatAsRead: (chatId: string) => void;
@@ -79,13 +79,15 @@ export const ChatsProvider: React.FC<{ children: ReactNode }> = ({
         setLoadingChatDetails(true);
 
         const chatRef = doc(db, 'chats', chatId);
+        let participantDetailsCache: any = {};
         
         // Listener for the chat document itself (for name, avatar etc)
         const chatUnsubscribe = onSnapshot(chatRef, (chatSnap) => {
              if (chatSnap.exists()) {
                 const chatData = chatSnap.data();
+                participantDetailsCache = chatData.participantDetails || {};
                 const otherParticipantId = chatData.participants.find((p: string) => p !== currentUser.uid);
-                const otherParticipantDetails = chatData.participantDetails[otherParticipantId];
+                const otherParticipantDetails = participantDetailsCache[otherParticipantId];
                 
                 setChatDetails(prevDetails => ({
                     ...(prevDetails || { id: chatId, messages: [] }), // Keep existing messages while chat info updates
@@ -105,19 +107,21 @@ export const ChatsProvider: React.FC<{ children: ReactNode }> = ({
         const messagesUnsubscribe = onSnapshot(q, (messagesSnapshot) => {
             const messages: Message[] = messagesSnapshot.docs.map((doc) => {
                 const msgData = doc.data();
+                const senderId = msgData.senderId;
+                const senderDetails = participantDetailsCache[senderId];
                 const timestamp = msgData.timestamp ? (msgData.timestamp as Timestamp).toDate() : new Date();
+                
                 return {
                     id: doc.id,
-                    senderId: msgData.senderId,
+                    senderId: senderId,
+                    senderName: senderDetails?.displayName || 'Unknown',
                     text: msgData.text,
                     timestamp: timestamp.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
-                    self: msgData.senderId === currentUser.uid,
+                    self: senderId === currentUser.uid,
                 };
             });
             
             setChatDetails(prevDetails => {
-                // If the chat details haven't been loaded yet, we can't set messages.
-                // This might happen on first load. We'll merge them in.
                 if (!prevDetails) {
                     return {
                         id: chatId,
@@ -161,7 +165,7 @@ export const ChatsProvider: React.FC<{ children: ReactNode }> = ({
     const sendMessage = useCallback(
         async (
             chatId: string,
-            message: Omit<Message, 'id' | 'timestamp' | 'self'>,
+            message: Omit<Message, 'id' | 'timestamp' | 'self' | 'senderName'>,
         ) => {
             if (!currentUser) return;
             await chatManager.sendMessage(chatId, {

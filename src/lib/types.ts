@@ -50,7 +50,7 @@ export interface Conversation {
 export interface Message {
     id: string;
     senderId: string;
-    senderName?: string;
+    senderName: string;
     text: string;
     timestamp: string;
     self: boolean;
