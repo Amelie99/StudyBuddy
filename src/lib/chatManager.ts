@@ -39,7 +39,7 @@ export const createChatWithUser = async (
     // The chat doesn't exist, so create it.
     await setDoc(chatRef, {
         participants: [currentUser.uid, otherUser.uid],
-        lastMessage: '',
+        lastMessage: 'Chat erstellt!',
         lastMessageTimestamp: serverTimestamp(),
         participantDetails: {
             [currentUser.uid]: {
@@ -95,55 +95,6 @@ export const getConversationsForUser = async (
     return mappedConversations.map(({ _sort_timestamp, ...rest }) => rest);
 };
 
-/**
- * Retrieves the details of a specific chat.
- *
- * @param chatId The ID of the chat.
- * @param currentUserId The ID of the current user.
- * @returns The chat details or null if the chat doesn't exist.
- */
-export const getChatDetails = async (
-    chatId: string,
-    currentUserId: string,
-): Promise<ChatDetail | null> => {
-    const chatRef = doc(db, 'chats', chatId);
-    const chatSnap = await getDoc(chatRef);
-
-    if (!chatSnap.exists()) {
-        return null;
-    }
-
-    const chatData = chatSnap.data();
-
-    const messagesRef = collection(chatRef, 'messages');
-    const q = query(messagesRef, orderBy('timestamp', 'asc'));
-    const messagesSnapshot = await getDocs(q);
-
-    const messages: Message[] = messagesSnapshot.docs.map((doc) => {
-        const msgData = doc.data();
-        const timestamp = msgData.timestamp ? (msgData.timestamp as Timestamp).toDate() : new Date();
-        return {
-            id: doc.id,
-            senderId: msgData.senderId,
-            text: msgData.text,
-            timestamp: timestamp.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
-            self: msgData.senderId === currentUserId,
-        };
-    });
-
-    const otherParticipantId = chatData.participants.find(
-        (p: string) => p !== currentUserId,
-    );
-    const otherParticipantDetails = chatData.participantDetails[otherParticipantId];
-
-    return {
-        id: chatId,
-        name: otherParticipantDetails?.displayName || 'Unknown User',
-        avatar: otherParticipantDetails?.photoURL || '',
-        messages,
-        type: 'user',
-    };
-};
 
 /**
  * Sends a message in a chat.
@@ -155,11 +106,11 @@ export const getChatDetails = async (
 export const sendMessage = async (
     chatId: string,
     message: Omit<Message, 'id' | 'timestamp' | 'self'>,
-): Promise<Message> => {
+): Promise<void> => {
     const chatRef = doc(db, 'chats', chatId);
     const messagesRef = collection(chatRef, 'messages');
 
-    const newMessageRef = await addDoc(messagesRef, {
+    await addDoc(messagesRef, {
         ...message,
         timestamp: serverTimestamp(),
     });
@@ -172,17 +123,11 @@ export const sendMessage = async (
         },
         { merge: true },
     );
+};
 
-    const newMessageSnap = await getDoc(newMessageRef);
-    const newMessageData = newMessageSnap.data();
-    const timestamp = newMessageData?.timestamp ? (newMessageData.timestamp as Timestamp).toDate() : new Date();
-
-
-    return {
-        id: newMessageSnap.id,
-        senderId: newMessageData?.senderId,
-        text: newMessageData?.text,
-        timestamp: timestamp.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
-        self: true,
-    };
+export const markMessagesAsRead = (chatId: string, userId: string) => {
+    // This is where you might update a 'readBy' array on messages,
+    // or an 'unreadCount' on the chat document for the specific user.
+    // For now, we'll just log it.
+    console.log(`Marking messages as read for user ${userId} in chat ${chatId}`);
 };

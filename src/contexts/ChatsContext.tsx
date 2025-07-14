@@ -18,11 +18,15 @@ import {
 } from '../lib/types';
 import * as chatManager from '../lib/chatManager';
 import { useAuth } from './AuthContext';
+import { db } from '@/config/firebase';
+import { onSnapshot, collection, query, orderBy, Timestamp, doc } from 'firebase/firestore';
 
 interface ChatsContextType {
     conversations: Conversation[];
-    loading: boolean;
-    getChatDetails: (chatId: string) => Promise<ChatDetail | null>;
+    loadingConversations: boolean; // Changed from 'loading' to be more specific
+    chatDetails: ChatDetail | null;
+    loadingChatDetails: boolean; // Added for specific chat loading
+    subscribeToChatDetails: (chatId: string) => () => void; // New function to handle subscription
     startNewChat: (otherUser: AppUser) => Promise<string | null>;
     sendMessage: (
         chatId: string,
@@ -46,30 +50,99 @@ export const ChatsProvider: React.FC<{ children: ReactNode }> = ({
 }) => {
     const { currentUser } = useAuth();
     const [conversations, setConversations] = useState<Conversation[]>([]);
-    const [loading, setLoading] = useState(true);
+    const [loadingConversations, setLoadingConversations] = useState(true);
+    const [chatDetails, setChatDetails] = useState<ChatDetail | null>(null);
+    const [loadingChatDetails, setLoadingChatDetails] = useState(true);
 
     const fetchConversations = useCallback(async () => {
         if (currentUser) {
-            setLoading(true);
+            setLoadingConversations(true);
             const userConversations = await chatManager.getConversationsForUser(
                 currentUser.uid,
             );
             setConversations(userConversations);
-            setLoading(false);
+            setLoadingConversations(false);
         }
     }, [currentUser]);
 
     useEffect(() => {
         fetchConversations();
     }, [fetchConversations]);
+    
+    const subscribeToChatDetails = useCallback((chatId: string) => {
+        if (!currentUser) {
+            setChatDetails(null);
+            return () => {}; // Return an empty unsubscribe function
+        }
 
-    const getChatDetails = useCallback(
-        async (chatId: string) => {
-            if (!currentUser) return null;
-            return await chatManager.getChatDetails(chatId, currentUser.uid);
-        },
-        [currentUser],
-    );
+        setLoadingChatDetails(true);
+
+        const chatRef = doc(db, 'chats', chatId);
+        
+        // Listener for the chat document itself (for name, avatar etc)
+        const chatUnsubscribe = onSnapshot(chatRef, (chatSnap) => {
+             if (chatSnap.exists()) {
+                const chatData = chatSnap.data();
+                const otherParticipantId = chatData.participants.find((p: string) => p !== currentUser.uid);
+                const otherParticipantDetails = chatData.participantDetails[otherParticipantId];
+                
+                setChatDetails(prevDetails => ({
+                    ...(prevDetails || { id: chatId, messages: [] }), // Keep existing messages while chat info updates
+                    name: otherParticipantDetails?.displayName || 'Unknown User',
+                    avatar: otherParticipantDetails?.photoURL || '',
+                    type: 'user',
+                }));
+             } else {
+                 setChatDetails(null);
+             }
+        });
+        
+        // Listener for the messages sub-collection
+        const messagesRef = collection(chatRef, 'messages');
+        const q = query(messagesRef, orderBy('timestamp', 'asc'));
+
+        const messagesUnsubscribe = onSnapshot(q, (messagesSnapshot) => {
+            const messages: Message[] = messagesSnapshot.docs.map((doc) => {
+                const msgData = doc.data();
+                const timestamp = msgData.timestamp ? (msgData.timestamp as Timestamp).toDate() : new Date();
+                return {
+                    id: doc.id,
+                    senderId: msgData.senderId,
+                    text: msgData.text,
+                    timestamp: timestamp.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
+                    self: msgData.senderId === currentUser.uid,
+                };
+            });
+            
+            setChatDetails(prevDetails => {
+                // If the chat details haven't been loaded yet, we can't set messages.
+                // This might happen on first load. We'll merge them in.
+                if (!prevDetails) {
+                    return {
+                        id: chatId,
+                        name: 'Laden...',
+                        avatar: '',
+                        type: 'user',
+                        messages,
+                    }
+                }
+                return { ...prevDetails, messages };
+            });
+            setLoadingChatDetails(false);
+        }, (error) => {
+            console.error("Error fetching messages:", error);
+            setLoadingChatDetails(false);
+        });
+
+        // Return a cleanup function that unsubscribes from both listeners
+        return () => {
+            console.log("Unsubscribing from chat details listeners");
+            chatUnsubscribe();
+            messagesUnsubscribe();
+            setChatDetails(null); // Reset details on cleanup
+        };
+
+    }, [currentUser]);
 
     const startNewChat = useCallback(
         async (otherUser: AppUser) => {
@@ -94,8 +167,7 @@ export const ChatsProvider: React.FC<{ children: ReactNode }> = ({
                 ...message,
                 senderId: currentUser.uid,
             });
-            // You might want to refresh conversations here as well
-            // if the last message display is critical
+            // No need to manually update state, the listener will do it.
         },
         [currentUser],
     );
@@ -112,16 +184,20 @@ export const ChatsProvider: React.FC<{ children: ReactNode }> = ({
     const value = useMemo(
         () => ({
             conversations,
-            loading,
-            getChatDetails,
+            loadingConversations,
+            chatDetails,
+            loadingChatDetails,
+            subscribeToChatDetails,
             startNewChat,
             sendMessage,
             markChatAsRead,
         }),
         [
             conversations,
-            loading,
-            getChatDetails,
+            loadingConversations,
+            chatDetails,
+            loadingChatDetails,
+            subscribeToChatDetails,
             startNewChat,
             sendMessage,
             markChatAsRead,

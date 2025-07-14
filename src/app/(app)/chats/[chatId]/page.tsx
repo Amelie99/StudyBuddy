@@ -15,7 +15,7 @@ import { Popover, PopoverTrigger } from '@/components/ui/popover';
 import { Dialog, DialogTrigger, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useChats } from '@/contexts/ChatsContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { ChatDetail, Message } from '@/lib/types';
+import { Message } from '@/lib/types';
 import dynamic from 'next/dynamic';
 
 const PopoverContent = dynamic(() => import('@/components/ui/popover').then(mod => mod.PopoverContent));
@@ -41,31 +41,25 @@ export default function ChatDetailPage() {
     const chatId = params.chatId as string;
     const router = useRouter();
     const { toast } = useToast();
-    const { getChatDetails, sendMessage, markChatAsRead } = useChats();
+    const { chatDetails, loadingChatDetails, subscribeToChatDetails, sendMessage, markChatAsRead } = useChats();
     const { currentUser } = useAuth();
-    const [chatDetails, setChatDetails] = useState<ChatDetail | null>(null);
-    const [loading, setLoading] = useState(true);
     const [newMessage, setNewMessage] = useState('');
     const scrollAreaRef = useRef<HTMLDivElement>(null);
     const emojis = ['😊', '👍', '😂', '🙏', '❤️'];
 
     useEffect(() => {
-        const fetchChatDetails = async () => {
-            if (chatId) {
-                setLoading(true);
-                const data = await getChatDetails(chatId);
-                setChatDetails(data);
-                if (currentUser) {
-                    markChatAsRead(chatId);
-                }
-                setLoading(false);
-            }
-        };
+        if (chatId && currentUser) {
+            const unsubscribe = subscribeToChatDetails(chatId);
+            markChatAsRead(chatId);
 
-        fetchChatDetails();
-    }, [chatId, getChatDetails, markChatAsRead, currentUser]);
+            // Cleanup subscription on component unmount
+            return () => unsubscribe();
+        }
+    }, [chatId, currentUser, subscribeToChatDetails, markChatAsRead]);
+
 
     useEffect(() => {
+        // Scroll to bottom whenever messages change
         if (scrollAreaRef.current) {
             scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
         }
@@ -74,17 +68,15 @@ export default function ChatDetailPage() {
     const handleSendMessage = async () => {
         if (!newMessage.trim() || !chatId || !currentUser) return;
 
-        const message = {
-            senderId: currentUser.uid,
+        // The UI will update automatically via the real-time listener
+        await sendMessage(chatId, {
             text: newMessage,
-        };
-
-        await sendMessage(chatId, message);
+        });
 
         setNewMessage('');
     };
 
-    if (loading || !currentUser) {
+    if (loadingChatDetails || !currentUser) {
         return <div className="flex justify-center items-center h-screen"><Loader2 className="h-12 w-12 animate-spin text-primary" /></div>;
     }
 
