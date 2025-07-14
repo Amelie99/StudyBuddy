@@ -13,13 +13,25 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useBuddies, type Buddy } from "@/contexts/PartnersContext";
+import { useBuddies, type Buddy, SuggestedBuddy } from "@/contexts/PartnersContext";
 import { useChats } from "@/contexts/ChatsContext";
 import { cn } from "@/lib/utils";
 import dynamic from "next/dynamic";
 import { useAuth } from "@/contexts/AuthContext";
 
 const AlertDialogContent = dynamic(() => import('@/components/ui/alert-dialog').then(mod => mod.AlertDialogContent));
+
+const oldSuggestedBuddies: SuggestedBuddy[] = [
+  { id: 1, name: "Lisa Schmidt", studiengang: "Soziale Arbeit, 1. Sem.", image: "https://i.imgur.com/FwkjiPu.jpeg", avatar: "https://i.imgur.com/PKtZX0C.jpeg", dataAiHint: "woman student", mutualInterests: ["Wissenschaftliches Arbeiten", "Psychologie Grundlagen"] },
+  { id: 101, name: "Anna Kurz", studiengang: "Informatik, 3. Sem.", image: "https://i.imgur.com/tfds6vN.jpeg", avatar: "https://i.imgur.com/PvGE2mz.jpeg", dataAiHint:"woman programmer", mutualInterests: ["Web-Entwicklung", "Python"] },
+  { id: 102, name: "Markus Lang", studiengang: "BWL, 5. Sem.", image: "https://i.imgur.com/umNyodm.jpeg", avatar: "https://i.imgur.com/hlTMgKi.jpeg", dataAiHint: "man business", mutualInterests: ["Marketing", "Statistik"] },
+  { id: 103, name: "Julia Klein", studiengang: "Soziale Arbeit, 1. Sem.", image: "https://i.imgur.com/FXdPVFK.jpeg", avatar: "https://i.imgur.com/Yt7EtV9.jpeg", dataAiHint:"woman social", mutualInterests: ["Grundlagen Psychologie"] },
+  { id: 104, name: "Atal Vajpayee", studiengang: "Wirtschaftsingenieurwesen, 4. Sem.", image: "https://i.imgur.com/4yHyOzV.jpeg", avatar: "https://i.imgur.com/xJZT5sW.jpeg", dataAiHint: "man engineer", mutualInterests: ["Logistik", "Projektarbeit"] },
+  { id: 105, name: "Sophie Becker", studiengang: "Maschinenbau, 6. Sem.", image: "https://i.imgur.com/m2xnjbE.jpeg", avatar: "https://i.imgur.com/Qx8BkHC.jpeg", dataAiHint: "woman smiling", mutualInterests: ["Thermodynamik", "Bachelorarbeit"] },
+  { id: 106, name: "Felix Schmidt", studiengang: "Informatik, 2. Sem.", image: "https://i.imgur.com/bJa3doH.jpeg", avatar: "https://i.imgur.com/gqj9hH1.jpeg", dataAiHint: "man coding", mutualInterests: ["Java", "Algorithmen"] },
+  { id: 107, name: "Lena Wolf", studiengang: "BWL, 2. Sem.", image: "https://i.imgur.com/MB2XPkM.jpeg", avatar: "https://i.imgur.com/13nuzOy.jpeg", dataAiHint: "woman student", mutualInterests: ["Controlling", "Rechnungswesen"] },
+  { id: 108, name: "Sarah Chen", studiengang: "BWL, 3. Sem.", image: "https://i.imgur.com/LLFzmJS.jpeg", avatar: "https://i.imgur.com/NkY3Ovh.jpeg", dataAiHint:"woman international student", mutualInterests: ["Marketing", "Sprachaustausch"] },
+];
 
 export default function PartnerFindenPage() {
   const [suggestions, setSuggestions] = useState<Buddy[]>([]);
@@ -54,8 +66,16 @@ export default function PartnerFindenPage() {
         const initialSuggestions = allBuddies.filter(
           suggested => suggested.id !== currentUser.uid && !myBuddyIds.has(suggested.id) && !declinedIds.has(suggested.id)
         );
+
+        const oldSuggestionsAsBuddies: Buddy[] = oldSuggestedBuddies.map(b => ({
+            id: b.id.toString(),
+            name: b.name,
+            course: b.studiengang,
+            avatar: b.avatar || b.image,
+            dataAiHint: b.dataAiHint,
+        }));
         
-        setSuggestions(initialSuggestions);
+        setSuggestions([...oldSuggestionsAsBuddies, ...initialSuggestions]);
         setIsLoading(false);
     }
   }, [allBuddies, currentUser]);
