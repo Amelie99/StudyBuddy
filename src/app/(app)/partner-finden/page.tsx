@@ -44,25 +44,14 @@ export default function PartnerFindenPage() {
       setIsLoading(true);
       try {
         const usersCollectionRef = collection(db, "users");
-        const querySnapshot = await getDocs(usersCollectionRef); // Corrected typo here
+        const querySnapshot = await getDocs(usersCollectionRef);
         const allUsers = querySnapshot.docs.map(doc => ({ ...doc.data(), uid: doc.id } as AppUser));
 
         const myBuddyIds = new Set(likedBuddies.map(b => b.id));
-        let declinedIds = new Set<string>();
-        try {
-          const storedDeclinedIds = localStorage.getItem('declinedBuddyIds');
-          if (storedDeclinedIds) {
-            const parsedIds = JSON.parse(storedDeclinedIds);
-            if (Array.isArray(parsedIds)) {
-              declinedIds = new Set(parsedIds);
-            }
-          }
-        } catch (error) {
-          console.error("Error parsing declined IDs from localStorage", error);
-        }
-
+        
+        // Filter out the current user and users who are already buddies.
         const filteredSuggestions = allUsers.filter(
-          user => user.uid !== currentUser.uid && !myBuddyIds.has(user.uid) && !declinedIds.has(user.uid)
+          user => user.uid !== currentUser.uid && !myBuddyIds.has(user.uid)
         );
         
         setSuggestions(filteredSuggestions);
@@ -84,30 +73,19 @@ export default function PartnerFindenPage() {
     const currentBuddy = suggestions[0];
     setSwipeState(action === 'like' ? 'right' : 'left');
     
-    // Fetch the full AppUser object for the liked user
-    const userDocRef = doc(db, 'users', currentBuddy.uid);
-    const userDoc = await getDoc(userDocRef);
-    const likedUser = userDoc.data() as AppUser;
-
-
-    setTimeout(() => {
+    setTimeout(async () => {
       if (action === 'like') {
-        addBuddy(likedUser);
-        setMatchedBuddy(likedUser);
-        setShowMatchDialog(true);
-      } else { // 'reject'
-        try {
-          const storedDeclinedIds = localStorage.getItem('declinedBuddyIds');
-          const declinedIds: string[] = storedDeclinedIds ? JSON.parse(storedDeclinedIds) : [];
-          if (!declinedIds.includes(currentBuddy.uid)) {
-            declinedIds.push(currentBuddy.uid);
-            localStorage.setItem('declinedBuddyIds', JSON.stringify(declinedIds));
-          }
-        } catch (error) {
-          console.error("Error updating localStorage", error);
+        const userDocRef = doc(db, 'users', currentBuddy.uid);
+        const userDoc = await getDoc(userDocRef);
+        if (userDoc.exists()) {
+            const likedUser = userDoc.data() as AppUser;
+            addBuddy(likedUser);
+            setMatchedBuddy(likedUser);
+            setShowMatchDialog(true);
         }
-      }
+      } 
       
+      // Remove the user from the suggestions list regardless of action
       setSuggestions(queue => queue.slice(1));
       setSwipeState(null);
     }, 300); 
