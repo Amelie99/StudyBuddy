@@ -27,11 +27,14 @@ const BuddyCard = memo(function BuddyCard({ buddy }: { buddy: Buddy }) {
     try {
         const userDocRef = doc(db, 'users', buddy.id);
         const userDoc = await getDoc(userDocRef);
-        const appUser = { ...userDoc.data(), uid: userDoc.id } as AppUser;
-
-        const chatId = await startNewChat(appUser);
-        if (chatId) {
-            router.push(`/chats/${chatId}`);
+        if (userDoc.exists()) {
+            const appUser = { ...userDoc.data(), uid: userDoc.id } as AppUser;
+            const chatId = await startNewChat(appUser);
+            if (chatId) {
+                router.push(`/chats/${chatId}`);
+            }
+        } else {
+             throw new Error("User document not found");
         }
     } catch (error) {
         console.error("Failed to start chat", error);

@@ -7,6 +7,7 @@ export interface AppUser {
   studiengang?: string;
   semester?: string;
   ueberMich?: string;
+  bio?: string;
   lerninteressen?: string[];
   lernstil?: string;
   kurse?: string[];
