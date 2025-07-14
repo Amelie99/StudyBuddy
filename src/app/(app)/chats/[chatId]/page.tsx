@@ -37,28 +37,22 @@ const DialogContent = dynamic(() => import('@/components/ui/dialog').then(mod =>
 const ChatMessageItem = memo(function ChatMessageItem({ msg, currentUserId, onDelete }: { msg: Message; currentUserId: string | undefined, onDelete: (messageId: string) => void }) {
     const isSelf = msg.senderId === currentUserId;
 
-    const MessageContent = (
-        <div className={cn("max-w-[70%] p-3 rounded-xl",
-            isSelf ? "bg-primary text-primary-foreground rounded-br-none" : "bg-secondary text-secondary-foreground rounded-bl-none"
-        )}>
-            <p className="text-sm whitespace-pre-wrap">{msg.text}</p>
-            <p className="text-xs mt-1 opacity-70 text-right">{msg.timestamp}</p>
-        </div>
-    );
-
     return (
         <div className={cn("flex mb-3", isSelf ? "justify-end" : "justify-start")}>
             <AlertDialog>
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild disabled={!isSelf}>
-                         <button className="focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-xl disabled:cursor-default">
-                            {MessageContent}
-                         </button>
+                        <div className={cn("max-w-[70%] p-3 rounded-xl cursor-pointer",
+                            isSelf ? "bg-primary text-primary-foreground rounded-br-none" : "bg-secondary text-secondary-foreground rounded-bl-none"
+                        )}>
+                            <p className="text-sm whitespace-pre-wrap">{msg.text}</p>
+                            <p className="text-xs mt-1 opacity-70 text-right">{msg.timestamp}</p>
+                        </div>
                     </DropdownMenuTrigger>
                     {isSelf && (
                         <DropdownMenuContent>
                             <AlertDialogTrigger asChild>
-                                 <DropdownMenuItem className="text-destructive">
+                                <DropdownMenuItem className="text-destructive">
                                     <Trash2 className="mr-2 h-4 w-4" />
                                     Löschen
                                 </DropdownMenuItem>
