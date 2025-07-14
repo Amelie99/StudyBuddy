@@ -27,6 +27,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 
 const PopoverContent = dynamic(() => import('@/components/ui/popover').then(mod => mod.PopoverContent));
