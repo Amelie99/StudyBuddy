@@ -41,6 +41,10 @@ export interface Conversation {
     avatar: string;
     dataAiHint?: string;
     messages?: Message[]; // Optional: To hold all messages for searching
+    match?: { // For search results
+        type: 'name' | 'message';
+        text: string;
+    };
 }
 
 export interface Message {

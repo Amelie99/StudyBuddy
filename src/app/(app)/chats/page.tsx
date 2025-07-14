@@ -10,26 +10,57 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useChats, type Conversation } from "@/contexts/ChatsContext";
 import Image from "next/image";
-import { memo, useState, useMemo } from "react";
+import React, { memo, useState, useMemo } from "react";
+import { cn } from "@/lib/utils";
 
-const ConversationItem = memo(function ConversationItem({ chat }: { chat: Conversation }) {
+
+const Highlight = memo(function Highlight({ text, highlight }: { text: string; highlight: string }) {
+  if (!highlight.trim()) {
+    return <span>{text}</span>;
+  }
+  const regex = new RegExp(`(${highlight})`, 'gi');
+  const parts = text.split(regex);
   return (
-    <Link href={`/chats/${chat.id}`} className="block hover:bg-accent/50 rounded-lg transition-colors">
+    <span>
+      {parts.map((part, i) =>
+        regex.test(part) ? (
+          <strong key={i} className="text-primary font-bold">{part}</strong>
+        ) : (
+          <span key={i}>{part}</span>
+        )
+      )}
+    </span>
+  );
+});
+
+
+const ConversationItem = memo(function ConversationItem({ chat, searchTerm }: { chat: Conversation; searchTerm: string }) {
+  const { match, name, avatar, dataAiHint, id, timestamp, unread, lastMessage } = chat;
+
+  const displayMessage = match?.type === 'message' ? match.text : lastMessage;
+  const highlightTerm = match?.type === 'message' ? searchTerm : '';
+
+  return (
+    <Link href={`/chats/${id}`} className="block hover:bg-accent/50 rounded-lg transition-colors">
       <div className="flex items-center p-3 space-x-3">
         <Avatar className="h-12 w-12">
-          <AvatarImage src={chat.avatar} alt={chat.name} data-ai-hint={chat.dataAiHint} />
-          <AvatarFallback>{chat.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+          <AvatarImage src={avatar} alt={name} data-ai-hint={dataAiHint} />
+          <AvatarFallback>{name.substring(0, 2).toUpperCase()}</AvatarFallback>
         </Avatar>
         <div className="flex-1 min-w-0">
           <div className="flex justify-between items-center">
-            <p className="font-semibold truncate">{chat.name}</p>
-            <span className="text-xs text-muted-foreground">{chat.timestamp}</span>
+            <p className="font-semibold truncate">
+              <Highlight text={name} highlight={searchTerm} />
+            </p>
+            <span className="text-xs text-muted-foreground">{timestamp}</span>
           </div>
           <div className="flex justify-between items-center">
-            <p className="text-sm text-muted-foreground truncate">{chat.lastMessage}</p>
-            {chat.unread > 0 && (
+            <p className={cn("text-sm truncate", match?.type === 'message' ? "text-foreground" : "text-muted-foreground")}>
+              <Highlight text={displayMessage} highlight={highlightTerm} />
+            </p>
+            {unread > 0 && (
               <span className="ml-2 bg-primary text-primary-foreground text-xs font-bold px-2 py-0.5 rounded-full">
-                {chat.unread}
+                {unread}
               </span>
             )}
           </div>
@@ -45,17 +76,33 @@ export default function ChatsPage() {
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredConversations = useMemo(() => {
-    const lowerCaseSearchTerm = searchTerm.toLowerCase();
+    const lowerCaseSearchTerm = searchTerm.toLowerCase().trim();
     if (!lowerCaseSearchTerm) {
       return conversations;
     }
-    return conversations.filter(conversation => {
+    return conversations.map(conversation => {
       const nameMatch = conversation.name.toLowerCase().includes(lowerCaseSearchTerm);
-      const lastMessageMatch = conversation.lastMessage && conversation.lastMessage.toLowerCase().includes(lowerCaseSearchTerm);
-      const allMessagesMatch = conversation.messages?.some(message => message.text.toLowerCase().includes(lowerCaseSearchTerm));
+
+      if (nameMatch) {
+          return { ...conversation, match: { type: 'name', text: conversation.name } };
+      }
+
+      const matchingMessage = conversation.messages?.find(message =>
+          message.text.toLowerCase().includes(lowerCaseSearchTerm)
+      );
+
+      if (matchingMessage) {
+          return { ...conversation, match: { type: 'message', text: matchingMessage.text } };
+      }
       
-      return nameMatch || lastMessageMatch || allMessagesMatch;
-    });
+      const lastMessageMatch = conversation.lastMessage?.toLowerCase().includes(lowerCaseSearchTerm);
+       if (lastMessageMatch) {
+           return { ...conversation, match: { type: 'message', text: conversation.lastMessage } };
+       }
+
+      return null;
+    }).filter((c): c is Conversation => c !== null);
+
   }, [conversations, searchTerm]);
 
   return (
@@ -78,7 +125,7 @@ export default function ChatsPage() {
       <ScrollArea className="flex-grow rounded-md border bg-card/80 backdrop-blur-sm">
         <div className="p-2 space-y-1">
           {filteredConversations.map(chat => (
-            <ConversationItem key={chat.id} chat={chat} />
+            <ConversationItem key={chat.id} chat={chat} searchTerm={searchTerm} />
           ))}
         </div>
       </ScrollArea>
