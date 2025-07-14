@@ -85,33 +85,42 @@ export default function PartnerSuchePage() {
   async function onSubmit(data: SearchFormValues) {
     setIsLoading(true);
     setHasSearched(true);
+    setResults([]);
 
     try {
         const usersRef = collection(db, 'users');
-        let conditions: QueryConstraint[] = [];
-        
-        // Firestore is limited. We can reliably filter by one 'where' and one 'array-contains-any'.
-        // Let's prioritize Studiengang for the DB query.
-        if (data.studiengang && data.studiengang !== 'all') {
-            conditions.push(where('studiengang', '==', data.studiengang));
-        }
-
-        const q = query(usersRef, ...conditions);
+        const q = query(usersRef);
         const querySnapshot = await getDocs(q);
         
-        const allFoundUsers = querySnapshot.docs
-            .map(doc => ({ ...doc.data(), uid: doc.id } as AppUser));
+        const allUsers = querySnapshot.docs
+            .map(doc => ({ ...doc.data(), uid: doc.id } as AppUser))
+            .filter(user => user.uid !== currentUser?.uid);
 
-        // Now, we filter the results on the client side for more complex logic
-        const filteredResults = allFoundUsers.filter(user => {
-            if (user.uid === currentUser?.uid) return false; // Exclude current user
+        let filteredResults = allUsers;
 
-            const semesterMatch = !data.semester || data.semester === 'all' || user.semester === data.semester;
-            const interessenMatch = !data.lerninteressen || data.lerninteressen.length === 0 || data.lerninteressen.some(interesse => user.lerninteressen?.includes(interesse));
-            const verfuegbarkeitMatch = !data.verfuegbarkeit || data.verfuegbarkeit.length === 0 || data.verfuegbarkeit.some(zeit => user.verfuegbarkeit?.includes(zeit));
+        // Filter by Studiengang
+        if (data.studiengang && data.studiengang !== 'all') {
+            filteredResults = filteredResults.filter(user => user.studiengang === data.studiengang);
+        }
 
-            return semesterMatch && interessenMatch && verfuegbarkeitMatch;
-        });
+        // Filter by Semester
+        if (data.semester && data.semester !== 'all') {
+            filteredResults = filteredResults.filter(user => user.semester === data.semester);
+        }
+
+        // Filter by Lerninteressen
+        if (data.lerninteressen && data.lerninteressen.length > 0) {
+            filteredResults = filteredResults.filter(user => 
+                data.lerninteressen!.some(interesse => user.lerninteressen?.includes(interesse))
+            );
+        }
+
+        // Filter by Verfügbarkeit
+        if (data.verfuegbarkeit && data.verfuegbarkeit.length > 0) {
+            filteredResults = filteredResults.filter(user => 
+                data.verfuegbarkeit!.some(zeit => user.verfuegbarkeit?.includes(zeit))
+            );
+        }
         
         setResults(filteredResults);
         
