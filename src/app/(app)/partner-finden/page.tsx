@@ -125,7 +125,7 @@ export default function PartnerFindenPage() {
 
     if (suggestions.length > 0) {
       const buddy = suggestions[0];
-      const safePhotoURL = buddy.photoURL && !buddy.photoURL.includes('thispersondoesnotexist.com') 
+      const safePhotoURL = buddy.photoURL && buddy.photoURL.startsWith('http') 
         ? buddy.photoURL 
         : 'https://i.imgur.com/PKtZX0C.jpeg';
 
