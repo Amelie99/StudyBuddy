@@ -10,7 +10,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useChats, type Conversation } from "@/contexts/ChatsContext";
 import Image from "next/image";
-import { memo } from "react";
+import { memo, useState, useMemo } from "react";
 
 const ConversationItem = memo(function ConversationItem({ chat }: { chat: Conversation }) {
   return (
@@ -42,6 +42,16 @@ const ConversationItem = memo(function ConversationItem({ chat }: { chat: Conver
 
 export default function ChatsPage() {
   const { conversations } = useChats();
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const filteredConversations = useMemo(() => {
+    if (!searchTerm) {
+      return conversations;
+    }
+    return conversations.filter(conversation =>
+      conversation.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [conversations, searchTerm]);
 
   return (
     <div className="container mx-auto h-[calc(100vh-var(--header-height,8rem))] flex flex-col py-8"> {/* Adjust header height if you have a fixed one */}
@@ -51,13 +61,18 @@ export default function ChatsPage() {
       
       <div className="relative mb-4">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-        <Input placeholder="Chats durchsuchen..." className="pl-10" />
+        <Input 
+          placeholder="Chats durchsuchen..." 
+          className="pl-10" 
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
       </div>
 
-      {conversations.length > 0 ? (
+      {filteredConversations.length > 0 ? (
       <ScrollArea className="flex-grow rounded-md border bg-card/80 backdrop-blur-sm">
         <div className="p-2 space-y-1">
-          {conversations.map(chat => (
+          {filteredConversations.map(chat => (
             <ConversationItem key={chat.id} chat={chat} />
           ))}
         </div>
@@ -66,8 +81,10 @@ export default function ChatsPage() {
         <Card className="flex-grow flex flex-col items-center justify-center text-center border-dashed bg-card/80 backdrop-blur-sm">
             <CardHeader>
               <MessageSquarePlus className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
-              <CardTitle>Keine Chats vorhanden</CardTitle>
-              <CardDescription>Starte eine neue Konversation, indem du Buddies findest.</CardDescription>
+              <CardTitle>Keine Chats gefunden</CardTitle>
+              <CardDescription>
+                {searchTerm ? "Deine Suche ergab keine Treffer." : "Starte eine neue Konversation, indem du Buddies findest."}
+              </CardDescription>
             </CardHeader>
             <CardContent>
                 <Button asChild>
