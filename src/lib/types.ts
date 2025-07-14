@@ -40,6 +40,7 @@ export interface Conversation {
     unread: number;
     avatar: string;
     dataAiHint?: string;
+    messages?: Message[]; // Optional: To hold all messages for searching
 }
 
 export interface Message {

@@ -58,39 +58,57 @@ export const createChatWithUser = async (
 };
 
 /**
- * Retrieves the conversations for a given user.
+ * Retrieves the conversations for a given user, including all messages for searching.
  *
  * @param userId The ID of the user.
- * @returns An array of conversations.
+ * @returns An array of conversations with full message history.
  */
 export const getConversationsForUser = async (
     userId: string,
 ): Promise<Conversation[]> => {
     const chatsRef = collection(db, 'chats');
-    const q = query(
-        chatsRef,
-        where('participants', 'array-contains', userId),
-    );
+    const q = query(chatsRef, where('participants', 'array-contains', userId));
 
     const querySnapshot = await getDocs(q);
 
-    const mappedConversations = querySnapshot.docs.map(doc => {
-        const chat = doc.data();
+    const conversationPromises = querySnapshot.docs.map(async (docSnap) => {
+        const chat = docSnap.data();
+        
+        // Fetch all messages for this chat
+        const messagesRef = collection(doc(db, 'chats', docSnap.id), 'messages');
+        const messagesQuery = query(messagesRef, orderBy('timestamp', 'asc'));
+        const messagesSnapshot = await getDocs(messagesQuery);
+        const messages: Message[] = messagesSnapshot.docs.map(msgDoc => {
+            const msgData = msgDoc.data();
+            const timestamp = msgData.timestamp instanceof Timestamp ? msgData.timestamp.toDate() : new Date();
+            return {
+                id: msgDoc.id,
+                senderId: msgData.senderId,
+                text: msgData.text,
+                timestamp: timestamp.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
+                self: msgData.senderId === userId,
+            };
+        });
+
         const otherParticipantId = chat.participants.find((p: string) => p !== userId);
         const otherParticipantDetails = chat.participantDetails?.[otherParticipantId] || {};
-        const lastMessageTimestamp = chat.lastMessageTimestamp ? (chat.lastMessageTimestamp as Timestamp).toDate() : null;
+        const lastMessageTimestamp = chat.lastMessageTimestamp instanceof Timestamp ? chat.lastMessageTimestamp.toDate() : null;
 
         return {
-             id: doc.id,
+             id: docSnap.id,
              name: otherParticipantDetails.displayName || 'Unknown User',
              avatar: otherParticipantDetails.photoURL || '',
              lastMessage: chat.lastMessage || '',
              timestamp: lastMessageTimestamp ? lastMessageTimestamp.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) : '',
              unread: 0,
+             messages: messages, // Attach all messages
              _sort_timestamp: lastMessageTimestamp || new Date(0)
         };
     });
 
+    const mappedConversations = await Promise.all(conversationPromises);
+
+    // Sort conversations by the timestamp of the last message
     mappedConversations.sort((a, b) => b._sort_timestamp.getTime() - a._sort_timestamp.getTime());
 
     return mappedConversations.map(({ _sort_timestamp, ...rest }) => rest);

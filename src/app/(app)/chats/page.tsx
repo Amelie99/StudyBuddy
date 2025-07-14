@@ -49,10 +49,13 @@ export default function ChatsPage() {
     if (!lowerCaseSearchTerm) {
       return conversations;
     }
-    return conversations.filter(conversation =>
-      conversation.name.toLowerCase().includes(lowerCaseSearchTerm) ||
-      (conversation.lastMessage && conversation.lastMessage.toLowerCase().includes(lowerCaseSearchTerm))
-    );
+    return conversations.filter(conversation => {
+      const nameMatch = conversation.name.toLowerCase().includes(lowerCaseSearchTerm);
+      const lastMessageMatch = conversation.lastMessage && conversation.lastMessage.toLowerCase().includes(lowerCaseSearchTerm);
+      const allMessagesMatch = conversation.messages?.some(message => message.text.toLowerCase().includes(lowerCaseSearchTerm));
+      
+      return nameMatch || lastMessageMatch || allMessagesMatch;
+    });
   }, [conversations, searchTerm]);
 
   return (
