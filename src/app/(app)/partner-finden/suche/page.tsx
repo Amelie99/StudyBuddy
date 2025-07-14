@@ -12,12 +12,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { lerninteressenOptions, verfuegbarkeitOptions, studiengangOptions, semesterOptions } from '@/lib/constants';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Loader2, Search, User, MessageSquare } from 'lucide-react';
+import { Loader2, Search, User, MessageSquare, ArrowLeft } from 'lucide-react';
 import type { AppUser } from '@/lib/types';
-import { collection, getDocs, query, where, QueryConstraint } from 'firebase/firestore';
+import { collection, getDocs } from 'firebase/firestore';
 import { db } from '@/config/firebase';
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 const searchSchema = z.object({
   studiengang: z.string().optional(),
@@ -71,7 +72,8 @@ export default function PartnerSuchePage() {
   const [results, setResults] = useState<AppUser[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
   const { currentUser } = useAuth();
-  const [dynamicStudiengangOptions, setDynamicStudiengangOptions] = useState<string[]>(studiengangOptions.map(o => o.label));
+  const [dynamicStudiengangOptions, setDynamicStudiengangOptions] = useState(studiengangOptions);
+  const router = useRouter();
 
 
   useEffect(() => {
@@ -84,9 +86,17 @@ export default function PartnerSuchePage() {
             .map(user => user.studiengang)
             .filter((course): course is string => !!course);
 
-        const combinedCourses = new Set([...studiengangOptions.map(o => o.label), ...coursesFromDB]);
+        const combinedCourseLabels = new Set([
+            ...studiengangOptions.map(o => o.label), 
+            ...coursesFromDB
+        ]);
         
-        setDynamicStudiengangOptions(Array.from(combinedCourses));
+        const newOptions = Array.from(combinedCourseLabels).map(label => {
+            const existingOption = studiengangOptions.find(o => o.label === label);
+            return existingOption || { id: label.toLowerCase().replace(/\s/g, ''), label: label };
+        });
+
+        setDynamicStudiengangOptions(newOptions);
     };
 
     fetchAndSetUniqueCourses();
@@ -109,8 +119,7 @@ export default function PartnerSuchePage() {
 
     try {
         const usersRef = collection(db, 'users');
-        const q = query(usersRef);
-        const querySnapshot = await getDocs(q);
+        const querySnapshot = await getDocs(usersRef);
         
         const allUsers = querySnapshot.docs
             .map(doc => ({ ...doc.data(), uid: doc.id } as AppUser))
@@ -118,9 +127,12 @@ export default function PartnerSuchePage() {
 
         let filteredResults = allUsers;
 
+        // Find the label for the selected studiengang ID
+        const selectedStudiengangLabel = data.studiengang ? dynamicStudiengangOptions.find(o => o.id === data.studiengang)?.label : null;
+
         // Filter by Studiengang
-        if (data.studiengang && data.studiengang !== 'all') {
-            filteredResults = filteredResults.filter(user => user.studiengang === data.studiengang);
+        if (selectedStudiengangLabel) {
+            filteredResults = filteredResults.filter(user => user.studiengang === selectedStudiengangLabel);
         }
 
         // Filter by Semester
@@ -153,6 +165,10 @@ export default function PartnerSuchePage() {
 
   return (
     <div className="container mx-auto py-8 space-y-8">
+        <Button variant="ghost" onClick={() => router.push('/partner-finden')} className="mb-4">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Zurück
+        </Button>
         <h1 className="text-3xl font-bold text-foreground">Detailsuche</h1>
         
         <Card>
@@ -164,7 +180,7 @@ export default function PartnerSuchePage() {
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <FormField control={form.control} name="studiengang" render={({ field }) => (<FormItem><FormLabel>Studiengang</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Alle Studiengänge" /></SelectTrigger></FormControl><SelectContent><SelectItem value="all">Alle</SelectItem>{dynamicStudiengangOptions.map(course => <SelectItem key={course} value={course}>{course}</SelectItem>)}</SelectContent></Select></FormItem>)} />
+                            <FormField control={form.control} name="studiengang" render={({ field }) => (<FormItem><FormLabel>Studiengang</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Alle Studiengänge" /></SelectTrigger></FormControl><SelectContent><SelectItem value="all">Alle</SelectItem>{dynamicStudiengangOptions.map(option => <SelectItem key={option.id} value={option.id}>{option.label}</SelectItem>)}</SelectContent></Select></FormItem>)} />
                             <FormField control={form.control} name="semester" render={({ field }) => (<FormItem><FormLabel>Semester</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Alle Semester" /></SelectTrigger></FormControl><SelectContent><SelectItem value="all">Alle</SelectItem>{semesterOptions.map(o => <SelectItem key={o.id} value={o.id}>{o.label}</SelectItem>)}</SelectContent></Select></FormItem>)} />
                         </div>
                         <FormField control={form.control} name="lerninteressen" render={() => (
