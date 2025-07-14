@@ -3,18 +3,15 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { PlusCircle, ListChecks, Clock, CalendarDays, Loader2 } from "lucide-react";
+import { PlusCircle, ListChecks, Clock, CalendarDays, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
-import React, { useState, useMemo, useEffect, memo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { de } from 'date-fns/locale';
 import { format, isSameDay } from 'date-fns';
 import { useCalendar, type CalendarEvent } from "@/contexts/CalendarContext";
-import dynamic from "next/dynamic";
-import { cn } from "@/lib/utils";
+import { SimpleCalendar } from '@/components/kalender/SimpleCalendar';
 
-const Calendar = dynamic(() => import('@/components/ui/calendar').then(mod => mod.Calendar));
-
-const UpcomingEventItem = memo(function UpcomingEventItem({ session }: { session: CalendarEvent }) {
+const UpcomingEventItem = React.memo(function UpcomingEventItem({ session }: { session: CalendarEvent }) {
   return (
     <li className="flex items-center justify-between p-3 bg-secondary/50 rounded-lg flex-wrap gap-4">
       <div>
@@ -28,20 +25,8 @@ const UpcomingEventItem = memo(function UpcomingEventItem({ session }: { session
   );
 });
 
-const WeekdayHeaders = () => {
-  const weekdays = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
-  return (
-    <div className="grid grid-cols-7 text-center text-sm text-muted-foreground mb-2 px-1">
-      {weekdays.map(day => (
-        <div key={day}>{day}</div>
-      ))}
-    </div>
-  );
-};
-
-
 export default function KalenderPage() {
-  const [date, setDate] = useState<Date | undefined>(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const { events, loading } = useCalendar();
   const [initialRender, setInitialRender] = useState(true);
 
@@ -61,12 +46,11 @@ export default function KalenderPage() {
     return d;
   }, [initialRender]);
 
-  const selectedDayEvents = date ? sortedEvents.filter(event => isSameDay(event.date, date)) : [];
+  const selectedDayEvents = selectedDate ? sortedEvents.filter(event => isSameDay(event.date, selectedDate)) : [];
 
   const upcomingEvents = useMemo(() => sortedEvents.filter(event => new Date(event.date) >= today), [sortedEvents, today]);
   
   const eventDays = useMemo(() => events.map(e => e.date), [events]);
-
 
   if (loading || initialRender) {
       return (
@@ -79,7 +63,7 @@ export default function KalenderPage() {
   return (
     <div className="container mx-auto py-8 space-y-8">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
-        <h1 className="text-3xl font-bold text-foreground mb-4 sm:mb-0">Mein Lernkalender</h1>
+        <h1 className="text-3xl font-bold text-foreground">Mein Lernkalender</h1>
         <Button asChild>
           <Link href="/kalender/event-erstellen">
             <PlusCircle className="mr-2 h-5 w-5" /> Termin erstellen
@@ -94,19 +78,10 @@ export default function KalenderPage() {
             <CardDescription>Wähle einen Tag, um Termine anzuzeigen.</CardDescription>
           </CardHeader>
           <CardContent className="flex justify-center flex-col">
-            <WeekdayHeaders />
-            <Calendar
-              locale={de}
-              weekStartsOn={1}
-              mode="single"
-              selected={date}
-              onSelect={setDate}
-              className="rounded-md"
-              modifiers={{ event: eventDays }}
-              modifiersClassNames={{
-                today: 'bg-accent text-accent-foreground',
-                event: 'has-event',
-              }}
+            <SimpleCalendar
+                selectedDate={selectedDate}
+                onDateChange={setSelectedDate}
+                eventDays={eventDays}
             />
           </CardContent>
         </Card>
@@ -115,7 +90,7 @@ export default function KalenderPage() {
           <CardHeader>
             <CardTitle className="flex items-center">
               <ListChecks className="mr-2 h-5 w-5 text-primary" />
-              Termine am {date ? format(date, 'd. MMMM', { locale: de }) : '...'}
+              Termine am {selectedDate ? format(selectedDate, 'd. MMMM', { locale: de }) : '...'}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -132,7 +107,7 @@ export default function KalenderPage() {
               </ul>
             ) : (
               <p className="text-muted-foreground text-center py-4">
-                {date ? "Keine Termine für diesen Tag." : "Wähle einen Tag im Kalender."}
+                {selectedDate ? "Keine Termine für diesen Tag." : "Wähle einen Tag im Kalender."}
               </p>
             )}
           </CardContent>
@@ -162,3 +137,4 @@ export default function KalenderPage() {
     </div>
   );
 }
+
