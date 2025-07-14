@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -15,12 +15,15 @@ import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, Users2, PlusCircle, UserPlus, ArrowLeft } from 'lucide-react';
-import { studiengangOptions } from '@/lib/constants';
+import { studiengangOptions as defaultStudiengangOptions } from '@/lib/constants';
 import { useGroups } from '@/contexts/GroupsContext';
 import { useBuddies } from '@/contexts/PartnersContext';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '@/config/firebase';
+import type { AppUser } from '@/lib/types';
 
 
 const groupSchema = z.object({
@@ -41,6 +44,34 @@ export default function GruppeErstellenPage() {
   const [isLoading, setIsLoading] = useState(false);
   const { addGroup } = useGroups();
   const { buddies } = useBuddies();
+  const [dynamicStudiengangOptions, setDynamicStudiengangOptions] = useState(defaultStudiengangOptions);
+
+
+  useEffect(() => {
+    const fetchAndSetUniqueCourses = async () => {
+        const usersRef = collection(db, 'users');
+        const querySnapshot = await getDocs(usersRef);
+        const allUsers = querySnapshot.docs.map(doc => doc.data() as AppUser);
+        
+        const coursesFromDB = allUsers
+            .map(user => user.studiengang)
+            .filter((course): course is string => !!course);
+
+        const combinedCourseLabels = new Set([
+            ...defaultStudiengangOptions.map(o => o.label), 
+            ...coursesFromDB
+        ]);
+        
+        const newOptions = Array.from(combinedCourseLabels).map(label => {
+            const existingOption = defaultStudiengangOptions.find(o => o.label === label);
+            return existingOption || { id: label.toLowerCase().replace(/\s/g, ''), label: label };
+        });
+
+        setDynamicStudiengangOptions(newOptions);
+    };
+
+    fetchAndSetUniqueCourses();
+  }, []);
 
   const form = useForm<GroupFormValues>({
     resolver: zodResolver(groupSchema),
@@ -139,7 +170,7 @@ export default function GruppeErstellenPage() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {studiengangOptions.map(o => <SelectItem key={o.id} value={o.id}>{o.label}</SelectItem>)}
+                          {dynamicStudiengangOptions.map(o => <SelectItem key={o.id} value={o.id}>{o.label}</SelectItem>)}
                           <SelectItem value="allgemein">Studiengangübergreifend</SelectItem>
                         </SelectContent>
                       </Select>

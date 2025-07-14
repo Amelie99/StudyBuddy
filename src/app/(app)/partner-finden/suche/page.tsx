@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { lerninteressenOptions, verfuegbarkeitOptions, studiengangOptions, semesterOptions } from '@/lib/constants';
+import { lerninteressenOptions, verfuegbarkeitOptions, studiengangOptions as defaultStudiengangOptions, semesterOptions } from '@/lib/constants';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Loader2, Search, User, MessageSquare, ArrowLeft } from 'lucide-react';
 import type { AppUser } from '@/lib/types';
@@ -72,7 +72,7 @@ export default function PartnerSuchePage() {
   const [results, setResults] = useState<AppUser[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
   const { currentUser } = useAuth();
-  const [dynamicStudiengangOptions, setDynamicStudiengangOptions] = useState(studiengangOptions);
+  const [dynamicStudiengangOptions, setDynamicStudiengangOptions] = useState(defaultStudiengangOptions);
   const router = useRouter();
 
 
@@ -87,12 +87,12 @@ export default function PartnerSuchePage() {
             .filter((course): course is string => !!course);
 
         const combinedCourseLabels = new Set([
-            ...studiengangOptions.map(o => o.label), 
+            ...defaultStudiengangOptions.map(o => o.label), 
             ...coursesFromDB
         ]);
         
         const newOptions = Array.from(combinedCourseLabels).map(label => {
-            const existingOption = studiengangOptions.find(o => o.label === label);
+            const existingOption = defaultStudiengangOptions.find(o => o.label === label);
             return existingOption || { id: label.toLowerCase().replace(/\s/g, ''), label: label };
         });
 
