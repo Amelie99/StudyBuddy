@@ -16,20 +16,9 @@ import Link from 'next/link';
 import React, { useEffect, useState, memo } from 'react';
 import dynamic from 'next/dynamic';
 import { useGroups, type Group } from '@/contexts/GroupsContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 const DialogContent = dynamic(() => import('@/components/ui/dialog').then(mod => mod.DialogContent));
-
-// Mock user and event data - in a real app, this would be fetched
-const mockMembers = [
-    { id: "user1", name: "Max Mustermann", avatar: "https://i.imgur.com/D267ZyT.jpeg", dataAiHint: "man student" },
-    { id: "user2", name: "Lisa Schmidt", avatar: "https://i.imgur.com/PKtZX0C.jpeg", dataAiHint: "woman student" },
-    { id: "user3", name: "Admin User", avatar: "https://i.imgur.com/t05wynC.jpeg", dataAiHint: "person icon" },
-];
-
-const mockEvents = [
-    { id: "event1", title: "Übungsaufgaben Besprechung", date: "20. Juli, 15:00 Uhr" },
-    { id: "event2", title: "Q&A Session vor Klausur", date: "25. Juli, 18:00 Uhr" },
-];
 
 const approvedHosts = ['i.imgur.com', 'placehold.co'];
 const getSafeAvatar = (url?: string) => {
@@ -71,12 +60,10 @@ export default function GroupDetailPage() {
   const router = useRouter();
   const { toast } = useToast();
   const { groups } = useGroups();
+  const { currentUser } = useAuth();
   const [group, setGroup] = useState<Group | null | undefined>(undefined);
   const [loading, setLoading] = useState(true);
   const [inviteEmail, setInviteEmail] = useState('');
-
-  // Mock current user ID - replace with actual auth user
-  const currentUserId = "user3"; 
 
   useEffect(() => {
     setLoading(true);
@@ -112,10 +99,9 @@ export default function GroupDetailPage() {
     );
   }
   
-  const isAdmin = true; // For now, assume user is admin of any group they view
-  const groupMembers = mockMembers.slice(0, group.members);
-  const upcomingEvents = mockEvents;
-
+  // For now, assume user is admin of any group they view for UI purposes.
+  // Real implementation would check against group data.
+  const isAdmin = true; 
 
   return (
     <div className="container mx-auto py-8">
@@ -159,10 +145,8 @@ export default function GroupDetailPage() {
             <h3 className="text-xl font-semibold mb-3 flex items-center">
               <Users className="mr-2 h-5 w-5 text-primary" /> Mitglieder ({group.members})
             </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-              {groupMembers.map((member: any) => (
-                <GroupMemberItem key={member.id} member={member} isAdmin={member.id === currentUserId} />
-              ))}
+            <div className="text-muted-foreground p-4 text-center border rounded-lg border-dashed">
+              Die Mitgliederliste wird in Kürze verfügbar sein.
             </div>
             {isAdmin && (
             <Dialog>
@@ -202,15 +186,7 @@ export default function GroupDetailPage() {
             <h3 className="text-xl font-semibold mb-3 flex items-center">
                 <CalendarPlus className="mr-2 h-5 w-5 text-primary" /> Anstehende Termine
             </h3>
-            {upcomingEvents && upcomingEvents.length > 0 ? (
-                <ul className="space-y-2">
-                    {upcomingEvents.map((event:any) => (
-                        <UpcomingGroupEventItem key={event.id} event={event} />
-                    ))}
-                </ul>
-            ): (
-                <p className="text-muted-foreground">Keine anstehenden Termine für diese Gruppe.</p>
-            )}
+            <p className="text-muted-foreground">Keine anstehenden Termine für diese Gruppe.</p>
           </div>
 
           {isAdmin && (
