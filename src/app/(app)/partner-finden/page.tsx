@@ -5,7 +5,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Heart, X, CheckCircle, MessageSquare, Users, Loader2 } from "lucide-react";
+import { Heart, X, CheckCircle, MessageSquare, Users, Loader2, RefreshCw } from "lucide-react";
 import Image from "next/image";
 import {
   AlertDialog,
@@ -27,6 +27,7 @@ const AlertDialogContent = dynamic(() => import('@/components/ui/alert-dialog').
 
 export default function PartnerFindenPage() {
   const [suggestions, setSuggestions] = useState<AppUser[]>([]);
+  const [rejectedSuggestions, setRejectedSuggestions] = useState<AppUser[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showMatchDialog, setShowMatchDialog] = useState(false);
   const [matchedBuddy, setMatchedBuddy] = useState<AppUser | null>(null);
@@ -83,7 +84,10 @@ export default function PartnerFindenPage() {
             setMatchedBuddy(likedUser);
             setShowMatchDialog(true);
         }
-      } 
+      } else {
+        // Add to rejected list for later
+        setRejectedSuggestions(prev => [...prev, currentBuddy]);
+      }
       
       // Remove the user from the suggestions list regardless of action
       setSuggestions(queue => queue.slice(1));
@@ -94,6 +98,11 @@ export default function PartnerFindenPage() {
   const closeDialogAndContinue = () => {
     setShowMatchDialog(false);
     setMatchedBuddy(null);
+  };
+
+  const handleShowRejected = () => {
+    setSuggestions(rejectedSuggestions);
+    setRejectedSuggestions([]);
   };
 
   const handleChat = async () => {
@@ -158,6 +167,21 @@ export default function PartnerFindenPage() {
             </Button>
           </div>
         </>
+      );
+    }
+    
+    if (rejectedSuggestions.length > 0) {
+       return (
+        <div className="flex flex-col items-center justify-center text-center h-full bg-card/80 backdrop-blur-sm rounded-2xl w-full max-w-xs p-4 shadow-inner">
+          <RefreshCw className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
+          <CardTitle>Keine neuen Vorschläge</CardTitle>
+          <CardDescription className="mt-2 mb-4">
+            Möchtest du zuvor abgelehnte Profile erneut sehen?
+          </CardDescription>
+          <Button onClick={handleShowRejected}>
+            Abgelehnte Profile anzeigen
+          </Button>
+        </div>
       );
     }
 
