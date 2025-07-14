@@ -3,7 +3,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { PlusCircle, Users, MessageSquare, User, Search } from "lucide-react";
+import { PlusCircle, Users, MessageSquare, User, Search, Wand2 } from "lucide-react";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useGroups, type Group } from "@/contexts/GroupsContext";
@@ -15,7 +15,9 @@ import { Loader2 } from "lucide-react";
 import { db } from "@/config/firebase";
 import { doc, getDoc } from "firebase/firestore";
 import type { AppUser } from "@/lib/types";
-import Image from "next/image";
+import { suggestGroups, SuggestGroupsOutput } from "@/ai/flows/suggest-groups-flow";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
 const approvedHosts = ['i.imgur.com', 'placehold.co'];
 const getSafeAvatar = (url?: string) => {
@@ -110,9 +112,72 @@ const GroupCard = memo(function GroupCard({ group }: { group: Group }) {
   );
 });
 
+const SuggestedGroupCard = memo(function SuggestedGroupCard({
+  suggestion,
+  onCreate,
+}: {
+  suggestion: { name: string; description: string };
+  onCreate: (name: string, description: string) => void;
+}) {
+  return (
+    <Card className="bg-secondary/50 border-primary/20">
+      <CardHeader>
+        <CardTitle className="text-lg">{suggestion.name}</CardTitle>
+        <CardDescription>{suggestion.description}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Button
+          size="sm"
+          className="w-full"
+          onClick={() => onCreate(suggestion.name, suggestion.description)}
+        >
+          <PlusCircle className="mr-2 h-4 w-4" />
+          Gruppe erstellen
+        </Button>
+      </CardContent>
+    </Card>
+  );
+});
+
 export default function PartnerAndGroupsPage() {
-  const { groups: myGroups } = useGroups();
+  const { groups: myGroups, addGroup } = useGroups();
   const { buddies: myBuddies } = useBuddies();
+  const { currentUser } = useAuth();
+  const { toast } = useToast();
+  const router = useRouter();
+
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [suggestions, setSuggestions] = useState<SuggestGroupsOutput['suggestions']>([]);
+
+  const handleGenerateSuggestions = async () => {
+    if (!currentUser) return;
+    setIsGenerating(true);
+    setSuggestions([]);
+    try {
+      const result = await suggestGroups(currentUser);
+      setSuggestions(result.suggestions);
+    } catch (error) {
+      console.error('Failed to generate group suggestions:', error);
+      toast({
+        title: 'Fehler',
+        description: 'Gruppenvorschläge konnten nicht generiert werden.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleCreateGroupFromSuggestion = (name: string, description: string) => {
+    addGroup({ name, description });
+    toast({
+      title: 'Gruppe erstellt!',
+      description: `Die Gruppe "${name}" wurde erfolgreich erstellt.`,
+    });
+    router.push('/gruppen');
+    setSuggestions([]); // Clear suggestions after creating one
+  };
+
 
   return (
     <div className="container mx-auto py-8">
@@ -184,6 +249,36 @@ export default function PartnerAndGroupsPage() {
                 </CardContent>
               </Card>
             )}
+            
+            <div className="pt-4">
+                {isGenerating && (
+                    <div className="flex items-center justify-center p-4">
+                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                        <span>Generiere Vorschläge...</span>
+                    </div>
+                )}
+                {suggestions.length > 0 && (
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">KI-basierte Gruppenvorschläge</h3>
+                    {suggestions.map((suggestion, index) => (
+                      <SuggestedGroupCard
+                        key={index}
+                        suggestion={suggestion}
+                        onCreate={handleCreateGroupFromSuggestion}
+                      />
+                    ))}
+                  </div>
+                )}
+                 <Button
+                    variant="outline"
+                    className="w-full mt-4"
+                    onClick={handleGenerateSuggestions}
+                    disabled={isGenerating}
+                >
+                    <Wand2 className="mr-2 h-4 w-4" />
+                    Gruppenvorschläge generieren
+                </Button>
+            </div>
           </div>
         </div>
       </div>
