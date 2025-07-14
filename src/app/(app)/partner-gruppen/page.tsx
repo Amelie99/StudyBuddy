@@ -139,7 +139,8 @@ const SuggestedGroupCard = memo(function SuggestedGroupCard({
   );
 });
 
-export default function PartnerAndGroupsPage() {
+
+function PartnerGruppenClient() {
   const { groups: myGroups, addGroup } = useGroups();
   const { buddies: myBuddies } = useBuddies();
   const { currentUser } = useAuth();
@@ -269,16 +270,15 @@ export default function PartnerAndGroupsPage() {
                     ))}
                   </div>
                 )}
-                 <div className="flex flex-col sm:flex-row gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                     <Button
                         variant="outline"
                         className="w-full"
-                        asChild
+                        onClick={handleGenerateSuggestions}
+                        disabled={isGenerating}
                     >
-                        <Link href="/gruppen">
-                         <Search className="mr-2 h-4 w-4" />
-                          Öffentliche Gruppen finden
-                        </Link>
+                         <Wand2 className="mr-2 h-4 w-4" />
+                         Gruppenvorschläge generieren
                     </Button>
                     <Button
                         variant="secondary"
@@ -296,4 +296,9 @@ export default function PartnerAndGroupsPage() {
       </div>
     </div>
   );
+}
+
+
+export default function PartnerAndGroupsPage() {
+    return <PartnerGruppenClient />;
 }
