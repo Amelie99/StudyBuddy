@@ -24,13 +24,6 @@ interface GroupsContextType {
     addGroup: (group: NewGroupData) => void;
 }
 
-// Mock initial data, consistent with the other pages
-const initialGroups = [
-  { id: "1", name: " Mathe Profis WS23/24", description: "Vorbereitung Analysis & Lineare Algebra", members: 5, image: "https://i.imgur.com/s4M5N0Q.png", dataAiHint:"mathematics study-group" },
-  { id: "2", name: "SE Projekt 'LernApp'", description: "Entwicklungsteam für die Software Engineering App", members: 3, image: "https://placehold.co/600x400.png", dataAiHint:"software development" },
-  { id: "3", name: "BWL Erstis HAWL", description: "Allgemeine Lerngruppe für BWL Grundlagen", members: 12, image: "https://i.imgur.com/xsVNjlV.png", dataAiHint:"business students" },
-];
-
 const GroupsContext = createContext<GroupsContextType | undefined>(undefined);
 
 export function useGroups() {
@@ -42,7 +35,7 @@ export function useGroups() {
 }
 
 export const GroupsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-    const [groups, setGroups] = useState<Group[]>(initialGroups);
+    const [groups, setGroups] = useState<Group[]>([]);
 
     const addGroup = useCallback((newGroupData: NewGroupData) => {
         const newGroup: Group = {
