@@ -45,11 +45,13 @@ export default function ChatsPage() {
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredConversations = useMemo(() => {
-    if (!searchTerm) {
+    const lowerCaseSearchTerm = searchTerm.toLowerCase();
+    if (!lowerCaseSearchTerm) {
       return conversations;
     }
     return conversations.filter(conversation =>
-      conversation.name.toLowerCase().includes(searchTerm.toLowerCase())
+      conversation.name.toLowerCase().includes(lowerCaseSearchTerm) ||
+      conversation.lastMessage.toLowerCase().includes(lowerCaseSearchTerm)
     );
   }, [conversations, searchTerm]);
 
