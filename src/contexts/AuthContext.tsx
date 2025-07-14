@@ -11,11 +11,10 @@ import {
   sendPasswordResetEmail,
   onAuthStateChanged
 } from 'firebase/auth';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import type { AppUser } from '@/lib/types';
 import { useRouter } from 'next/navigation';
-import { Loader2 } from 'lucide-react';
 
 interface AuthContextType {
   currentUser: AppUser | null;

@@ -1,57 +1,81 @@
-// This file can be removed if logic is fully handled in AuthContext.tsx
-// Or it can be expanded for more complex route guarding scenarios outside of context.
-// For now, the primary redirect logic is within AuthContext.tsx.
-// This file is kept as a placeholder for potential future expansion of route guarding.
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface UseAuthGuardOptions {
-  redirectTo?: string; // Page to redirect to if not authenticated
-  redirectIfAuthedTo?: string; // Page to redirect to if authenticated (e.g., for login/register pages)
-  requireProfileComplete?: boolean; // If true, redirect to profile creation if profile is incomplete
-  profileRedirectTo?: string; // Page to redirect to if profile is incomplete
+  redirectTo?: string;
+  redirectIfAuthedTo?: string;
+  requireProfileComplete?: boolean;
+  profileRedirectTo?: string;
 }
 
+const AUTH_ROUTES = ['/anmelden', '/registrierung'];
+const PROFILE_CREATION_ROUTE = '/profil-erstellen';
+
 export function useAuthGuard(options: UseAuthGuardOptions = {}) {
-  const { currentUser, loading } = useAuth();
+  const { currentUser, loading: authLoading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+  const [isRedirecting, setIsRedirecting] = useState(true);
 
-  const { 
-    redirectTo = '/anmelden', 
-    redirectIfAuthedTo,
+  const {
+    redirectTo = '/anmelden',
+    redirectIfAuthedTo = '/dashboard',
     requireProfileComplete = false,
-    profileRedirectTo = '/profil-erstellen'
+    profileRedirectTo = PROFILE_CREATION_ROUTE,
   } = options;
 
   useEffect(() => {
-    if (loading) {
-      return; // Don't redirect until loading is false
+    if (authLoading) {
+      return; // Wait for auth state to be determined
     }
 
-    // If trying to access a protected route without being authenticated
-    if (!currentUser && !pathname.startsWith(redirectTo) && !pathname.startsWith('/registrierung')) {
-       if (pathname !== redirectTo && !pathname.startsWith('/api')) { // Avoid redirect loops for auth pages
-        router.push(redirectTo);
-       }
-      return;
+    const isAuthRoute = AUTH_ROUTES.includes(pathname);
+    const isProfileCreationRoute = pathname === profileRedirectTo;
+
+    // Case 1: User is logged in
+    if (currentUser) {
+      // And their profile is incomplete
+      if (requireProfileComplete && !currentUser.profileComplete) {
+        // If they are not on the profile creation page, redirect them
+        if (!isProfileCreationRoute) {
+          router.replace(profileRedirectTo);
+          return;
+        }
+      }
+      // Profile is complete, but they are on an auth or profile creation page
+      else if (isAuthRoute || (requireProfileComplete && isProfileCreationRoute)) {
+        router.replace(redirectIfAuthedTo);
+        return;
+      }
+    }
+    // Case 2: User is not logged in
+    else {
+      // And they are trying to access a protected page
+      if (!isAuthRoute && !isProfileCreationRoute) {
+        router.replace(redirectTo);
+        return;
+      }
     }
     
-    // If authenticated and trying to access login/register pages
-    if (currentUser && redirectIfAuthedTo && (pathname.startsWith('/anmelden') || pathname.startsWith('/registrierung'))) {
-      router.push(redirectIfAuthedTo);
-      return;
-    }
+    // If no redirection is needed, allow rendering
+    setIsRedirecting(false);
 
-    // If profile completion is required and profile is not complete
-    if (currentUser && requireProfileComplete && !currentUser.profileComplete && pathname !== profileRedirectTo) {
-      router.push(profileRedirectTo);
-      return;
-    }
-
-  }, [currentUser, loading, router, redirectTo, redirectIfAuthedTo, requireProfileComplete, profileRedirectTo, pathname]);
-
-  return { currentUser, loading };
+  }, [
+    currentUser,
+    authLoading,
+    pathname,
+    router,
+    redirectTo,
+    redirectIfAuthedTo,
+    requireProfileComplete,
+    profileRedirectTo,
+  ]);
+  
+  // Return rendering decision
+  return { 
+      shouldRender: !isRedirecting,
+      isLoading: authLoading
+   };
 }

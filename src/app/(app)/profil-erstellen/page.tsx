@@ -86,21 +86,22 @@ export default function ProfilErstellenPage() {
         semester: data.semester,
         photoURL: data.photoURL,
         ueberMich: data.ueberMich,
+        bio: data.ueberMich, // also populate bio field
         lerninteressen: data.lerninteressen,
         lernstil: data.lernstil,
         kurse: data.kurse?.split(',').map(k => k.trim()),
         verfuegbarkeit: data.verfuegbarkeit,
-        profileComplete: true,
+        profileComplete: true, // Mark the profile as complete
       };
 
-      updateUserProfile(updatedProfile);
+      await updateUserProfile(updatedProfile);
 
 
       toast({
         title: 'Profil erstellt!',
         description: 'Dein Profil wurde erfolgreich eingerichtet. Du wirst weitergeleitet.',
       });
-      router.push('/partner-finden'); // As per user flow
+      router.push('/dashboard'); // Go to dashboard after profile completion
     } catch (error: any) {
       toast({
         title: 'Fehler bei Profilerstellung',
