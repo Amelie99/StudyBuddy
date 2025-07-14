@@ -46,7 +46,7 @@ const ChatMessageItem = memo(function ChatMessageItem({ msg, currentUserId, onDe
                 <AlertDialog>
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild disabled={!isSelf}>
-                            <div className={cn("max-w-[70%] p-3 rounded-xl cursor-pointer",
+                            <div className={cn("max-w-[85%] p-3 rounded-xl cursor-pointer",
                                 isSelf ? "bg-primary text-primary-foreground rounded-br-none" : "bg-secondary text-secondary-foreground rounded-bl-none"
                             )}>
                                 <p className="text-sm whitespace-pre-wrap">{msg.text}</p>
