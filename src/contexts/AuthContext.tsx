@@ -59,10 +59,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const appUser: AppUser = {
             uid: user.uid,
             email: user.email || '',
-            displayName: user.displayName || null,
+            displayName: user.displayName || user.email?.split('@')[0] || 'New User',
             photoURL: user.photoURL || '',
             profileComplete: false, 
           };
+          // Create the document in firestore for this new user
+          await setDoc(userDocRef, appUser);
           setCurrentUser(appUser);
         }
       } else {
