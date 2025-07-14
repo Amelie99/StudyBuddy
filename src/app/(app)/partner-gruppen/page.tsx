@@ -250,16 +250,16 @@ export default function PartnerAndGroupsPage() {
               </Card>
             )}
             
-            <div className="pt-4">
+            <div className="pt-4 space-y-4">
                 {isGenerating && (
-                    <div className="flex items-center justify-center p-4">
+                    <div className="flex items-center justify-center p-4 text-muted-foreground">
                         <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                         <span>Generiere Vorschläge...</span>
                     </div>
                 )}
                 {suggestions.length > 0 && (
                   <div className="space-y-4">
-                    <h3 className="text-lg font-semibold">KI-basierte Gruppenvorschläge</h3>
+                    <h3 className="text-lg font-semibold text-center">KI-basierte Gruppenvorschläge</h3>
                     {suggestions.map((suggestion, index) => (
                       <SuggestedGroupCard
                         key={index}
@@ -269,15 +269,27 @@ export default function PartnerAndGroupsPage() {
                     ))}
                   </div>
                 )}
-                 <Button
-                    variant="outline"
-                    className="w-full mt-4"
-                    onClick={handleGenerateSuggestions}
-                    disabled={isGenerating}
-                >
-                    <Wand2 className="mr-2 h-4 w-4" />
-                    Gruppenvorschläge generieren
-                </Button>
+                 <div className="flex flex-col sm:flex-row gap-2">
+                    <Button
+                        variant="outline"
+                        className="w-full"
+                        asChild
+                    >
+                        <Link href="/gruppen">
+                         <Search className="mr-2 h-4 w-4" />
+                          Öffentliche Gruppen finden
+                        </Link>
+                    </Button>
+                    <Button
+                        variant="secondary"
+                        className="w-full"
+                        onClick={handleGenerateSuggestions}
+                        disabled={isGenerating}
+                    >
+                        <Wand2 className="mr-2 h-4 w-4" />
+                        Gruppenvorschläge generieren
+                    </Button>
+                </div>
             </div>
           </div>
         </div>
