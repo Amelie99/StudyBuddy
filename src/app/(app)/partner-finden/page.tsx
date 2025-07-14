@@ -41,6 +41,7 @@ const getSafeAvatar = (url?: string) => {
 export default function PartnerFindenPage() {
   const [suggestions, setSuggestions] = useState<AppUser[]>([]);
   const [rejectedSuggestions, setRejectedSuggestions] = useState<AppUser[]>([]);
+  const [rejectedIds, setRejectedIds] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(true);
   const [showMatchDialog, setShowMatchDialog] = useState(false);
   const [matchedBuddy, setMatchedBuddy] = useState<AppUser | null>(null);
@@ -63,9 +64,9 @@ export default function PartnerFindenPage() {
 
         const myBuddyIds = new Set(likedBuddies.map(b => b.id));
         
-        // Filter out the current user and users who are already buddies.
+        // Filter out the current user, users who are already buddies, and users who have been rejected in this session.
         const filteredSuggestions = allUsers.filter(
-          user => user.uid !== currentUser.uid && !myBuddyIds.has(user.uid)
+          user => user.uid !== currentUser.uid && !myBuddyIds.has(user.uid) && !rejectedIds.has(user.uid)
         );
         
         setSuggestions(filteredSuggestions);
@@ -78,7 +79,7 @@ export default function PartnerFindenPage() {
     };
 
     fetchUsers();
-  }, [currentUser, likedBuddies, buddiesLoading]);
+  }, [currentUser, likedBuddies, buddiesLoading, rejectedIds]);
 
 
   const handleAction = useCallback(async (action: 'like' | 'reject') => {
@@ -98,8 +99,9 @@ export default function PartnerFindenPage() {
             setShowMatchDialog(true);
         }
       } else {
-        // Add to rejected list for later
+        // Add to rejected list for later and track the ID
         setRejectedSuggestions(prev => [...prev, currentBuddy]);
+        setRejectedIds(prev => new Set(prev).add(currentBuddy.uid));
       }
       
       // Remove the user from the suggestions list regardless of action
@@ -116,6 +118,7 @@ export default function PartnerFindenPage() {
   const handleShowRejected = () => {
     setSuggestions(rejectedSuggestions);
     setRejectedSuggestions([]);
+    setRejectedIds(new Set()); // Reset rejected IDs so they can be fetched again if needed later
   };
 
   const handleChat = async () => {
