@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useCallback } from "react";
@@ -43,7 +44,7 @@ export default function PartnerFindenPage() {
       setIsLoading(true);
       try {
         const usersCollectionRef = collection(db, "users");
-        const querySnapshot = await getDocs(usersCollectionreF);
+        const querySnapshot = await getDocs(usersCollectionRef); // Corrected typo here
         const allUsers = querySnapshot.docs.map(doc => ({ ...doc.data(), uid: doc.id } as AppUser));
 
         const myBuddyIds = new Set(likedBuddies.map(b => b.id));

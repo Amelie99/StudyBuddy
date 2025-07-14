@@ -1,4 +1,26 @@
 
+export interface AppUser {
+  uid: string;
+  email: string;
+  displayName: string | null;
+  photoURL?: string;
+  studiengang?: string;
+  semester?: string;
+  ueberMich?: string;
+  lerninteressen?: string[];
+  lernstil?: string;
+  kurse?: string[];
+  verfuegbarkeit?: string[];
+  profileComplete: boolean;
+}
+
+export interface Buddy {
+    id: string;
+    name: string;
+    course: string;
+    avatar: string;
+}
+
 export interface SuggestedBuddy {
     id: number;
     name: string;
@@ -16,7 +38,7 @@ export interface Conversation {
     timestamp: string;
     unread: number;
     avatar: string;
-    dataAiHint: string;
+    dataAiHint?: string;
 }
 
 export interface Message {
@@ -32,7 +54,7 @@ export interface ChatDetail {
     id: string;
     name: string;
     avatar: string;
-    dataAiHint: string;
+    dataAiHint?: string;
     type: 'user' | 'group';
     membersCount?: number;
     messages: Message[];
