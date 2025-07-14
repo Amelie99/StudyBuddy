@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
-import { Users, MessageSquare, UserPlus, Settings, CalendarPlus, Trash2, Edit, Loader2, ArrowLeft } from 'lucide-react';
+import { Users, MessageSquare, UserPlus, Settings, CalendarPlus, Trash2, Edit, Loader2, ArrowLeft, LogOut } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import React, { useEffect, useState, memo } from 'react';
@@ -132,8 +132,11 @@ export default function GroupDetailPage() {
                 <CalendarPlus className="mr-2 h-4 w-4" /> Termin planen
               </Link>
             </Button>
+            <Button variant="outline" className="text-destructive hover:bg-destructive/10 hover:text-destructive">
+                <LogOut className="mr-2 h-4 w-4" /> Aus Gruppe austreten
+            </Button>
             {isAdmin && (
-                 <Button variant="outline" className="text-destructive hover:bg-destructive/10 hover:text-destructive">
+                 <Button variant="destructive" className="ml-auto">
                     <Trash2 className="mr-2 h-4 w-4" /> Gruppe löschen
                 </Button>
             )}
