@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Send, CalendarPlus, Smile, Paperclip, Loader2, UploadCloud } from 'lucide-react';
+import { ArrowLeft, Send, CalendarPlus, Smile, Paperclip, Loader2, UploadCloud, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import React, { useEffect, useState, useRef, memo } from 'react';
 import { cn } from '@/lib/utils';
@@ -17,20 +17,75 @@ import { useChats } from '@/contexts/ChatsContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Message } from '@/lib/types';
 import dynamic from 'next/dynamic';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 const PopoverContent = dynamic(() => import('@/components/ui/popover').then(mod => mod.PopoverContent));
 const DialogContent = dynamic(() => import('@/components/ui/dialog').then(mod => mod.DialogContent));
 
-const ChatMessageItem = memo(function ChatMessageItem({ msg, currentUserId }: { msg: Message; currentUserId: string | undefined }) {
+
+const ChatMessageItem = memo(function ChatMessageItem({ msg, currentUserId, onDelete }: { msg: Message; currentUserId: string | undefined, onDelete: (messageId: string) => void }) {
     const isSelf = msg.senderId === currentUserId;
-    return (
-        <div className={cn("flex mb-3", isSelf ? "justify-end" : "justify-start")}>
-            <div className={cn("max-w-[70%] p-3 rounded-xl",
-                isSelf ? "bg-primary text-primary-foreground rounded-br-none" : "bg-secondary text-secondary-foreground rounded-bl-none"
-            )}>
-                <p className="text-sm whitespace-pre-wrap">{msg.text}</p>
-                <p className="text-xs mt-1 opacity-70 text-right">{msg.timestamp}</p>
+
+    const MessageContent = () => (
+        <div className={cn("max-w-[70%] p-3 rounded-xl",
+            isSelf ? "bg-primary text-primary-foreground rounded-br-none" : "bg-secondary text-secondary-foreground rounded-bl-none"
+        )}>
+            <p className="text-sm whitespace-pre-wrap">{msg.text}</p>
+            <p className="text-xs mt-1 opacity-70 text-right">{msg.timestamp}</p>
+        </div>
+    );
+
+    if (!isSelf) {
+         return (
+            <div className="flex justify-start mb-3">
+                <MessageContent />
             </div>
+         );
+    }
+    
+    return (
+        <div className="flex justify-end mb-3">
+            <AlertDialog>
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                         <button className="focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-xl">
+                            <MessageContent />
+                         </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                        <AlertDialogTrigger asChild>
+                             <DropdownMenuItem className="text-destructive">
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Löschen
+                            </DropdownMenuItem>
+                        </AlertDialogTrigger>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Nachricht löschen?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Diese Aktion kann nicht rückgängig gemacht werden. Möchtest du diese Nachricht wirklich dauerhaft löschen?
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => onDelete(msg.id)} className="bg-destructive hover:bg-destructive/90">
+                            Löschen
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 });
@@ -41,7 +96,7 @@ export default function ChatDetailPage() {
     const chatId = params.chatId as string;
     const router = useRouter();
     const { toast } = useToast();
-    const { chatDetails, loadingChatDetails, subscribeToChatDetails, sendMessage, markChatAsRead } = useChats();
+    const { chatDetails, loadingChatDetails, subscribeToChatDetails, sendMessage, markChatAsRead, deleteMessage } = useChats();
     const { currentUser } = useAuth();
     const [newMessage, setNewMessage] = useState('');
     const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -74,6 +129,22 @@ export default function ChatDetailPage() {
         });
 
         setNewMessage('');
+    };
+
+    const handleDeleteMessage = async (messageId: string) => {
+        try {
+            await deleteMessage(chatId, messageId);
+            toast({
+                title: "Nachricht gelöscht",
+                description: "Deine Nachricht wurde erfolgreich entfernt.",
+            });
+        } catch (error) {
+             toast({
+                title: "Fehler",
+                description: "Die Nachricht konnte nicht gelöscht werden.",
+                variant: "destructive",
+            });
+        }
     };
 
     if (loadingChatDetails || !currentUser) {
@@ -115,7 +186,7 @@ export default function ChatDetailPage() {
 
             <ScrollArea className="flex-1 p-4 space-y-4" ref={scrollAreaRef}>
                 {chatDetails.messages.map((msg: any) => (
-                    <ChatMessageItem key={msg.id} msg={msg} currentUserId={currentUser?.uid} />
+                    <ChatMessageItem key={msg.id} msg={msg} currentUserId={currentUser?.uid} onDelete={handleDeleteMessage}/>
                 ))}
             </ScrollArea>
 

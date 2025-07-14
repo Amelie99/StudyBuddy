@@ -11,6 +11,7 @@ import {
     serverTimestamp,
     setDoc,
     orderBy,
+    deleteDoc,
 } from 'firebase/firestore';
 import { db } from '@/config/firebase';
 import { AppUser, Conversation, Message, ChatDetail } from '@/lib/types';
@@ -124,6 +125,23 @@ export const sendMessage = async (
         { merge: true },
     );
 };
+
+/**
+ * Deletes a message from a chat.
+ *
+ * @param chatId The ID of the chat.
+ * @param messageId The ID of the message to delete.
+ */
+export const deleteMessage = async (chatId: string, messageId: string): Promise<void> => {
+    const messageRef = doc(db, 'chats', chatId, 'messages', messageId);
+    await deleteDoc(messageRef);
+    
+    // Optional: After deleting, you might want to update the 'lastMessage' of the chat
+    // to the new latest message. This would involve querying for the new last message.
+    // For simplicity, we'll omit this for now. If the deleted message was the last one,
+    // the chat preview will still show it until a new message is sent.
+};
+
 
 export const markMessagesAsRead = (chatId: string, userId: string) => {
     // This is where you might update a 'readBy' array on messages,

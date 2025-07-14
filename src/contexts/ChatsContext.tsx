@@ -32,6 +32,7 @@ interface ChatsContextType {
         chatId: string,
         message: Omit<Message, 'id' | 'timestamp' | 'self'>,
     ) => Promise<void>;
+    deleteMessage: (chatId: string, messageId: string) => Promise<void>;
     markChatAsRead: (chatId: string) => void;
 }
 
@@ -172,6 +173,22 @@ export const ChatsProvider: React.FC<{ children: ReactNode }> = ({
         [currentUser],
     );
 
+     const deleteMessage = useCallback(async (chatId: string, messageId: string) => {
+        if (!currentUser) return;
+        
+        // We need to verify that the current user is the sender of the message.
+        // This is a security check. The UI should prevent this, but we double-check here.
+        const messageRef = doc(db, 'chats', chatId, 'messages', messageId);
+        const messageSnap = await getDoc(messageRef);
+
+        if (messageSnap.exists() && messageSnap.data().senderId === currentUser.uid) {
+            await chatManager.deleteMessage(chatId, messageId);
+            // The real-time listener will automatically update the UI.
+        } else {
+            throw new Error("You can only delete your own messages.");
+        }
+    }, [currentUser]);
+
     const markChatAsRead = useCallback(
         (chatId: string) => {
             if (!currentUser) return;
@@ -190,6 +207,7 @@ export const ChatsProvider: React.FC<{ children: ReactNode }> = ({
             subscribeToChatDetails,
             startNewChat,
             sendMessage,
+            deleteMessage,
             markChatAsRead,
         }),
         [
@@ -200,6 +218,7 @@ export const ChatsProvider: React.FC<{ children: ReactNode }> = ({
             subscribeToChatDetails,
             startNewChat,
             sendMessage,
+            deleteMessage,
             markChatAsRead,
         ],
     );
