@@ -14,7 +14,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, Users2, PlusCircle, UserPlus } from 'lucide-react';
+import { Loader2, Users2, PlusCircle, UserPlus, ArrowLeft } from 'lucide-react';
 import { studiengangOptions } from '@/lib/constants';
 import { useGroups } from '@/contexts/GroupsContext';
 import { useBuddies } from '@/contexts/PartnersContext';
@@ -86,6 +86,10 @@ export default function GruppeErstellenPage() {
 
   return (
     <div className="container mx-auto py-8">
+      <Button variant="ghost" onClick={() => router.back()} className="mb-4">
+        <ArrowLeft className="mr-2 h-4 w-4" />
+        Zurück
+      </Button>
       <Card className="max-w-2xl mx-auto shadow-xl">
         <CardHeader className="text-center">
           <Users2 className="mx-auto h-12 w-12 text-primary mb-3" />
