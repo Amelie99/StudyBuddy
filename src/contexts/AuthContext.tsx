@@ -3,9 +3,18 @@
 
 import type { User as FirebaseUser } from 'firebase/auth';
 import React, { createContext, useContext, useEffect, useState, useMemo, useCallback } from 'react';
-import { auth, db } from '@/config/firebase'; // Using mocked auth
+import { auth, db } from '@/config/firebase';
+import { 
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut,
+  sendPasswordResetEmail,
+  onAuthStateChanged
+} from 'firebase/auth';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import type { AppUser } from '@/lib/types';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
+import { Loader2 } from 'lucide-react';
 
 interface AuthContextType {
   currentUser: AppUser | null;
@@ -15,7 +24,7 @@ interface AuthContextType {
   logout: () => Promise<void>;
   sendPasswordReset: (email: string) => Promise<void>;
   isHochschuleEmail: (email: string) => boolean;
-  updateUserProfile: (profileData: Partial<AppUser>) => void;
+  updateUserProfile: (profileData: Partial<AppUser>) => Promise<void>;
   updateAuthContextUser: (updatedUser: Partial<AppUser>) => void;
   deleteCurrentUser: () => void;
 }
@@ -34,26 +43,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [currentUser, setCurrentUser] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
-  const pathname = usePathname();
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user: FirebaseUser | null) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user: FirebaseUser | null) => {
       if (user) {
-        const appUser: AppUser = {
-          uid: user.uid,
-          email: user.email || '',
-          displayName: (user as any).displayName || null,
-          photoURL: (user as any).photoURL || '',
-          profileComplete: (user as any).profileComplete !== undefined ? (user as any).profileComplete : false,
-          studiengang: (user as any).studiengang || '',
-          semester: (user as any).semester || '',
-          ueberMich: (user as any).ueberMich || '',
-          lerninteressen: (user as any).lerninteressen || [],
-          lernstil: (user as any).lernstil || '',
-          kurse: (user as any).kurse || [],
-          verfuegbarkeit: (user as any).verfuegbarkeit || [],
-        };
-        setCurrentUser(appUser);
+        const userDocRef = doc(db, "users", user.uid);
+        const userDoc = await getDoc(userDocRef);
+        if (userDoc.exists()) {
+          const userData = userDoc.data() as AppUser;
+          setCurrentUser({ ...userData, uid: user.uid });
+        } else {
+          // This case handles users created via Firebase Auth but without a Firestore doc yet
+          const appUser: AppUser = {
+            uid: user.uid,
+            email: user.email || '',
+            displayName: user.displayName || null,
+            photoURL: user.photoURL || '',
+            profileComplete: false, 
+          };
+          setCurrentUser(appUser);
+        }
       } else {
         setCurrentUser(null);
       }
@@ -62,91 +71,54 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return unsubscribe;
   }, []);
   
-  useEffect(() => {
-    if (loading) {
-      return; 
-    }
-
-    const isAuthPage = pathname.startsWith('/anmelden') || pathname.startsWith('/registrierung');
-    const isProfileSetupPage = pathname.startsWith('/profil-erstellen');
-    const isRootPage = pathname === '/';
-
-    if (currentUser) {
-      if (!currentUser.profileComplete) {
-        if (!isProfileSetupPage) {
-          router.replace('/profil-erstellen');
-        }
-      } else {
-        if (isAuthPage || isProfileSetupPage || isRootPage) {
-          // After login, redirect to a useful page like the dashboard
-          router.replace('/dashboard');
-        }
-      }
-    } else {
-      // If not logged in, and not on an auth-related page, redirect to login
-      if (!isAuthPage) {
-         router.replace('/anmelden');
-      }
-    }
-  }, [currentUser, loading, router, pathname]);
-
   const updateAuthContextUser = useCallback((updatedData: Partial<AppUser>) => {
     setCurrentUser(prevUser => {
       if (!prevUser) return null;
-      const newUser = { ...prevUser, ...updatedData };
-      // @ts-ignore
-      if (auth.currentUser && auth.currentUser.uid === newUser.uid) {
-         // @ts-ignore
-        Object.assign(auth.currentUser, updatedData); 
-      }
-      return newUser;
+      return { ...prevUser, ...updatedData };
     });
   }, []);
 
   const logout = useCallback(async () => {
-     // @ts-ignore
-    await auth.signOut();
-    setCurrentUser(null); 
+    await signOut(auth);
     router.replace('/anmelden');
   }, [router]);
 
-  const updateUserProfile = useCallback((profileData: Partial<AppUser>) => {
+  const updateUserProfile = useCallback(async (profileData: Partial<AppUser>) => {
     if (currentUser) {
-      db.updateUserProfile(currentUser.uid, profileData);
+      const userDocRef = doc(db, "users", currentUser.uid);
+      await setDoc(userDocRef, profileData, { merge: true });
       updateAuthContextUser(profileData);
     }
   }, [currentUser, updateAuthContextUser]);
 
   const deleteCurrentUser = useCallback(() => {
     if (currentUser) {
-      db.deleteUserProfile(currentUser.uid);
+      console.log("Deleting profile for:", currentUser.uid);
       logout();
     }
   }, [currentUser, logout]);
 
   const login = useCallback(async (email: string, pass: string) => {
-    // @ts-ignore
-    return auth.signInWithEmailAndPassword(email, pass);
+    return signInWithEmailAndPassword(auth, email, pass);
   }, []);
 
   const register = useCallback(async (email: string, pass: string) => {
-    // @ts-ignore
-    const userCredential = await auth.createUserWithEmailAndPassword(email, pass);
+    const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
     if (userCredential.user) {
       const { uid } = userCredential.user;
       const initialProfile = {
+        uid,
         email,
         displayName: email.split('@')[0], 
         profileComplete: false,
       };
-      db.updateUserProfile(uid, initialProfile);
+      await setDoc(doc(db, "users", uid), initialProfile);
     }
     return userCredential;
   }, []);
 
   const sendPasswordReset = useCallback(async (email: string) => {
-     // @ts-ignore
-    return auth.sendPasswordResetEmail(email);
+    return sendPasswordResetEmail(auth, email);
   }, []);
 
   const isHochschuleEmail = useCallback((email: string) => {
@@ -166,6 +138,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     deleteCurrentUser,
   }), [currentUser, loading, login, register, logout, sendPasswordReset, isHochschuleEmail, updateUserProfile, updateAuthContextUser, deleteCurrentUser]);
 
-
+  // The AuthProvider no longer needs to render the loader itself,
+  // as the HomePage now acts as the "splash screen".
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

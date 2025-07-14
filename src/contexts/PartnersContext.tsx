@@ -2,39 +2,15 @@
 'use client';
 
 import React, { createContext, useContext, useState, ReactNode, useCallback, useMemo, useEffect } from 'react';
-import { db } from '@/config/firebase'; // Import the mock database
+import { db } from '@/config/firebase';
+import { collection, getDocs } from 'firebase/firestore';
 import { useAuth } from './AuthContext';
-
-// Consistent Buddy type for use across the app
-export interface Buddy {
-    id: string;
-    name: string;
-    course: string;
-    avatar: string;
-    dataAiHint: string;
-}
-
-// This is the shape of the buddy object from the "partner-finden" page suggestions
-export interface SuggestedBuddy {
-    id: number;
-    name: string;
-    studiengang: string;
-    image: string;
-    avatar?: string;
-    dataAiHint: string;
-    mutualInterests: string[];
-}
-
+import type { AppUser, SuggestedBuddy, Buddy } from '@/lib/types';
 
 interface BuddiesContextType {
     buddies: Buddy[];
     addBuddy: (buddy: SuggestedBuddy) => void;
 }
-
-// Mock initial data, consistent with the other pages
-// const initialBuddies: Buddy[] = [
-//   { id: "2", name: "David Meier", course: "Master Elektrotechnik", avatar: "https://i.imgur.com/ZiKvLxU.jpeg", dataAiHint: "man portrait" },
-// ];
 
 const BuddiesContext = createContext<BuddiesContextType | undefined>(undefined);
 
@@ -51,24 +27,37 @@ export const BuddiesProvider: React.FC<{ children: ReactNode }> = ({ children })
     const { currentUser } = useAuth();
 
     useEffect(() => {
-        if (currentUser) {
-            const allUsers = db.getAllUsers();
-            const otherUsers = allUsers.filter(user => user.uid !== currentUser.uid).map(user => ({
-                id: user.uid,
-                name: user.displayName,
-                course: user.studiengang,
-                avatar: user.photoURL,
-                dataAiHint: 'user profile picture',
-            }));
-            setBuddies(otherUsers);
-        }
+        const fetchUsers = async () => {
+            if (currentUser) {
+                try {
+                    const usersCollectionRef = collection(db, "users");
+                    const querySnapshot = await getDocs(usersCollectionRef);
+                    const allUsers = querySnapshot.docs
+                        .map(doc => {
+                            const data = doc.data() as AppUser;
+                            return {
+                                id: doc.id,
+                                name: data.displayName || 'Unnamed User',
+                                course: data.studiengang || 'Studiengang nicht angegeben',
+                                avatar: data.photoURL || 'https://i.imgur.com/PKtZX0C.jpeg',
+                                dataAiHint: 'user profile picture',
+                            };
+                        });
+                    const otherUsers = allUsers.filter(user => user.id !== currentUser.uid);
+                    setBuddies(otherUsers);
+                } catch (error) {
+                    console.error("Error fetching users for BuddiesProvider:", error);
+                }
+            }
+        };
+
+        fetchUsers();
     }, [currentUser]);
 
     const addBuddy = useCallback((suggestedBuddy: SuggestedBuddy) => {
         const buddyId = suggestedBuddy.id.toString();
         
         setBuddies(prevBuddies => {
-            // Check if buddy already exists inside the updater to get the latest state
             if (prevBuddies.some(p => p.id === buddyId)) {
                 return prevBuddies;
             }
@@ -82,13 +71,12 @@ export const BuddiesProvider: React.FC<{ children: ReactNode }> = ({ children })
             };
             return [...prevBuddies, newBuddy];
         });
-    }, []); // No dependencies needed for setBuddies
+    }, []);
 
     const value = useMemo(() => ({
         buddies,
         addBuddy,
     }), [buddies, addBuddy]);
-
 
     return (
         <BuddiesContext.Provider value={value}>

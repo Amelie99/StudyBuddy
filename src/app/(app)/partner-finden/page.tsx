@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useCallback } from "react";
@@ -13,42 +14,49 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useBuddies, type Buddy, SuggestedBuddy } from "@/contexts/PartnersContext";
+import { useBuddies, type Buddy } from "@/contexts/PartnersContext";
 import { useChats } from "@/contexts/ChatsContext";
 import { cn } from "@/lib/utils";
 import dynamic from "next/dynamic";
 import { useAuth } from "@/contexts/AuthContext";
+import { db } from "@/config/firebase";
+import { collection, getDocs } from "firebase/firestore";
+import type { AppUser } from "@/lib/types";
 
 const AlertDialogContent = dynamic(() => import('@/components/ui/alert-dialog').then(mod => mod.AlertDialogContent));
-
-const oldSuggestedBuddies: SuggestedBuddy[] = [
-  { id: 1, name: "Lisa Schmidt", studiengang: "Soziale Arbeit, 1. Sem.", image: "https://i.imgur.com/FwkjiPu.jpeg", avatar: "https://i.imgur.com/PKtZX0C.jpeg", dataAiHint: "woman student", mutualInterests: ["Wissenschaftliches Arbeiten", "Psychologie Grundlagen"] },
-  { id: 101, name: "Anna Kurz", studiengang: "Informatik, 3. Sem.", image: "https://i.imgur.com/tfds6vN.jpeg", avatar: "https://i.imgur.com/PvGE2mz.jpeg", dataAiHint:"woman programmer", mutualInterests: ["Web-Entwicklung", "Python"] },
-  { id: 102, name: "Markus Lang", studiengang: "BWL, 5. Sem.", image: "https://i.imgur.com/umNyodm.jpeg", avatar: "https://i.imgur.com/hlTMgKi.jpeg", dataAiHint: "man business", mutualInterests: ["Marketing", "Statistik"] },
-  { id: 103, name: "Julia Klein", studiengang: "Soziale Arbeit, 1. Sem.", image: "https://i.imgur.com/FXdPVFK.jpeg", avatar: "https://i.imgur.com/Yt7EtV9.jpeg", dataAiHint:"woman social", mutualInterests: ["Grundlagen Psychologie"] },
-  { id: 104, name: "Atal Vajpayee", studiengang: "Wirtschaftsingenieurwesen, 4. Sem.", image: "https://i.imgur.com/4yHyOzV.jpeg", avatar: "https://i.imgur.com/xJZT5sW.jpeg", dataAiHint: "man engineer", mutualInterests: ["Logistik", "Projektarbeit"] },
-  { id: 105, name: "Sophie Becker", studiengang: "Maschinenbau, 6. Sem.", image: "https://i.imgur.com/m2xnjbE.jpeg", avatar: "https://i.imgur.com/Qx8BkHC.jpeg", dataAiHint: "woman smiling", mutualInterests: ["Thermodynamik", "Bachelorarbeit"] },
-  { id: 106, name: "Felix Schmidt", studiengang: "Informatik, 2. Sem.", image: "https://i.imgur.com/bJa3doH.jpeg", avatar: "https://i.imgur.com/gqj9hH1.jpeg", dataAiHint: "man coding", mutualInterests: ["Java", "Algorithmen"] },
-  { id: 107, name: "Lena Wolf", studiengang: "BWL, 2. Sem.", image: "https://i.imgur.com/MB2XPkM.jpeg", avatar: "https://i.imgur.com/13nuzOy.jpeg", dataAiHint: "woman student", mutualInterests: ["Controlling", "Rechnungswesen"] },
-  { id: 108, name: "Sarah Chen", studiengang: "BWL, 3. Sem.", image: "https://i.imgur.com/LLFzmJS.jpeg", avatar: "https://i.imgur.com/NkY3Ovh.jpeg", dataAiHint:"woman international student", mutualInterests: ["Marketing", "Sprachaustausch"] },
-];
 
 export default function PartnerFindenPage() {
   const [suggestions, setSuggestions] = useState<Buddy[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showMatchDialog, setShowMatchDialog] = useState(false);
   const [matchedBuddy, setMatchedBuddy] = useState<Buddy | null>(null);
-  const { buddies: allBuddies, addBuddy } = useBuddies();
+  const { buddies: likedBuddies, addBuddy } = useBuddies();
   const { startNewChat } = useChats();
   const router = useRouter();
   const [swipeState, setSwipeState] = useState<'left' | 'right' | null>(null);
   const { currentUser } = useAuth();
 
-
   useEffect(() => {
-    if (currentUser) {
-        const myBuddyIds = new Set(allBuddies.map(b => b.id));
-    
+    const fetchUsers = async () => {
+      if (!currentUser) return;
+
+      setIsLoading(true);
+      try {
+        const usersCollectionRef = collection(db, "users");
+        const querySnapshot = await getDocs(usersCollectionRef);
+        const allUsers: Buddy[] = querySnapshot.docs
+          .map(doc => {
+            const data = doc.data() as AppUser;
+            return {
+              id: doc.id,
+              name: data.displayName || 'Unnamed User',
+              course: data.studiengang || 'Studiengang nicht angegeben',
+              avatar: data.photoURL || 'https://i.imgur.com/PKtZX0C.jpeg', // Default avatar
+              dataAiHint: 'user profile picture', // Generic hint
+            };
+          });
+
+        const myBuddyIds = new Set(likedBuddies.map(b => b.id));
         let declinedIds = new Set<string>();
         try {
           const storedDeclinedIds = localStorage.getItem('declinedBuddyIds');
@@ -60,25 +68,23 @@ export default function PartnerFindenPage() {
           }
         } catch (error) {
           console.error("Error parsing declined IDs from localStorage", error);
-          localStorage.removeItem('declinedBuddyIds');
         }
-        
-        const initialSuggestions = allBuddies.filter(
-          suggested => suggested.id !== currentUser.uid && !myBuddyIds.has(suggested.id) && !declinedIds.has(suggested.id)
-        );
 
-        const oldSuggestionsAsBuddies: Buddy[] = oldSuggestedBuddies.map(b => ({
-            id: b.id.toString(),
-            name: b.name,
-            course: b.studiengang,
-            avatar: b.avatar || b.image,
-            dataAiHint: b.dataAiHint,
-        }));
+        const filteredSuggestions = allUsers.filter(
+          user => user.id !== currentUser.uid && !myBuddyIds.has(user.id) && !declinedIds.has(user.id)
+        );
         
-        setSuggestions([...oldSuggestionsAsBuddies, ...initialSuggestions]);
+        setSuggestions(filteredSuggestions);
+
+      } catch (error) {
+        console.error("Error fetching users:", error);
+      } finally {
         setIsLoading(false);
-    }
-  }, [allBuddies, currentUser]);
+      }
+    };
+
+    fetchUsers();
+  }, [currentUser, likedBuddies]);
 
 
   const handleAction = useCallback((action: 'like' | 'reject') => {

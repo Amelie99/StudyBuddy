@@ -25,9 +25,9 @@ export default function AnmeldenPage() {
       </CardHeader>
       <CardContent>
         {isLoginView ? (
-          <LoginForm onSwitchToRegister={() => setIsLoginView(false)} />
+          <LoginForm/>
         ) : (
-          <RegistrationForm onSwitchToLogin={() => setIsLoginView(true)} />
+          <RegistrationForm/>
         )}
       </CardContent>
       <CardFooter className="flex flex-col items-center space-y-4">
