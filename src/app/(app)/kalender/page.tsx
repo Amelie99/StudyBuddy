@@ -7,9 +7,8 @@ import { PlusCircle, ListChecks, Clock, CalendarDays, Loader2 } from "lucide-rea
 import Link from "next/link";
 import React, { useState, useMemo, useEffect, memo } from "react";
 import { de } from 'date-fns/locale';
-import { format } from 'date-fns';
+import { format, isSameDay } from 'date-fns';
 import { useCalendar, type CalendarEvent } from "@/contexts/CalendarContext";
-import Image from "next/image";
 import dynamic from "next/dynamic";
 
 const Calendar = dynamic(() => import('@/components/ui/calendar').then(mod => mod.Calendar));
@@ -19,7 +18,7 @@ const UpcomingEventItem = memo(function UpcomingEventItem({ session }: { session
     <li className="flex items-center justify-between p-3 bg-secondary/50 rounded-lg flex-wrap gap-4">
       <div>
         <p className="font-semibold">{session.title}</p>
-        <p className="text-sm text-muted-foreground">{format(session.date, "EEEE, d. MMMM yyyy - HH:mm 'Uhr'", { locale: de })}</p>
+        <p className="text-sm text-muted-foreground">{format(session.date, "EEEE, d. MMMM' - 'HH:mm 'Uhr'", { locale: de })}</p>
       </div>
       <Button variant="outline" size="sm" asChild>
           <Link href={`/kalender/${session.id}`}>Details</Link>
@@ -53,14 +52,14 @@ export default function KalenderPage() {
   }, [initialRender]);
 
   // Filter events for the selected day in the calendar
-  const selectedDayEvents = date ? sortedEvents.filter(event => {
-    const eventDate = new Date(event.date);
-    eventDate.setHours(0, 0, 0, 0);
-    return eventDate.getTime() === new Date(date).setHours(0, 0, 0, 0);
-  }) : [];
+  const selectedDayEvents = date ? sortedEvents.filter(event => isSameDay(event.date, date)) : [];
+
 
    // Filter for sessions that are upcoming.
   const upcomingEvents = useMemo(() => sortedEvents.filter(event => new Date(event.date) >= today), [sortedEvents, today]);
+  
+  const eventDays = useMemo(() => events.map(e => e.date), [events]);
+
 
   if (loading || initialRender) {
       return (
@@ -81,8 +80,8 @@ export default function KalenderPage() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="md:col-span-2 shadow-lg bg-card/80 backdrop-blur-sm">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <Card className="lg:col-span-2 shadow-lg bg-card/80 backdrop-blur-sm">
           <CardHeader>
             <CardTitle>Kalenderansicht</CardTitle>
             <CardDescription>Wähle einen Tag, um Termine anzuzeigen.</CardDescription>
@@ -94,21 +93,12 @@ export default function KalenderPage() {
               selected={date}
               onSelect={setDate}
               className="rounded-md border p-0"
-              modifiers={{ 
-                eventDay: events.map(e => e.date),
-              }}
-              modifiersClassNames={{
-                eventDay: "font-bold"
-              }}
-              classNames={{
-                day_selected: "bg-secondary text-secondary-foreground",
-                day_today: "border-2 border-primary rounded-md",
-              }}
+              modifiers={{ eventDay: eventDays }}
             />
           </CardContent>
         </Card>
 
-        <Card className="md:col-span-1 shadow-lg bg-card/80 backdrop-blur-sm">
+        <Card className="lg:col-span-1 shadow-lg bg-card/80 backdrop-blur-sm">
           <CardHeader>
             <CardTitle className="flex items-center">
               <ListChecks className="mr-2 h-5 w-5 text-primary" />
