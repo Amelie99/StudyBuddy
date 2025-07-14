@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -22,20 +23,29 @@ import { Loader2, Send } from 'lucide-react';
 
 const profileSchema = z.object({
   fullName: z.string().min(3, { message: 'Vollständiger Name ist erforderlich (mind. 3 Zeichen).' }),
-  studiengang: z.string().min(1, { message: 'Studiengang ist erforderlich.' }),
+  studiengang: z.string().optional(),
+  customStudiengang: z.string().optional(),
   semester: z.string().min(1, { message: 'Semester ist erforderlich.' }),
   photoURL: z.string().url({ message: 'Ungültige URL für Profilbild.' }).optional().or(z.literal('')),
   ueberMich: z.string().max(500, { message: 'Maximal 500 Zeichen.' }).optional(),
   lerninteressen: z.array(z.string()).min(1, { message: 'Wählen Sie mindestens ein Lerninteresse.' }),
   lernstil: z.string().min(1, { message: 'Lernstil ist erforderlich.' }),
-  kurse: z.string().optional(), // For simplicity, comma-separated string. Could be array of tags.
+  kurse: z.string().optional(),
   verfuegbarkeit: z.array(z.string()).min(1, { message: 'Wählen Sie mindestens eine Verfügbarkeit.' }),
+}).refine(data => {
+    if (data.studiengang === 'anderer') {
+        return !!data.customStudiengang && data.customStudiengang.length > 2;
+    }
+    return !!data.studiengang;
+}, {
+    message: 'Bitte geben Sie Ihren Studiengang an oder wählen Sie einen aus der Liste.',
+    path: ['studiengang'],
 });
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
 
 export default function ProfilErstellenPage() {
-  const { currentUser, loading: authLoading, updateUserProfile } = useAuth(); // Add updateUserProfile
+  const { currentUser, loading: authLoading, updateUserProfile } = useAuth();
   const { toast } = useToast();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
@@ -45,6 +55,7 @@ export default function ProfilErstellenPage() {
     defaultValues: {
       fullName: '',
       studiengang: '',
+      customStudiengang: '',
       semester: '',
       photoURL: '',
       ueberMich: '',
@@ -55,8 +66,9 @@ export default function ProfilErstellenPage() {
     },
   });
   
+  const studiengangValue = form.watch('studiengang');
+
   useEffect(() => {
-    // Pre-fill with existing data if user comes back to this page somehow
     if (currentUser) {
       form.reset({
         fullName: currentUser.displayName || '',
@@ -80,18 +92,20 @@ export default function ProfilErstellenPage() {
     }
     setIsLoading(true);
     try {
+      const finalStudiengang = data.studiengang === 'anderer' ? data.customStudiengang : data.studiengang;
+
       const updatedProfile: Partial<AppUser> = {
         displayName: data.fullName,
-        studiengang: data.studiengang,
+        studiengang: finalStudiengang,
         semester: data.semester,
         photoURL: data.photoURL,
         ueberMich: data.ueberMich,
-        bio: data.ueberMich, // also populate bio field
+        bio: data.ueberMich,
         lerninteressen: data.lerninteressen,
         lernstil: data.lernstil,
         kurse: data.kurse?.split(',').map(k => k.trim()),
         verfuegbarkeit: data.verfuegbarkeit,
-        profileComplete: true, // Mark the profile as complete
+        profileComplete: true,
       };
 
       await updateUserProfile(updatedProfile);
@@ -101,7 +115,7 @@ export default function ProfilErstellenPage() {
         title: 'Profil erstellt!',
         description: 'Dein Profil wurde erfolgreich eingerichtet. Du wirst weitergeleitet.',
       });
-      router.push('/dashboard'); // Go to dashboard after profile completion
+      router.push('/dashboard');
     } catch (error: any) {
       toast({
         title: 'Fehler bei Profilerstellung',
@@ -118,7 +132,6 @@ export default function ProfilErstellenPage() {
   }
 
   if (!currentUser && !authLoading) {
-     // This case should ideally be handled by AuthGuard redirecting to login
     router.push('/anmelden');
     return null;
   }
@@ -142,6 +155,22 @@ export default function ProfilErstellenPage() {
                 <FormField control={form.control} name="studiengang" render={({ field }) => (<FormItem><FormLabel>Studiengang</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Studiengang wählen" /></SelectTrigger></FormControl><SelectContent>{studiengangOptions.map(o => <SelectItem key={o.id} value={o.id}>{o.label}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>)} />
                 <FormField control={form.control} name="semester" render={({ field }) => (<FormItem><FormLabel>Semester</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Semester wählen" /></SelectTrigger></FormControl><SelectContent>{semesterOptions.map(o => <SelectItem key={o.id} value={o.id}>{o.label}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>)} />
               </div>
+              
+              {studiengangValue === 'anderer' && (
+                  <FormField
+                    control={form.control}
+                    name="customStudiengang"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Eigener Studiengang</FormLabel>
+                        <FormControl>
+                          <Input placeholder="z.B. Mechatronik" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+              )}
 
               <FormField control={form.control} name="ueberMich" render={({ field }) => (<FormItem><FormLabel>Über Mich / Meine Lernziele</FormLabel><FormControl><Textarea placeholder="Erzähl etwas über dich, deine Lernmethoden und was du dir von einem Lernpartner erwartest..." className="min-h-[100px]" {...field} /></FormControl><FormMessage /></FormItem>)} />
               

@@ -45,13 +45,14 @@ export const verfuegbarkeitOptions = [
   { id: 'flexibel', label: 'Flexibel' },
 ];
 
-export const studiengangOptions = [ // Example, should be comprehensive or fetched
+export const studiengangOptions = [
   { id: "informatik", label: "Informatik" },
   { id: "sozialeArbeit", label: "Soziale Arbeit" },
   { id: "masterElektrotechnik", label: "Master Elektrotechnik" },
   { id: "bwl", label: "Betriebswirtschaft (BWL)" },
   { id: "wirtschaftsingenieurwesen", label: "Wirtschaftsingenieurwesen" },
   { id: "maschinenbau", label: "Maschinenbau" },
+  { id: "anderer", label: "Anderer Studiengang" },
 ];
 
 export const semesterOptions = Array.from({ length: 10 }, (_, i) => ({
