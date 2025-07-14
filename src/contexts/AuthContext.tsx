@@ -3,7 +3,7 @@
 
 import type { User as FirebaseUser } from 'firebase/auth';
 import React, { createContext, useContext, useEffect, useState, useMemo, useCallback } from 'react';
-import { auth, db } from '@/config/firebase';
+import { auth, db, storage } from '@/config/firebase';
 import { 
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
@@ -12,6 +12,7 @@ import {
   onAuthStateChanged
 } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import type { AppUser } from '@/lib/types';
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
@@ -25,6 +26,7 @@ interface AuthContextType {
   sendPasswordReset: (email: string) => Promise<void>;
   isHochschuleEmail: (email: string) => boolean;
   updateUserProfile: (profileData: Partial<AppUser>) => Promise<void>;
+  uploadProfilePicture: (file: File, userId: string) => Promise<string>;
   updateAuthContextUser: (updatedUser: Partial<AppUser>) => void;
   deleteCurrentUser: () => void;
 }
@@ -91,6 +93,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [currentUser, updateAuthContextUser]);
 
+  const uploadProfilePicture = useCallback(async (file: File, userId: string): Promise<string> => {
+    const storageRef = ref(storage, `profile-pictures/${userId}/${file.name}`);
+    const snapshot = await uploadBytes(storageRef, file);
+    const downloadURL = await getDownloadURL(snapshot.ref);
+    await updateUserProfile({ photoURL: downloadURL });
+    return downloadURL;
+  }, [updateUserProfile]);
+
   const deleteCurrentUser = useCallback(() => {
     if (currentUser) {
       console.log("Deleting profile for:", currentUser.uid);
@@ -134,9 +144,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     sendPasswordReset,
     isHochschuleEmail,
     updateUserProfile,
+    uploadProfilePicture,
     updateAuthContextUser,
     deleteCurrentUser,
-  }), [currentUser, loading, login, register, logout, sendPasswordReset, isHochschuleEmail, updateUserProfile, updateAuthContextUser, deleteCurrentUser]);
+  }), [currentUser, loading, login, register, logout, sendPasswordReset, isHochschuleEmail, updateUserProfile, uploadProfilePicture, updateAuthContextUser, deleteCurrentUser]);
 
   // The AuthProvider no longer needs to render the loader itself,
   // as the HomePage now acts as the "splash screen".

@@ -1,6 +1,6 @@
 
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -36,10 +36,11 @@ type ProfileFormValues = z.infer<typeof profileSchema>;
 
 
 export default function MeinProfilPage() {
-  const { currentUser, loading: authLoading } = useAuth(); // Assuming updateUser is a function in AuthContext to update user details
+  const { currentUser, loading: authLoading, uploadProfilePicture, updateUserProfile } = useAuth();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
@@ -75,12 +76,18 @@ export default function MeinProfilPage() {
   async function onSubmit(data: ProfileFormValues) {
     setIsLoading(true);
     try {
-      // In a real app, this would update Firestore and potentially Firebase Auth profile
-      console.log('Profilaktualisierung:', data);
-      // await updateUserProfile(currentUser.uid, data); // This would be your Firebase update function
-      // Example of updating local state for mock:
-      // @ts-ignore
-      // updateAuthContextUser({ ...currentUser, ...data, displayName: data.fullName, kurse: data.kurse?.split(',').map(k => k.trim()) }); 
+      const profileData: Partial<AppUser> = {
+        displayName: data.fullName,
+        photoURL: data.photoURL,
+        studiengang: data.studiengang,
+        semester: data.semester,
+        ueberMich: data.ueberMich,
+        lerninteressen: data.lerninteressen,
+        lernstil: data.lernstil,
+        kurse: data.kurse?.split(',').map(k => k.trim()),
+        verfuegbarkeit: data.verfuegbarkeit
+      }
+      await updateUserProfile(profileData);
       
       toast({
         title: 'Profil aktualisiert',
@@ -98,12 +105,40 @@ export default function MeinProfilPage() {
     }
   }
 
+  const handleAvatarClick = () => {
+    if (isEditing) {
+      fileInputRef.current?.click();
+    }
+  };
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file && currentUser) {
+      setIsLoading(true);
+      try {
+        const newPhotoURL = await uploadProfilePicture(file, currentUser.uid);
+        form.setValue('photoURL', newPhotoURL, { shouldValidate: true });
+        toast({
+          title: 'Profilbild hochgeladen',
+          description: 'Dein neues Profilbild wurde gespeichert.',
+        });
+      } catch (error) {
+        toast({
+          title: 'Upload fehlgeschlagen',
+          description: 'Das Profilbild konnte nicht hochgeladen werden.',
+          variant: 'destructive',
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
+
   if (authLoading) {
     return <div className="flex justify-center items-center h-screen"><Loader2 className="h-12 w-12 animate-spin text-primary" /></div>;
   }
 
   if (!currentUser) {
-     // This case should ideally be handled by AuthGuard redirecting to login
     return <div className="text-center p-8">Bitte zuerst anmelden.</div>;
   }
   
@@ -121,8 +156,15 @@ export default function MeinProfilPage() {
                       {currentUser.displayName ? currentUser.displayName.substring(0,2).toUpperCase() : '??'}
                     </AvatarFallback>
                 </Avatar>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileChange}
+                  className="hidden"
+                  accept="image/png, image/jpeg"
+                />
                 {isEditing && (
-                    <Button size="icon" variant="outline" className="absolute bottom-0 right-0 rounded-full bg-card">
+                    <Button size="icon" variant="outline" className="absolute bottom-0 right-0 rounded-full bg-card" onClick={handleAvatarClick}>
                         <Edit3 className="h-4 w-4"/>
                         <span className="sr-only">Profilbild ändern</span>
                     </Button>
