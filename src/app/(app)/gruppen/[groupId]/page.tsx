@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
-import { Users, MessageSquare, UserPlus, Settings, CalendarPlus, Trash2, Edit, Loader2 } from 'lucide-react';
+import { Users, MessageSquare, UserPlus, Settings, CalendarPlus, Trash2, Edit, Loader2, ArrowLeft } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import React, { useEffect, useState, memo } from 'react';
@@ -119,6 +119,10 @@ export default function GroupDetailPage() {
 
   return (
     <div className="container mx-auto py-8">
+      <Button variant="ghost" onClick={() => router.push('/partner-gruppen')} className="mb-4">
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Zurück zu Buddies & Gruppen
+      </Button>
       <Card className="overflow-hidden shadow-xl">
         {group.image && (
           <div className="relative h-48 md:h-64 w-full">
