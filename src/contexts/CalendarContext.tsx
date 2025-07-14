@@ -1,6 +1,8 @@
+
 'use client';
 
 import React, { createContext, useContext, useState, ReactNode, useCallback, useEffect, useMemo } from 'react';
+import { useAuth } from './AuthContext';
 
 export interface CalendarEvent {
     id: string;
@@ -9,6 +11,7 @@ export interface CalendarEvent {
     description?: string;
     location?: string;
     type: 'Gruppe' | 'Einzel';
+    attendees: string[]; // List of user IDs
 }
 
 interface CalendarContextType {
@@ -28,6 +31,7 @@ export function useCalendar() {
 }
 
 export const CalendarProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+    const { currentUser } = useAuth();
     const [events, setEvents] = useState<CalendarEvent[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -38,10 +42,19 @@ export const CalendarProvider: React.FC<{ children: ReactNode }> = ({ children }
             date.setDate(date.getDate() + days);
             return date;
         };
+        
+        // Mock user IDs from seed data for realistic scenario
+        const davidMeierId = 'jXo8P8Q6yYg4Z2n2V5N2fW1t1Y23';
+        const annaSchmidtId = 'kL9qRstUvWxYz3o3W6P3gX2u2Z34';
+        const juliaSchneiderId = 'mN0sTuVwXyZa1b1X7Q4hY3v3A45';
 
         const initialEvents: CalendarEvent[] = [
-            { id: "1", title: "Mathe II Lerngruppe", date: getFutureDate(1), type: "Gruppe" },
-            { id: "2", title: "Projektbesprechung SE", date: getFutureDate(5), type: "Einzel" },
+            // This event includes David and Julia, so it will show up for them.
+            { id: "1", title: "Mathe II Lerngruppe", date: getFutureDate(1), type: "Gruppe", attendees: [davidMeierId, juliaSchneiderId] },
+            // This event only includes Anna, so it will only show for her.
+            { id: "2", title: "Projektbesprechung SE", date: getFutureDate(5), type: "Einzel", attendees: [annaSchmidtId] },
+            // A general event for everyone to see initially
+            { id: "3", title: "Allgemeine Q&A Session", date: getFutureDate(10), type: "Gruppe", attendees: [davidMeierId, annaSchmidtId, juliaSchneiderId] },
         ];
         
         setEvents(initialEvents);
@@ -49,12 +62,15 @@ export const CalendarProvider: React.FC<{ children: ReactNode }> = ({ children }
     }, []);
 
     const addEvent = useCallback((eventData: Omit<CalendarEvent, 'id'>) => {
+        if(!currentUser) return;
         const newEvent: CalendarEvent = {
             id: `event-${Date.now()}`,
             ...eventData,
+            // Automatically add the creator to the attendees
+            attendees: [...new Set([...(eventData.attendees || []), currentUser.uid])]
         };
         setEvents(prevEvents => [...prevEvents, newEvent].sort((a,b) => a.date.getTime() - b.date.getTime()));
-    }, []);
+    }, [currentUser]);
 
     const value = useMemo(() => ({
         events,

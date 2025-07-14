@@ -14,15 +14,13 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, CalendarPlus, Clock } from 'lucide-react';
+import { Loader2, CalendarPlus, Clock, CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { useCalendar } from '@/contexts/CalendarContext';
 import dynamic from 'next/dynamic';
-
-const Calendar = dynamic(() => import('@/components/ui/calendar').then(mod => mod.Calendar));
-
+import { Calendar } from '@/components/ui/calendar';
 
 const eventSchema = z.object({
   title: z.string().min(3, { message: 'Titel muss mindestens 3 Zeichen lang sein.' }),
@@ -84,6 +82,7 @@ export default function EventErstellenForm() {
         description: data.description,
         location: `${data.location || 'N/A'} (${data.startTime} - ${data.endTime})`,
         type: 'Einzel' as const,
+        attendees: [currentUser.uid], // Start with current user
       };
 
       addEvent(eventData);
@@ -128,7 +127,7 @@ export default function EventErstellenForm() {
                         <FormControl>
                           <Button variant={"outline"} className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
                             {field.value ? format(field.value, "PPP", { locale: de }) : <span>Datum wählen</span>}
-                            <Clock className="ml-auto h-4 w-4 opacity-50" />
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                           </Button>
                         </FormControl>
                       </PopoverTrigger>

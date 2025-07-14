@@ -60,9 +60,10 @@ export default function DashboardPage() {
   const { events } = useCalendar();
 
   const upcomingSessions = useMemo(() => {
+    if (!currentUser) return [];
     const now = new Date();
     return [...events]
-      .filter(event => event.date >= now)
+      .filter(event => event.date >= now && event.attendees.includes(currentUser.uid))
       .sort((a, b) => a.date.getTime() - b.date.getTime())
       .slice(0, 2)
       .map(event => ({
@@ -71,7 +72,7 @@ export default function DashboardPage() {
         time: formatDistanceToNow(event.date, { addSuffix: true, locale: de }),
         type: event.type
       }));
-  }, [events]);
+  }, [events, currentUser]);
 
 
   const unreadCount = notifications.filter(n => !n.read).length;
@@ -169,7 +170,7 @@ export default function DashboardPage() {
                   ))}
                 </ul>
               ) : (
-                <p className="text-muted-foreground">Keine anstehenden Sitzungen.</p>
+                <p className="text-muted-foreground">Keine anstehenden Sitzungen für dich geplant.</p>
               )}
             </CardContent>
           </Card>
