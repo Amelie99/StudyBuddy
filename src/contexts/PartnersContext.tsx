@@ -3,13 +3,14 @@
 
 import React, { createContext, useContext, useState, ReactNode, useCallback, useMemo, useEffect } from 'react';
 import { db } from '@/config/firebase';
-import { collection, onSnapshot, doc, setDoc } from 'firebase/firestore';
+import { collection, onSnapshot, doc, setDoc, deleteDoc } from 'firebase/firestore';
 import { useAuth } from './AuthContext';
 import type { AppUser, Buddy } from '@/lib/types';
 
 interface BuddiesContextType {
     buddies: Buddy[];
     addBuddy: (buddy: AppUser) => Promise<void>;
+    removeBuddy: (buddyId: string) => Promise<void>;
     loading: boolean;
 }
 
@@ -38,7 +39,6 @@ export const BuddiesProvider: React.FC<{ children: ReactNode }> = ({ children })
         setLoading(true);
         const buddiesRef = collection(db, 'users', currentUser.uid, 'buddies');
         
-        // Use onSnapshot for real-time updates
         const unsubscribe = onSnapshot(buddiesRef, (snapshot) => {
             const buddiesList = snapshot.docs.map(doc => doc.data() as Buddy);
             setBuddies(buddiesList);
@@ -48,7 +48,6 @@ export const BuddiesProvider: React.FC<{ children: ReactNode }> = ({ children })
             setLoading(false);
         });
 
-        // Cleanup the listener when the component unmounts or user changes
         return () => unsubscribe();
     }, [currentUser]);
 
@@ -67,7 +66,6 @@ export const BuddiesProvider: React.FC<{ children: ReactNode }> = ({ children })
 
         await setDoc(buddyRef, buddyData);
 
-        // Also add the current user to the buddy's buddy list to make it reciprocal
         const otherBuddyRef = doc(db, 'users', buddy.uid, 'buddies', currentUser.uid);
         const currentUserAsBuddy: Buddy = {
              id: currentUser.uid,
@@ -76,15 +74,24 @@ export const BuddiesProvider: React.FC<{ children: ReactNode }> = ({ children })
              avatar: currentUser.photoURL || '',
         };
         await setDoc(otherBuddyRef, currentUserAsBuddy);
+    }, [currentUser]);
 
-        // No need to manually update state here, onSnapshot will handle it.
+    const removeBuddy = useCallback(async (buddyId: string) => {
+        if (!currentUser) throw new Error("No current user found");
+
+        const buddyRef = doc(db, 'users', currentUser.uid, 'buddies', buddyId);
+        await deleteDoc(buddyRef);
+
+        const otherBuddyRef = doc(db, 'users', buddyId, 'buddies', currentUser.uid);
+        await deleteDoc(otherBuddyRef);
     }, [currentUser]);
 
     const value = useMemo(() => ({
         buddies,
         addBuddy,
+        removeBuddy,
         loading,
-    }), [buddies, addBuddy, loading]);
+    }), [buddies, addBuddy, removeBuddy, loading]);
 
     return (
         <BuddiesContext.Provider value={value}>

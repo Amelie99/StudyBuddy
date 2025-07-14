@@ -2,11 +2,11 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Loader2, MessageSquare } from 'lucide-react';
+import { ArrowLeft, Loader2, MessageSquare, UserX } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { lerninteressenOptions, lernstilOptions, verfuegbarkeitOptions } from '@/lib/constants';
 import Link from 'next/link';
@@ -14,6 +14,18 @@ import { Badge } from '@/components/ui/badge';
 import { db } from '@/config/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import type { AppUser } from '@/lib/types';
+import { useBuddies } from '@/contexts/PartnersContext';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 const fetchUserDetails = async (userId: string): Promise<AppUser | null> => {
   if (!userId) return null;
@@ -21,7 +33,7 @@ const fetchUserDetails = async (userId: string): Promise<AppUser | null> => {
   const userDoc = await getDoc(userDocRef);
 
   if (userDoc.exists()) {
-    return userDoc.data() as AppUser;
+    return { ...userDoc.data(), uid: userDoc.id } as AppUser;
   }
   return null;
 }
@@ -33,6 +45,7 @@ export default function UserProfilePage() {
     const { toast } = useToast();
     const [user, setUser] = useState<AppUser | null>(null);
     const [loading, setLoading] = useState(true);
+    const { buddies, removeBuddy } = useBuddies();
 
     useEffect(() => {
         if (userId) {
@@ -47,6 +60,27 @@ export default function UserProfilePage() {
         }
     }, [userId, toast]);
     
+    const isBuddy = useMemo(() => buddies.some(b => b.id === userId), [buddies, userId]);
+
+    const handleRemoveBuddy = async () => {
+        try {
+            await removeBuddy(userId);
+            toast({
+                title: 'Buddy entfernt',
+                description: `${user?.displayName} ist nicht mehr dein Buddy.`
+            });
+            // Optionally, you can navigate away or just update the UI
+            // For now, the button will just disappear as `isBuddy` becomes false.
+        } catch (error) {
+            console.error('Failed to remove buddy', error);
+            toast({
+                title: 'Fehler',
+                description: 'Konnte Buddy nicht entfernen.',
+                variant: 'destructive'
+            });
+        }
+    }
+
     if (loading) {
         return <div className="flex justify-center items-center h-screen"><Loader2 className="h-12 w-12 animate-spin text-primary" /></div>;
     }
@@ -87,6 +121,29 @@ export default function UserProfilePage() {
                                <MessageSquare className="mr-2 h-4 w-4" /> Nachricht senden
                             </Link>
                         </Button>
+                        {isBuddy && (
+                            <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                    <Button variant="destructive" >
+                                        <UserX className="mr-2 h-4 w-4" /> Buddy entfernen
+                                    </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>Bist du sicher?</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            Möchtest du {user.displayName} wirklich als Buddy entfernen? Diese Aktion kann nicht rückgängig gemacht werden.
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+                                        <AlertDialogAction onClick={handleRemoveBuddy}>
+                                            Entfernen
+                                        </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
+                        )}
                     </div>
                     <div>
                         <h3 className="font-semibold text-lg mb-1">Über Mich</h3>
