@@ -100,7 +100,10 @@ export default function PartnerSuchePage() {
 
         // Filter by Studiengang
         if (data.studiengang && data.studiengang !== 'all') {
-            filteredResults = filteredResults.filter(user => user.studiengang === data.studiengang);
+            const studiengangLabel = studiengangOptions.find(o => o.id === data.studiengang)?.label;
+            if (studiengangLabel) {
+                 filteredResults = filteredResults.filter(user => user.studiengang === studiengangLabel);
+            }
         }
 
         // Filter by Semester
@@ -111,14 +114,14 @@ export default function PartnerSuchePage() {
         // Filter by Lerninteressen
         if (data.lerninteressen && data.lerninteressen.length > 0) {
             filteredResults = filteredResults.filter(user => 
-                data.lerninteressen!.some(interesse => user.lerninteressen?.includes(interesse))
+                data.lerninteressen!.every(interesse => user.lerninteressen?.includes(interesse))
             );
         }
 
         // Filter by Verfügbarkeit
         if (data.verfuegbarkeit && data.verfuegbarkeit.length > 0) {
             filteredResults = filteredResults.filter(user => 
-                data.verfuegbarkeit!.some(zeit => user.verfuegbarkeit?.includes(zeit))
+                data.verfuegbarkeit!.every(zeit => user.verfuegbarkeit?.includes(zeit))
             );
         }
         
