@@ -5,7 +5,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Heart, X, CheckCircle, MessageSquare, Users, Loader2, RefreshCw, Search, SlidersHorizontal } from "lucide-react";
+import { Heart, X, CheckCircle, MessageSquare, Users, Loader2, RefreshCw, Search } from "lucide-react";
 import Image from "next/image";
 import {
   AlertDialog,
@@ -22,7 +22,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { db } from "@/config/firebase";
 import { collection, getDocs, doc, getDoc } from "firebase/firestore";
 import type { AppUser } from "@/lib/types";
-import { Input } from "@/components/ui/input";
+import Link from "next/link";
 
 const AlertDialogContent = dynamic(() => import('@/components/ui/alert-dialog').then(mod => mod.AlertDialogContent));
 
@@ -223,16 +223,12 @@ export default function PartnerFindenPage() {
           </div>
           
           <div className="w-full max-w-sm px-4 mb-4">
-            <div className="flex gap-2">
-                <div className="relative flex-grow">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                    <Input placeholder="Nach Name, Kurs, etc. suchen..." className="pl-10" />
-                </div>
-                <Button variant="outline" size="icon">
-                    <SlidersHorizontal className="h-5 w-5" />
-                    <span className="sr-only">Filteroptionen</span>
-                </Button>
-            </div>
+            <Button asChild className="w-full">
+              <Link href="/partner-finden/suche">
+                <Search className="mr-2 h-4 w-4" />
+                Zur Detailsuche
+              </Link>
+            </Button>
           </div>
         
           <div className="flex-grow flex flex-col items-center justify-center w-full">
