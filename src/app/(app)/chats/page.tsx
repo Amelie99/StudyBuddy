@@ -51,7 +51,7 @@ export default function ChatsPage() {
     }
     return conversations.filter(conversation =>
       conversation.name.toLowerCase().includes(lowerCaseSearchTerm) ||
-      conversation.lastMessage.toLowerCase().includes(lowerCaseSearchTerm)
+      (conversation.lastMessage && conversation.lastMessage.toLowerCase().includes(lowerCaseSearchTerm))
     );
   }, [conversations, searchTerm]);
 
@@ -83,9 +83,9 @@ export default function ChatsPage() {
         <Card className="flex-grow flex flex-col items-center justify-center text-center border-dashed bg-card/80 backdrop-blur-sm">
             <CardHeader>
               <MessageSquarePlus className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
-              <CardTitle>Keine Chats gefunden</CardTitle>
+              <CardTitle>{conversations.length > 0 ? "Keine Chats gefunden" : "Starte eine neue Konversation"}</CardTitle>
               <CardDescription>
-                {searchTerm ? "Deine Suche ergab keine Treffer." : "Starte eine neue Konversation, indem du Buddies findest."}
+                {searchTerm ? "Deine Suche ergab keine Treffer. Versuche es mit einem anderen Suchbegriff." : "Du hast noch keine aktiven Chats. Finde Buddies, um ein Gespräch zu beginnen."}
               </CardDescription>
             </CardHeader>
             <CardContent>
