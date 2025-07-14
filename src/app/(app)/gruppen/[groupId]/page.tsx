@@ -157,7 +157,7 @@ export default function GroupDetailPage() {
 
           <div>
             <h3 className="text-xl font-semibold mb-3 flex items-center">
-              <Users className="mr-2 h-5 w-5 text-primary" /> Mitglieder ({groupMembers.length})
+              <Users className="mr-2 h-5 w-5 text-primary" /> Mitglieder ({group.members})
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
               {groupMembers.map((member: any) => (
@@ -232,5 +232,3 @@ export default function GroupDetailPage() {
     </div>
   );
 }
-
-    
