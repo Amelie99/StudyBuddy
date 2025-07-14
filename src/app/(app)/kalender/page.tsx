@@ -28,19 +28,6 @@ const UpcomingEventItem = memo(function UpcomingEventItem({ session }: { session
   );
 });
 
-const WeekdayHeaders = () => {
-    const weekdays = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
-    return (
-        <div className="grid grid-cols-7 mb-2">
-            {weekdays.map(day => (
-                <div key={day} className="text-center text-muted-foreground text-sm font-medium">
-                    {day}
-                </div>
-            ))}
-        </div>
-    )
-}
-
 export default function KalenderPage() {
   const [date, setDate] = useState<Date | undefined>(new Date());
   const { events, loading } = useCalendar();
@@ -95,7 +82,6 @@ export default function KalenderPage() {
             <CardDescription>Wähle einen Tag, um Termine anzuzeigen.</CardDescription>
           </CardHeader>
           <CardContent className="flex justify-center flex-col">
-            <WeekdayHeaders />
             <Calendar
               locale={de}
               weekStartsOn={1}
