@@ -92,18 +92,20 @@ export default function GruppeErstellenPage() {
     }
     setIsLoading(true);
     try {
-      addGroup({
+      const groupId = await addGroup({
         name: data.name,
         description: data.description,
+        invites: data.invites,
+        isPrivate: data.isPrivate,
+        studiengang: data.studiengang,
+        kursModul: data.kursModul,
       });
       
-      console.log("Invited buddies:", data.invites);
-
       toast({
         title: 'Gruppe erstellt!',
         description: `Die Gruppe "${data.name}" wurde erfolgreich erstellt.`,
       });
-      router.push('/gruppen'); // Redirect to groups list page
+      router.push(`/gruppen/${groupId}`); // Redirect to the new group's page
     } catch (error: any) {
       toast({
         title: 'Fehler bei Gruppenerstellung',

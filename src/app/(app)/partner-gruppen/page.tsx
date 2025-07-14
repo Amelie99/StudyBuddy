@@ -98,7 +98,7 @@ const GroupCard = memo(function GroupCard({ group }: { group: Group }) {
                   <p className="font-semibold text-lg">{group.name}</p>
                   <div className="flex items-center text-sm text-muted-foreground">
                       <Users className="mr-2 h-4 w-4" />
-                      <span>{group.members} Mitglieder</span>
+                      <span>{group.members.length} Mitglieder</span>
                   </div>
               </div>
           </Link>
@@ -169,13 +169,13 @@ function PartnerGruppenClient() {
     }
   };
 
-  const handleCreateGroupFromSuggestion = (name: string, description: string) => {
-    addGroup({ name, description });
+  const handleCreateGroupFromSuggestion = async (name: string, description: string) => {
+    const groupId = await addGroup({ name, description });
     toast({
       title: 'Gruppe erstellt!',
       description: `Die Gruppe "${name}" wurde erfolgreich erstellt.`,
     });
-    router.push('/gruppen');
+    router.push(`/gruppen/${groupId}`);
     setSuggestions([]); // Clear suggestions after creating one
   };
 

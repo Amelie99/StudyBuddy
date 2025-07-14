@@ -15,7 +15,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import React, { useEffect, useState, memo } from 'react';
 import dynamic from 'next/dynamic';
-import { useGroups, type Group } from '@/contexts/GroupsContext';
+import { useGroups, type Group, type GroupMember } from '@/contexts/GroupsContext';
 import { useAuth } from '@/contexts/AuthContext';
 
 const DialogContent = dynamic(() => import('@/components/ui/dialog').then(mod => mod.DialogContent));
@@ -31,15 +31,17 @@ const getSafeAvatar = (url?: string) => {
     }
 };
 
-const GroupMemberItem = memo(function GroupMemberItem({ member, isAdmin }: { member: any, isAdmin: boolean }) {
-    const safeAvatar = getSafeAvatar(member.avatar);
+const GroupMemberItem = memo(function GroupMemberItem({ member, isAdmin }: { member: GroupMember, isAdmin: boolean }) {
+    const safeAvatar = getSafeAvatar(member.photoURL);
     return (
         <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-accent/10">
-            <Avatar>
-                <AvatarImage src={safeAvatar} alt={member.name} data-ai-hint={member.dataAiHint} sizes="48px" />
-                <AvatarFallback>{member.name.substring(0, 2).toUpperCase()}</AvatarFallback>
-            </Avatar>
-            <span>{member.name} {isAdmin && <span className="text-xs text-primary ml-1">(Admin)</span>}</span>
+            <Link href={`/profil/${member.uid}`} className="flex items-center space-x-3 w-full">
+                <Avatar>
+                    <AvatarImage src={safeAvatar} alt={member.displayName || 'Avatar'} sizes="48px" />
+                    <AvatarFallback>{member.displayName?.substring(0, 2).toUpperCase()}</AvatarFallback>
+                </Avatar>
+                <span>{member.displayName} {isAdmin && <span className="text-xs text-primary ml-1">(Admin)</span>}</span>
+            </Link>
         </div>
     );
 });
@@ -59,10 +61,13 @@ export default function GroupDetailPage() {
   const groupId = params.groupId as string;
   const router = useRouter();
   const { toast } = useToast();
-  const { groups } = useGroups();
+  const { groups, getGroupMembers } = useGroups();
   const { currentUser } = useAuth();
+  
   const [group, setGroup] = useState<Group | null | undefined>(undefined);
+  const [members, setMembers] = useState<GroupMember[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMembers, setLoadingMembers] = useState(true);
   const [inviteEmail, setInviteEmail] = useState('');
 
   useEffect(() => {
@@ -70,9 +75,16 @@ export default function GroupDetailPage() {
     if (groupId && groups.length > 0) {
       const foundGroup = groups.find(g => g.id === groupId);
       setGroup(foundGroup);
+      if (foundGroup) {
+          setLoadingMembers(true);
+          getGroupMembers(foundGroup.members).then(fetchedMembers => {
+              setMembers(fetchedMembers);
+              setLoadingMembers(false);
+          });
+      }
     }
     setLoading(false);
-  }, [groupId, groups]);
+  }, [groupId, groups, getGroupMembers]);
 
   const handleInviteMember = () => {
     if (!inviteEmail) {
@@ -99,9 +111,7 @@ export default function GroupDetailPage() {
     );
   }
   
-  // For now, assume user is admin of any group they view for UI purposes.
-  // Real implementation would check against group data.
-  const isAdmin = true; 
+  const isAdmin = group.createdBy === currentUser?.uid;
 
   return (
     <div className="container mx-auto py-8">
@@ -146,11 +156,23 @@ export default function GroupDetailPage() {
 
           <div>
             <h3 className="text-xl font-semibold mb-3 flex items-center">
-              <Users className="mr-2 h-5 w-5 text-primary" /> Mitglieder ({group.members})
+              <Users className="mr-2 h-5 w-5 text-primary" /> Mitglieder ({group.members.length})
             </h3>
-            <div className="text-muted-foreground p-4 text-center border rounded-lg border-dashed">
-              Die Mitgliederliste wird in Kürze verfügbar sein.
-            </div>
+             {loadingMembers ? (
+                <div className="flex justify-center items-center h-24">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+            ) : members.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                   {members.map(member => (
+                       <GroupMemberItem key={member.uid} member={member} isAdmin={group.createdBy === member.uid} />
+                   ))}
+                </div>
+            ) : (
+                <div className="text-muted-foreground p-4 text-center border rounded-lg border-dashed">
+                    Mitgliederinformationen konnten nicht geladen werden.
+                </div>
+            )}
             {isAdmin && (
             <Dialog>
               <DialogTrigger asChild>

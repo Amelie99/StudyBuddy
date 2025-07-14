@@ -30,7 +30,7 @@ const GroupCard = memo(function GroupCard({ group }: { group: Group }) {
       <CardContent className="flex-grow">
         <div className="flex items-center text-sm text-muted-foreground">
           <Users className="mr-2 h-4 w-4" />
-          <span>{group.members} Mitglieder</span>
+          <span>{group.members.length} Mitglieder</span>
         </div>
       </CardContent>
       <CardFooter className="flex justify-between">
