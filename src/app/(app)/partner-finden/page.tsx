@@ -5,7 +5,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Heart, X, CheckCircle, MessageSquare, Users, Loader2, RefreshCw } from "lucide-react";
+import { Heart, X, CheckCircle, MessageSquare, Users, Loader2, RefreshCw, Search, SlidersHorizontal } from "lucide-react";
 import Image from "next/image";
 import {
   AlertDialog,
@@ -22,15 +22,17 @@ import { useAuth } from "@/contexts/AuthContext";
 import { db } from "@/config/firebase";
 import { collection, getDocs, doc, getDoc } from "firebase/firestore";
 import type { AppUser } from "@/lib/types";
+import { Input } from "@/components/ui/input";
 
 const AlertDialogContent = dynamic(() => import('@/components/ui/alert-dialog').then(mod => mod.AlertDialogContent));
 
 const approvedHosts = ['i.imgur.com', 'placehold.co'];
 const getSafeAvatar = (url?: string) => {
     try {
-        if (!url) return 'https://i.imgur.com/8bFhU43.jpeg';
-        const hostname = new URL(url).hostname;
-        return approvedHosts.includes(hostname) ? url : 'https://i.imgur.com/8bFhU43.jpeg';
+        if (!url || !approvedHosts.some(host => new URL(url).hostname === host)) {
+            return 'https://i.imgur.com/8bFhU43.jpeg';
+        }
+        return url;
     } catch (_e) {
         return 'https://i.imgur.com/8bFhU43.jpeg';
     }
@@ -215,9 +217,22 @@ export default function PartnerFindenPage() {
   return (
     <>
       <div className="flex flex-col items-center py-8 h-full overflow-hidden">
-          <div className="text-center mb-8">
+          <div className="text-center mb-4 w-full max-w-sm px-4">
             <h1 className="text-3xl font-bold text-foreground">Buddies entdecken</h1>
             <p className="text-muted-foreground">Wische durch Profile oder nutze die Buttons unten.</p>
+          </div>
+          
+          <div className="w-full max-w-sm px-4 mb-4">
+            <div className="flex gap-2">
+                <div className="relative flex-grow">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                    <Input placeholder="Nach Name, Kurs, etc. suchen..." className="pl-10" />
+                </div>
+                <Button variant="outline" size="icon">
+                    <SlidersHorizontal className="h-5 w-5" />
+                    <span className="sr-only">Filteroptionen</span>
+                </Button>
+            </div>
           </div>
         
           <div className="flex-grow flex flex-col items-center justify-center w-full">
