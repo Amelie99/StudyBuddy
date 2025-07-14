@@ -56,7 +56,7 @@ const UserResultCard = ({ user }: { user: AppUser }) => {
                     </div>
                 </Link>
                 <Button variant="outline" size="sm" asChild>
-                    <Link href={`/chats/new?userId=${user.uid}`}>
+                    <Link href={`/chats/${user.uid}`}>
                         <MessageSquare className="mr-2 h-4 w-4"/>
                         Nachricht
                     </Link>
@@ -90,27 +90,30 @@ export default function PartnerSuchePage() {
         const usersRef = collection(db, 'users');
         let conditions: QueryConstraint[] = [];
         
+        // Firestore is limited. We can reliably filter by one 'where' and one 'array-contains-any'.
+        // Let's prioritize Studiengang for the DB query.
         if (data.studiengang && data.studiengang !== 'all') {
             conditions.push(where('studiengang', '==', data.studiengang));
         }
-        if (data.semester && data.semester !== 'all') {
-            conditions.push(where('semester', '==', data.semester));
-        }
-        if (data.lerninteressen && data.lerninteressen.length > 0) {
-             conditions.push(where('lerninteressen', 'array-contains-any', data.lerninteressen));
-        }
-        if (data.verfuegbarkeit && data.verfuegbarkeit.length > 0) {
-            conditions.push(where('verfuegbarkeit', 'array-contains-any', data.verfuegbarkeit));
-        }
-        
+
         const q = query(usersRef, ...conditions);
         const querySnapshot = await getDocs(q);
         
-        const foundUsers = querySnapshot.docs
-            .map(doc => ({ ...doc.data(), uid: doc.id } as AppUser))
-            .filter(user => user.uid !== currentUser?.uid); // Filter out current user
+        const allFoundUsers = querySnapshot.docs
+            .map(doc => ({ ...doc.data(), uid: doc.id } as AppUser));
 
-        setResults(foundUsers);
+        // Now, we filter the results on the client side for more complex logic
+        const filteredResults = allFoundUsers.filter(user => {
+            if (user.uid === currentUser?.uid) return false; // Exclude current user
+
+            const semesterMatch = !data.semester || data.semester === 'all' || user.semester === data.semester;
+            const interessenMatch = !data.lerninteressen || data.lerninteressen.length === 0 || data.lerninteressen.some(interesse => user.lerninteressen?.includes(interesse));
+            const verfuegbarkeitMatch = !data.verfuegbarkeit || data.verfuegbarkeit.length === 0 || data.verfuegbarkeit.some(zeit => user.verfuegbarkeit?.includes(zeit));
+
+            return semesterMatch && interessenMatch && verfuegbarkeitMatch;
+        });
+        
+        setResults(filteredResults);
         
     } catch (error) {
         console.error("Error searching for users:", error);
