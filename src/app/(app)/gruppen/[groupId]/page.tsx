@@ -21,9 +21,9 @@ const DialogContent = dynamic(() => import('@/components/ui/dialog').then(mod =>
 
 // Mock user and event data - in a real app, this would be fetched
 const mockMembers = [
-    { id: "user1", name: "Max Mustermann", avatar: "https://placehold.co/100x100.png", dataAiHint: "man student" },
+    { id: "user1", name: "Max Mustermann", avatar: "https://i.imgur.com/D267ZyT.jpeg", dataAiHint: "man student" },
     { id: "user2", name: "Lisa Schmidt", avatar: "https://i.imgur.com/PKtZX0C.jpeg", dataAiHint: "woman student" },
-    { id: "user3", name: "Admin User", avatar: "https://placehold.co/100x100.png", dataAiHint: "person icon" },
+    { id: "user3", name: "Admin User", avatar: "https://i.imgur.com/t05wynC.jpeg", dataAiHint: "person icon" },
 ];
 
 const mockEvents = [

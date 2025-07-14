@@ -24,11 +24,11 @@ const fetchSessionDetails = async (sessionId: string) => {
             location: "Raum E0.04",
             type: "Gruppe",
             description: "Wir besprechen die Übungsaufgaben von Blatt 5 und bereiten uns auf die kommende Vorlesung vor. Bitte bringt das Skript und eure Fragen mit.",
-            organizer: { name: "Max Mustermann", avatar: "https://placehold.co/100x100.png", dataAiHint: "man student" },
+            organizer: { name: "Max Mustermann", avatar: "https://i.imgur.com/D267ZyT.jpeg", dataAiHint: "man student" },
             attendees: [
                 { id: "user1", name: "Lisa Schmidt", avatar: "https://i.imgur.com/PKtZX0C.jpeg", dataAiHint: "woman student" },
                 { id: "user2", name: "Sarah Chen", avatar: "https://i.imgur.com/NkY3Ovh.jpeg", dataAiHint: "woman smiling" },
-                { id: "user3", name: "Du", avatar: "https://placehold.co/100x100.png", dataAiHint: "person icon" },
+                { id: "user3", name: "Du", avatar: "https://i.imgur.com/t05wynC.jpeg", dataAiHint: "person icon" },
             ]
         },
         "2": {
@@ -41,7 +41,7 @@ const fetchSessionDetails = async (sessionId: string) => {
             description: "Finale Abstimmung der Meilensteine für den Prototypen. Agenda: 1. Review letzter Sprint, 2. Planung nächster Sprint, 3. Offene Punkte.",
             organizer: { name: "David Meier", avatar: "https://i.imgur.com/ZiKvLxU.jpeg", dataAiHint: "man portrait" },
             attendees: [
-                { id: "user4", name: "Du", avatar: "https://placehold.co/100x100.png", dataAiHint: "person icon" },
+                { id: "user4", name: "Du", avatar: "https://i.imgur.com/t05wynC.jpeg", dataAiHint: "person icon" },
             ]
         }
     };
