@@ -90,10 +90,10 @@ export default function PartnerSuchePage() {
         const usersRef = collection(db, 'users');
         let conditions: QueryConstraint[] = [];
         
-        if (data.studiengang) {
+        if (data.studiengang && data.studiengang !== 'all') {
             conditions.push(where('studiengang', '==', data.studiengang));
         }
-        if (data.semester) {
+        if (data.semester && data.semester !== 'all') {
             conditions.push(where('semester', '==', data.semester));
         }
         if (data.lerninteressen && data.lerninteressen.length > 0) {
@@ -132,8 +132,8 @@ export default function PartnerSuchePage() {
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <FormField control={form.control} name="studiengang" render={({ field }) => (<FormItem><FormLabel>Studiengang</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Studiengang wählen" /></SelectTrigger></FormControl><SelectContent>{studiengangOptions.map(o => <SelectItem key={o.id} value={o.id}>{o.label}</SelectItem>)}</SelectContent></Select></FormItem>)} />
-                            <FormField control={form.control} name="semester" render={({ field }) => (<FormItem><FormLabel>Semester</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Semester wählen" /></SelectTrigger></FormControl><SelectContent>{semesterOptions.map(o => <SelectItem key={o.id} value={o.id}>{o.label}</SelectItem>)}</SelectContent></Select></FormItem>)} />
+                            <FormField control={form.control} name="studiengang" render={({ field }) => (<FormItem><FormLabel>Studiengang</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Alle Studiengänge" /></SelectTrigger></FormControl><SelectContent><SelectItem value="all">Alle</SelectItem>{studiengangOptions.map(o => <SelectItem key={o.id} value={o.id}>{o.label}</SelectItem>)}</SelectContent></Select></FormItem>)} />
+                            <FormField control={form.control} name="semester" render={({ field }) => (<FormItem><FormLabel>Semester</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Alle Semester" /></SelectTrigger></FormControl><SelectContent><SelectItem value="all">Alle</SelectItem>{semesterOptions.map(o => <SelectItem key={o.id} value={o.id}>{o.label}</SelectItem>)}</SelectContent></Select></FormItem>)} />
                         </div>
                         <FormField control={form.control} name="lerninteressen" render={() => (
                             <FormItem>
