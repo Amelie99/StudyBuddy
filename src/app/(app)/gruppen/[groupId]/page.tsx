@@ -31,11 +31,23 @@ const mockEvents = [
     { id: "event2", title: "Q&A Session vor Klausur", date: "25. Juli, 18:00 Uhr" },
 ];
 
+const approvedHosts = ['i.imgur.com', 'placehold.co'];
+const getSafeAvatar = (url?: string) => {
+    try {
+        if (!url) return 'https://i.imgur.com/8bFhU43.jpeg';
+        const hostname = new URL(url).hostname;
+        return approvedHosts.includes(hostname) ? url : 'https://i.imgur.com/8bFhU43.jpeg';
+    } catch (_e) {
+        return 'https://i.imgur.com/8bFhU43.jpeg';
+    }
+};
+
 const GroupMemberItem = memo(function GroupMemberItem({ member, isAdmin }: { member: any, isAdmin: boolean }) {
+    const safeAvatar = getSafeAvatar(member.avatar);
     return (
         <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-accent/10">
             <Avatar>
-                <AvatarImage src={member.avatar} alt={member.name} data-ai-hint={member.dataAiHint} sizes="48px" />
+                <AvatarImage src={safeAvatar} alt={member.name} data-ai-hint={member.dataAiHint} sizes="48px" />
                 <AvatarFallback>{member.name.substring(0, 2).toUpperCase()}</AvatarFallback>
             </Avatar>
             <span>{member.name} {isAdmin && <span className="text-xs text-primary ml-1">(Admin)</span>}</span>

@@ -127,9 +127,21 @@ async function seedUsers() {
             });
         } catch (error) {
             if (error.code === 'auth/uid-already-exists' || error.code === 'auth/email-already-exists') {
-                // User already exists, which is fine
+                // User already exists, which is fine for re-running the seed.
+                // Let's ensure the Firestore data is up-to-date.
+                 const { uid, email, displayName, photoURL, studiengang, bio, interessen, profileComplete } = user;
+                 await db.collection('users').doc(uid).set({
+                    uid,
+                    email,
+                    displayName,
+                    photoURL,
+                    studiengang,
+                    bio,
+                    interessen,
+                    profileComplete
+                }, { merge: true }); // Use merge to avoid overwriting everything if not needed
             } else {
-                console.error('Error seeding user:', error);
+                console.error('Error seeding user:', user.email, error);
             }
         }
     }

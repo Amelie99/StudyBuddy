@@ -10,6 +10,17 @@ import { Separator } from '@/components/ui/separator';
 import { Calendar, Clock, MapPin, Users, Info, ArrowLeft, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
+const approvedHosts = ['i.imgur.com', 'placehold.co'];
+const getSafeAvatar = (url?: string) => {
+    try {
+        if (!url) return 'https://i.imgur.com/8bFhU43.jpeg';
+        const hostname = new URL(url).hostname;
+        return approvedHosts.includes(hostname) ? url : 'https://i.imgur.com/8bFhU43.jpeg';
+    } catch (_e) {
+        return 'https://i.imgur.com/8bFhU43.jpeg';
+    }
+};
+
 // Mock data, in a real app this would be fetched from a database
 const fetchSessionDetails = async (sessionId: string) => {
     console.log("Fetching session details for: ", sessionId);
@@ -39,7 +50,7 @@ const fetchSessionDetails = async (sessionId: string) => {
             location: "Online - Zoom (Link im Chat)",
             type: "Einzel",
             description: "Finale Abstimmung der Meilensteine für den Prototypen. Agenda: 1. Review letzter Sprint, 2. Planung nächster Sprint, 3. Offene Punkte.",
-            organizer: { name: "David Meier", avatar: "https://i.imgur.com/ZiKvLxU.jpeg", dataAiHint: "man portrait" },
+            organizer: { name: "David Meier", avatar: "https://i.imgur.com/8bFhU43.jpeg", dataAiHint: "man portrait" },
             attendees: [
                 { id: "user4", name: "Du", avatar: "https://i.imgur.com/t05wynC.jpeg", dataAiHint: "person icon" },
             ]
@@ -82,6 +93,8 @@ export default function SessionDetailPage() {
             </div>
         );
     }
+    
+    const organizerSafeAvatar = getSafeAvatar(session.organizer.avatar);
 
     return (
         <div className="container mx-auto py-8">
@@ -124,20 +137,22 @@ export default function SessionDetailPage() {
                          <div className="space-y-3">
                             <div className="flex items-center space-x-3 text-sm">
                                 <Avatar>
-                                    <AvatarImage src={session.organizer.avatar} alt={session.organizer.name} data-ai-hint={session.organizer.dataAiHint} />
+                                    <AvatarImage src={organizerSafeAvatar} alt={session.organizer.name} data-ai-hint={session.organizer.dataAiHint} />
                                     <AvatarFallback>{session.organizer.name.substring(0, 2).toUpperCase()}</AvatarFallback>
                                 </Avatar>
                                 <span>{session.organizer.name} <span className="text-xs text-primary">(Organisator)</span></span>
                             </div>
-                            {session.attendees.map((attendee: any) => (
+                            {session.attendees.map((attendee: any) => {
+                                const attendeeSafeAvatar = getSafeAvatar(attendee.avatar);
+                                return (
                                 <div key={attendee.id} className="flex items-center space-x-3 text-sm">
                                     <Avatar>
-                                        <AvatarImage src={attendee.avatar} alt={attendee.name} data-ai-hint={attendee.dataAiHint} />
+                                        <AvatarImage src={attendeeSafeAvatar} alt={attendee.name} data-ai-hint={attendee.dataAiHint} />
                                         <AvatarFallback>{attendee.name.substring(0, 2).toUpperCase()}</AvatarFallback>
                                     </Avatar>
                                     <span>{attendee.name}</span>
                                 </div>
-                            ))}
+                            )})}
                          </div>
                     </div>
                 </CardContent>

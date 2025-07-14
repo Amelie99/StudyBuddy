@@ -25,6 +25,17 @@ import type { AppUser } from "@/lib/types";
 
 const AlertDialogContent = dynamic(() => import('@/components/ui/alert-dialog').then(mod => mod.AlertDialogContent));
 
+const approvedHosts = ['i.imgur.com', 'placehold.co'];
+const getSafeAvatar = (url?: string) => {
+    try {
+        if (!url) return 'https://i.imgur.com/8bFhU43.jpeg';
+        const hostname = new URL(url).hostname;
+        return approvedHosts.includes(hostname) ? url : 'https://i.imgur.com/8bFhU43.jpeg';
+    } catch (_e) {
+        return 'https://i.imgur.com/8bFhU43.jpeg';
+    }
+};
+
 export default function PartnerFindenPage() {
   const [suggestions, setSuggestions] = useState<AppUser[]>([]);
   const [rejectedSuggestions, setRejectedSuggestions] = useState<AppUser[]>([]);
@@ -125,9 +136,7 @@ export default function PartnerFindenPage() {
 
     if (suggestions.length > 0) {
       const buddy = suggestions[0];
-      const safePhotoURL = buddy.photoURL && buddy.photoURL.startsWith('http') 
-        ? buddy.photoURL 
-        : 'https://i.imgur.com/PKtZX0C.jpeg';
+      const safePhotoURL = getSafeAvatar(buddy.photoURL);
 
       return (
         <>

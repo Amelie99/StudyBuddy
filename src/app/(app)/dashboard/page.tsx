@@ -24,7 +24,17 @@ const initialNotifications = [
 ];
 
 const BuddyItem = memo(function BuddyItem({ buddy }: { buddy: any }) {
-  const safeAvatar = buddy.avatar && buddy.avatar.startsWith('http') ? buddy.avatar : 'https://i.imgur.com/8bFhU43.jpeg';
+  const approvedHosts = ['i.imgur.com', 'placehold.co'];
+  const getSafeAvatar = (url?: string) => {
+      try {
+          if (!url) return 'https://i.imgur.com/8bFhU43.jpeg';
+          const hostname = new URL(url).hostname;
+          return approvedHosts.includes(hostname) ? url : 'https://i.imgur.com/8bFhU43.jpeg';
+      } catch (_e) {
+          return 'https://i.imgur.com/8bFhU43.jpeg';
+      }
+  };
+  const safeAvatar = getSafeAvatar(buddy.avatar);
   return (
     <Link href={`/profil/${buddy.id}`} className="block rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
         <div className="flex items-center space-x-3 p-3 border rounded-lg hover:shadow-md transition-shadow h-full bg-background/50">

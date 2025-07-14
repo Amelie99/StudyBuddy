@@ -17,12 +17,22 @@ import { doc, getDoc } from "firebase/firestore";
 import type { AppUser } from "@/lib/types";
 import Image from "next/image";
 
+const approvedHosts = ['i.imgur.com', 'placehold.co'];
+const getSafeAvatar = (url?: string) => {
+    try {
+        if (!url) return 'https://i.imgur.com/8bFhU43.jpeg';
+        const hostname = new URL(url).hostname;
+        return approvedHosts.includes(hostname) ? url : 'https://i.imgur.com/8bFhU43.jpeg';
+    } catch (_e) {
+        return 'https://i.imgur.com/8bFhU43.jpeg';
+    }
+};
 
 const BuddyCard = memo(function BuddyCard({ buddy }: { buddy: Buddy }) {
   const { startNewChat } = useChats();
   const router = useRouter();
   const [isCreatingChat, setIsCreatingChat] = useState(false);
-  const safeAvatar = buddy.avatar && buddy.avatar.startsWith('http') ? buddy.avatar : 'https://i.imgur.com/8bFhU43.jpeg';
+  const safeAvatar = getSafeAvatar(buddy.avatar);
 
   const handleStartChat = async () => {
     setIsCreatingChat(true);
@@ -73,7 +83,7 @@ const BuddyCard = memo(function BuddyCard({ buddy }: { buddy: Buddy }) {
 });
 
 const GroupCard = memo(function GroupCard({ group }: { group: Group }) {
-  const safeImage = group.image && group.image.startsWith('http') ? group.image : 'https://placehold.co/600x400.png';
+  const safeImage = getSafeAvatar(group.image);
   return (
     <Card className="hover:shadow-lg hover:border-primary/50 transition-all bg-card/80 backdrop-blur-sm">
       <CardContent className="flex items-center justify-between space-x-4 p-4">

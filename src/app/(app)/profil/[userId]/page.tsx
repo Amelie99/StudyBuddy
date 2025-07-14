@@ -38,6 +38,17 @@ const fetchUserDetails = async (userId: string): Promise<AppUser | null> => {
   return null;
 }
 
+const approvedHosts = ['i.imgur.com', 'placehold.co'];
+const getSafeAvatar = (url?: string) => {
+    try {
+        if (!url) return 'https://i.imgur.com/8bFhU43.jpeg';
+        const hostname = new URL(url).hostname;
+        return approvedHosts.includes(hostname) ? url : 'https://i.imgur.com/8bFhU43.jpeg';
+    } catch (_e) {
+        return 'https://i.imgur.com/8bFhU43.jpeg';
+    }
+};
+
 export default function UserProfilePage() {
     const params = useParams();
     const userId = params.userId as string;
@@ -95,7 +106,7 @@ export default function UserProfilePage() {
         );
     }
 
-    const profilePicUrl = user.photoURL && user.photoURL.startsWith('http') ? user.photoURL : 'https://i.imgur.com/8bFhU43.jpeg';
+    const profilePicUrl = getSafeAvatar(user.photoURL);
 
     return (
         <div className="container mx-auto py-8">
