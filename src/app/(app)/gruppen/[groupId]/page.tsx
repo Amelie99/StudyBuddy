@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
@@ -14,35 +15,21 @@ import Image from 'next/image';
 import Link from 'next/link';
 import React, { useEffect, useState, memo } from 'react';
 import dynamic from 'next/dynamic';
+import { useGroups, type Group } from '@/contexts/GroupsContext';
 
 const DialogContent = dynamic(() => import('@/components/ui/dialog').then(mod => mod.DialogContent));
 
-// Mock data - replace with actual data fetching
-const fetchGroupDetails = async (groupId: string) => {
-  console.log("Fetching group details for: ", groupId);
-  // Simulate API call
-  await new Promise(resolve => setTimeout(resolve, 500));
-  if (groupId === "1") { // Example group
-    return {
-      id: "1",
-      name: "Mathe Profis WS23/24",
-      description: "Vorbereitung Analysis & Lineare Algebra für Erstsemester. Wöchentliche Treffen geplant.",
-      image: "https://i.imgur.com/s4M5N0Q.png",
-      dataAiHint: "mathematics chalkboard",
-      members: [
-        { id: "user1", name: "Max Mustermann", avatar: "https://placehold.co/100x100.png", dataAiHint: "man student" },
-        { id: "user2", name: "Lisa Schmidt", avatar: "https://i.imgur.com/PKtZX0C.jpeg", dataAiHint: "woman student" },
-        { id: "user3", name: "Admin User", avatar: "https://placehold.co/100x100.png", dataAiHint: "person icon" },
-      ],
-      createdBy: "user3", // Assume current user is admin for demo
-      upcomingEvents: [
-        { id: "event1", title: "Übungsaufgaben Besprechung", date: "20. Juli, 15:00 Uhr" },
-        { id: "event2", title: "Q&A Session vor Klausur", date: "25. Juli, 18:00 Uhr" },
-      ]
-    };
-  }
-  return null;
-};
+// Mock user and event data - in a real app, this would be fetched
+const mockMembers = [
+    { id: "user1", name: "Max Mustermann", avatar: "https://placehold.co/100x100.png", dataAiHint: "man student" },
+    { id: "user2", name: "Lisa Schmidt", avatar: "https://i.imgur.com/PKtZX0C.jpeg", dataAiHint: "woman student" },
+    { id: "user3", name: "Admin User", avatar: "https://placehold.co/100x100.png", dataAiHint: "person icon" },
+];
+
+const mockEvents = [
+    { id: "event1", title: "Übungsaufgaben Besprechung", date: "20. Juli, 15:00 Uhr" },
+    { id: "event2", title: "Q&A Session vor Klausur", date: "25. Juli, 18:00 Uhr" },
+];
 
 const GroupMemberItem = memo(function GroupMemberItem({ member, isAdmin }: { member: any, isAdmin: boolean }) {
     return (
@@ -71,7 +58,8 @@ export default function GroupDetailPage() {
   const groupId = params.groupId as string;
   const router = useRouter();
   const { toast } = useToast();
-  const [group, setGroup] = useState<any>(null); // Replace 'any' with a proper Group type
+  const { groups } = useGroups();
+  const [group, setGroup] = useState<Group | null | undefined>(undefined);
   const [loading, setLoading] = useState(true);
   const [inviteEmail, setInviteEmail] = useState('');
 
@@ -79,18 +67,13 @@ export default function GroupDetailPage() {
   const currentUserId = "user3"; 
 
   useEffect(() => {
-    if (groupId) {
-      fetchGroupDetails(groupId).then(data => {
-        setGroup(data);
-        setLoading(false);
-      }).catch(err => {
-        console.error("Failed to fetch group details", err);
-        toast({ title: "Fehler", description: "Gruppe nicht gefunden.", variant: "destructive" });
-        setLoading(false);
-        // router.push('/gruppen');
-      });
+    setLoading(true);
+    if (groupId && groups.length > 0) {
+      const foundGroup = groups.find(g => g.id === groupId);
+      setGroup(foundGroup);
     }
-  }, [groupId, toast]);
+    setLoading(false);
+  }, [groupId, groups]);
 
   const handleInviteMember = () => {
     if (!inviteEmail) {
@@ -102,8 +85,8 @@ export default function GroupDetailPage() {
     setInviteEmail('');
     // Close dialog if needed, depends on Dialog structure
   };
-
-  if (loading) {
+  
+  if (loading || group === undefined) {
     return <div className="flex justify-center items-center h-screen"><Loader2 className="h-12 w-12 animate-spin text-primary" /></div>;
   }
 
@@ -117,7 +100,9 @@ export default function GroupDetailPage() {
     );
   }
   
-  const isAdmin = group.createdBy === currentUserId;
+  const isAdmin = true; // For now, assume user is admin of any group they view
+  const groupMembers = mockMembers.slice(0, group.members);
+  const upcomingEvents = mockEvents;
 
 
   return (
@@ -156,11 +141,11 @@ export default function GroupDetailPage() {
 
           <div>
             <h3 className="text-xl font-semibold mb-3 flex items-center">
-              <Users className="mr-2 h-5 w-5 text-primary" /> Mitglieder ({group.members.length})
+              <Users className="mr-2 h-5 w-5 text-primary" /> Mitglieder ({groupMembers.length})
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-              {group.members.map((member: any) => (
-                <GroupMemberItem key={member.id} member={member} isAdmin={member.id === group.createdBy} />
+              {groupMembers.map((member: any) => (
+                <GroupMemberItem key={member.id} member={member} isAdmin={member.id === currentUserId} />
               ))}
             </div>
             {isAdmin && (
@@ -201,9 +186,9 @@ export default function GroupDetailPage() {
             <h3 className="text-xl font-semibold mb-3 flex items-center">
                 <CalendarPlus className="mr-2 h-5 w-5 text-primary" /> Anstehende Termine
             </h3>
-            {group.upcomingEvents && group.upcomingEvents.length > 0 ? (
+            {upcomingEvents && upcomingEvents.length > 0 ? (
                 <ul className="space-y-2">
-                    {group.upcomingEvents.map((event:any) => (
+                    {upcomingEvents.map((event:any) => (
                         <UpcomingGroupEventItem key={event.id} event={event} />
                     ))}
                 </ul>
@@ -231,3 +216,5 @@ export default function GroupDetailPage() {
     </div>
   );
 }
+
+    
