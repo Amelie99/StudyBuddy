@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useCallback } from "react";
@@ -14,23 +13,23 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useBuddies, type Buddy } from "@/contexts/PartnersContext";
+import { useBuddies } from "@/contexts/PartnersContext";
 import { useChats } from "@/contexts/ChatsContext";
 import { cn } from "@/lib/utils";
 import dynamic from "next/dynamic";
 import { useAuth } from "@/contexts/AuthContext";
 import { db } from "@/config/firebase";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, doc, getDoc } from "firebase/firestore";
 import type { AppUser } from "@/lib/types";
 
 const AlertDialogContent = dynamic(() => import('@/components/ui/alert-dialog').then(mod => mod.AlertDialogContent));
 
 export default function PartnerFindenPage() {
-  const [suggestions, setSuggestions] = useState<Buddy[]>([]);
+  const [suggestions, setSuggestions] = useState<AppUser[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showMatchDialog, setShowMatchDialog] = useState(false);
-  const [matchedBuddy, setMatchedBuddy] = useState<Buddy | null>(null);
-  const { buddies: likedBuddies, addBuddy } = useBuddies();
+  const [matchedBuddy, setMatchedBuddy] = useState<AppUser | null>(null);
+  const { buddies: likedBuddies, addBuddy, loading: buddiesLoading } = useBuddies();
   const { startNewChat } = useChats();
   const router = useRouter();
   const [swipeState, setSwipeState] = useState<'left' | 'right' | null>(null);
@@ -38,23 +37,14 @@ export default function PartnerFindenPage() {
 
   useEffect(() => {
     const fetchUsers = async () => {
-      if (!currentUser) return;
+      // Wait for currentUser and for the buddy list to finish loading.
+      if (!currentUser || buddiesLoading) return;
 
       setIsLoading(true);
       try {
         const usersCollectionRef = collection(db, "users");
-        const querySnapshot = await getDocs(usersCollectionRef);
-        const allUsers: Buddy[] = querySnapshot.docs
-          .map(doc => {
-            const data = doc.data() as AppUser;
-            return {
-              id: doc.id,
-              name: data.displayName || 'Unnamed User',
-              course: data.studiengang || 'Studiengang nicht angegeben',
-              avatar: data.photoURL || 'https://i.imgur.com/PKtZX0C.jpeg', // Default avatar
-              dataAiHint: 'user profile picture', // Generic hint
-            };
-          });
+        const querySnapshot = await getDocs(usersCollectionreF);
+        const allUsers = querySnapshot.docs.map(doc => ({ ...doc.data(), uid: doc.id } as AppUser));
 
         const myBuddyIds = new Set(likedBuddies.map(b => b.id));
         let declinedIds = new Set<string>();
@@ -71,7 +61,7 @@ export default function PartnerFindenPage() {
         }
 
         const filteredSuggestions = allUsers.filter(
-          user => user.id !== currentUser.uid && !myBuddyIds.has(user.id) && !declinedIds.has(user.id)
+          user => user.uid !== currentUser.uid && !myBuddyIds.has(user.uid) && !declinedIds.has(user.uid)
         );
         
         setSuggestions(filteredSuggestions);
@@ -84,27 +74,32 @@ export default function PartnerFindenPage() {
     };
 
     fetchUsers();
-  }, [currentUser, likedBuddies]);
+  }, [currentUser, likedBuddies, buddiesLoading]);
 
 
-  const handleAction = useCallback((action: 'like' | 'reject') => {
+  const handleAction = useCallback(async (action: 'like' | 'reject') => {
     if (suggestions.length === 0 || swipeState) return;
 
     const currentBuddy = suggestions[0];
     setSwipeState(action === 'like' ? 'right' : 'left');
+    
+    // Fetch the full AppUser object for the liked user
+    const userDocRef = doc(db, 'users', currentBuddy.uid);
+    const userDoc = await getDoc(userDocRef);
+    const likedUser = userDoc.data() as AppUser;
+
 
     setTimeout(() => {
       if (action === 'like') {
-        addBuddy(currentBuddy);
-        startNewChat(currentBuddy);
-        setMatchedBuddy(currentBuddy);
+        addBuddy(likedUser);
+        setMatchedBuddy(likedUser);
         setShowMatchDialog(true);
       } else { // 'reject'
         try {
           const storedDeclinedIds = localStorage.getItem('declinedBuddyIds');
           const declinedIds: string[] = storedDeclinedIds ? JSON.parse(storedDeclinedIds) : [];
-          if (!declinedIds.includes(currentBuddy.id)) {
-            declinedIds.push(currentBuddy.id);
+          if (!declinedIds.includes(currentBuddy.uid)) {
+            declinedIds.push(currentBuddy.uid);
             localStorage.setItem('declinedBuddyIds', JSON.stringify(declinedIds));
           }
         } catch (error) {
@@ -115,21 +110,24 @@ export default function PartnerFindenPage() {
       setSuggestions(queue => queue.slice(1));
       setSwipeState(null);
     }, 300); 
-  }, [suggestions, swipeState, addBuddy, startNewChat]);
+  }, [suggestions, swipeState, addBuddy]);
 
   const closeDialogAndContinue = () => {
     setShowMatchDialog(false);
     setMatchedBuddy(null);
   };
 
-  const handleChat = () => {
+  const handleChat = async () => {
     if (!matchedBuddy) return;
-    router.push(`/chats/${matchedBuddy.id}`);
+    const chatId = await startNewChat(matchedBuddy);
+    if(chatId) {
+        router.push(`/chats/${chatId}`);
+    }
     closeDialogAndContinue();
   };
   
   const renderContent = () => {
-    if (isLoading) {
+    if (isLoading || buddiesLoading) {
       return (
         <div className="flex flex-col items-center justify-center text-center h-full w-full">
           <Loader2 className="h-16 w-16 text-primary animate-spin" />
@@ -138,34 +136,25 @@ export default function PartnerFindenPage() {
     }
 
     if (suggestions.length > 0) {
+      const buddy = suggestions[0];
       return (
         <>
           <div className="relative w-full max-w-xs h-[450px] md:h-[500px] mb-8">
-            {suggestions.map((buddy, index) => {
-              const isTopCard = index === 0;
-              return (
                 <Card 
-                  key={buddy.id} 
+                  key={buddy.uid} 
                   className={cn(
                     "absolute w-full h-full rounded-2xl overflow-hidden shadow-2xl transition-all duration-300 ease-in-out",
-                    isTopCard && swipeState === 'left' && "transform -translate-x-[150%] rotate-[-15deg]",
-                    isTopCard && swipeState === 'right' && "transform translate-x-[150%] rotate-[15deg]"
+                    swipeState === 'left' && "transform -translate-x-[150%] rotate-[-15deg]",
+                    swipeState === 'right' && "transform translate-x-[150%] rotate-[15deg]"
                   )}
-                  style={{ 
-                    zIndex: suggestions.length - index,
-                    transform: `translateY(${Math.min(index, 2) * -8}px) scale(${1 - Math.min(index, 2) * 0.05})`,
-                    opacity: index < 3 ? 1 : 0,
-                  }}
                 >
-                  <Image src={buddy.avatar} alt={buddy.name} fill sizes="320px" className="object-cover" data-ai-hint={buddy.dataAiHint}/>
+                  <Image src={buddy.photoURL || 'https://i.imgur.com/PKtZX0C.jpeg'} alt={buddy.displayName || "user"} fill sizes="320px" className="object-cover"/>
                   <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent" />
                   <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-                    <h3 className="text-2xl font-bold drop-shadow-md">{buddy.name}</h3>
-                    <p className="text-sm opacity-90 drop-shadow-sm">{buddy.course}</p>
+                    <h3 className="text-2xl font-bold drop-shadow-md">{buddy.displayName}</h3>
+                    <p className="text-sm opacity-90 drop-shadow-sm">{buddy.studiengang}</p>
                   </div>
                 </Card>
-              )
-            })}
           </div>
           <div className="flex justify-center space-x-6">
             <Button 
@@ -225,7 +214,7 @@ export default function PartnerFindenPage() {
             <CheckCircle className="h-16 w-16 text-green-500 mb-2" />
             <AlertDialogTitle className="text-2xl">Buddy gefunden!</AlertDialogTitle>
             <AlertDialogDescription>
-              Super! {matchedBuddy?.name} wurde zu deinen Buddies hinzugefügt. Starte doch gleich ein Gespräch.
+              Super! {matchedBuddy?.displayName} wurde zu deinen Buddies hinzugefügt. Starte doch gleich ein Gespräch.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-col sm:flex-row gap-2">

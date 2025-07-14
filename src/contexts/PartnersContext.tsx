@@ -3,13 +3,14 @@
 
 import React, { createContext, useContext, useState, ReactNode, useCallback, useMemo, useEffect } from 'react';
 import { db } from '@/config/firebase';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, onSnapshot, doc, setDoc } from 'firebase/firestore';
 import { useAuth } from './AuthContext';
-import type { AppUser, SuggestedBuddy, Buddy } from '@/lib/types';
+import type { AppUser, Buddy } from '@/lib/types';
 
 interface BuddiesContextType {
     buddies: Buddy[];
-    addBuddy: (buddy: SuggestedBuddy) => void;
+    addBuddy: (buddy: AppUser) => Promise<void>;
+    loading: boolean;
 }
 
 const BuddiesContext = createContext<BuddiesContextType | undefined>(undefined);
@@ -24,59 +25,66 @@ export function useBuddies() {
 
 export const BuddiesProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [buddies, setBuddies] = useState<Buddy[]>([]);
+    const [loading, setLoading] = useState(true);
     const { currentUser } = useAuth();
 
     useEffect(() => {
-        const fetchUsers = async () => {
-            if (currentUser) {
-                try {
-                    const usersCollectionRef = collection(db, "users");
-                    const querySnapshot = await getDocs(usersCollectionRef);
-                    const allUsers = querySnapshot.docs
-                        .map(doc => {
-                            const data = doc.data() as AppUser;
-                            return {
-                                id: doc.id,
-                                name: data.displayName || 'Unnamed User',
-                                course: data.studiengang || 'Studiengang nicht angegeben',
-                                avatar: data.photoURL || 'https://i.imgur.com/PKtZX0C.jpeg',
-                                dataAiHint: 'user profile picture',
-                            };
-                        });
-                    const otherUsers = allUsers.filter(user => user.id !== currentUser.uid);
-                    setBuddies(otherUsers);
-                } catch (error) {
-                    console.error("Error fetching users for BuddiesProvider:", error);
-                }
-            }
-        };
+        if (!currentUser) {
+            setLoading(false);
+            setBuddies([]);
+            return;
+        }
 
-        fetchUsers();
+        setLoading(true);
+        const buddiesRef = collection(db, 'users', currentUser.uid, 'buddies');
+        
+        // Use onSnapshot for real-time updates
+        const unsubscribe = onSnapshot(buddiesRef, (snapshot) => {
+            const buddiesList = snapshot.docs.map(doc => doc.data() as Buddy);
+            setBuddies(buddiesList);
+            setLoading(false);
+        }, (error) => {
+            console.error("Failed to fetch buddies with real-time listener:", error);
+            setLoading(false);
+        });
+
+        // Cleanup the listener when the component unmounts or user changes
+        return () => unsubscribe();
     }, [currentUser]);
 
-    const addBuddy = useCallback((suggestedBuddy: SuggestedBuddy) => {
-        const buddyId = suggestedBuddy.id.toString();
-        
-        setBuddies(prevBuddies => {
-            if (prevBuddies.some(p => p.id === buddyId)) {
-                return prevBuddies;
-            }
 
-            const newBuddy: Buddy = {
-                id: buddyId,
-                name: suggestedBuddy.name,
-                course: suggestedBuddy.studiengang,
-                avatar: suggestedBuddy.avatar || suggestedBuddy.image.replace('300x400', '100x100'),
-                dataAiHint: suggestedBuddy.dataAiHint,
-            };
-            return [...prevBuddies, newBuddy];
-        });
-    }, []);
+    const addBuddy = useCallback(async (buddy: AppUser) => {
+        if (!currentUser) throw new Error("No current user found");
+
+        const buddyRef = doc(db, 'users', currentUser.uid, 'buddies', buddy.uid);
+        
+        const buddyData: Buddy = {
+            id: buddy.uid,
+            name: buddy.displayName || 'Unknown',
+            course: buddy.studiengang || 'Not specified',
+            avatar: buddy.photoURL || '',
+        };
+
+        await setDoc(buddyRef, buddyData);
+
+        // Also add the current user to the buddy's buddy list to make it reciprocal
+        const otherBuddyRef = doc(db, 'users', buddy.uid, 'buddies', currentUser.uid);
+        const currentUserAsBuddy: Buddy = {
+             id: currentUser.uid,
+             name: currentUser.displayName || 'Unknown',
+             course: currentUser.studiengang || 'Not specified',
+             avatar: currentUser.photoURL || '',
+        };
+        await setDoc(otherBuddyRef, currentUserAsBuddy);
+
+        // No need to manually update state here, onSnapshot will handle it.
+    }, [currentUser]);
 
     const value = useMemo(() => ({
         buddies,
         addBuddy,
-    }), [buddies, addBuddy]);
+        loading,
+    }), [buddies, addBuddy, loading]);
 
     return (
         <BuddiesContext.Provider value={value}>
