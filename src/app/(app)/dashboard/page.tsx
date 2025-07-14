@@ -24,10 +24,11 @@ const initialNotifications = [
 ];
 
 const BuddyItem = memo(function BuddyItem({ buddy }: { buddy: any }) {
+  const safeAvatar = buddy.avatar && buddy.avatar.startsWith('http') ? buddy.avatar : 'https://i.imgur.com/8bFhU43.jpeg';
   return (
     <Link href={`/profil/${buddy.id}`} className="block rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
         <div className="flex items-center space-x-3 p-3 border rounded-lg hover:shadow-md transition-shadow h-full bg-background/50">
-          <Image src={buddy.avatar} alt={buddy.name} width={40} height={40} className="rounded-full" data-ai-hint={buddy.dataAiHint} />
+          <Image src={safeAvatar} alt={buddy.name} width={40} height={40} className="rounded-full" data-ai-hint={buddy.dataAiHint} />
           <div>
             <p className="font-semibold">{buddy.name}</p>
             <p className="text-xs text-muted-foreground">{buddy.course}</p>

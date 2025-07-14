@@ -15,12 +15,14 @@ import { Loader2 } from "lucide-react";
 import { db } from "@/config/firebase";
 import { doc, getDoc } from "firebase/firestore";
 import type { AppUser } from "@/lib/types";
+import Image from "next/image";
 
 
 const BuddyCard = memo(function BuddyCard({ buddy }: { buddy: Buddy }) {
   const { startNewChat } = useChats();
   const router = useRouter();
   const [isCreatingChat, setIsCreatingChat] = useState(false);
+  const safeAvatar = buddy.avatar && buddy.avatar.startsWith('http') ? buddy.avatar : 'https://i.imgur.com/8bFhU43.jpeg';
 
   const handleStartChat = async () => {
     setIsCreatingChat(true);
@@ -49,7 +51,7 @@ const BuddyCard = memo(function BuddyCard({ buddy }: { buddy: Buddy }) {
       <CardContent className="flex items-center justify-between space-x-4 p-4">
         <Link href={`/profil/${buddy.id}`} className="flex items-center space-x-4 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
           <Avatar className="h-14 w-14">
-            <AvatarImage src={buddy.avatar} alt={buddy.name} sizes="56px" />
+            <AvatarImage src={safeAvatar} alt={buddy.name} sizes="56px" />
             <AvatarFallback>{buddy.name.substring(0, 2).toUpperCase()}</AvatarFallback>
           </Avatar>
           <div>
@@ -71,12 +73,13 @@ const BuddyCard = memo(function BuddyCard({ buddy }: { buddy: Buddy }) {
 });
 
 const GroupCard = memo(function GroupCard({ group }: { group: Group }) {
+  const safeImage = group.image && group.image.startsWith('http') ? group.image : 'https://placehold.co/600x400.png';
   return (
     <Card className="hover:shadow-lg hover:border-primary/50 transition-all bg-card/80 backdrop-blur-sm">
       <CardContent className="flex items-center justify-between space-x-4 p-4">
           <Link href={`/gruppen/${group.id}`} className="flex items-center space-x-4 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
               <Avatar className="h-14 w-14">
-                  <AvatarImage src={group.image} alt={group.name} data-ai-hint={group.dataAiHint} sizes="56px"/>
+                  <AvatarImage src={safeImage} alt={group.name} data-ai-hint={group.dataAiHint} sizes="56px"/>
                   <AvatarFallback>{group.name.substring(0, 2).toUpperCase()}</AvatarFallback>
               </Avatar>
               <div>

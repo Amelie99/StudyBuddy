@@ -95,7 +95,7 @@ export default function UserProfilePage() {
         );
     }
 
-    const profilePicUrl = user.photoURL || `https://placehold.co/128x128.png`;
+    const profilePicUrl = user.photoURL && user.photoURL.startsWith('http') ? user.photoURL : 'https://i.imgur.com/8bFhU43.jpeg';
 
     return (
         <div className="container mx-auto py-8">
