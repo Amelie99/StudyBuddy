@@ -10,6 +10,7 @@ import { de } from 'date-fns/locale';
 import { format, isSameDay } from 'date-fns';
 import { useCalendar, type CalendarEvent } from "@/contexts/CalendarContext";
 import dynamic from "next/dynamic";
+import { cn } from "@/lib/utils";
 
 const Calendar = dynamic(() => import('@/components/ui/calendar').then(mod => mod.Calendar));
 
@@ -33,29 +34,23 @@ export default function KalenderPage() {
   const [initialRender, setInitialRender] = useState(true);
 
   useEffect(() => {
-    // This effect runs once on the client to ensure dates are client-side only initially
-    // and avoids hydration mismatch for `new Date()`
     setInitialRender(false);
   }, []);
 
-  // Memoize sorted events to prevent re-sorting on every render
   const sortedEvents = useMemo(() => {
     if (loading || initialRender) return [];
     return [...events].sort((a, b) => a.date.getTime() - b.date.getTime());
   }, [events, loading, initialRender]);
   
   const today = useMemo(() => {
-    if (initialRender) return new Date(); // Temporary server-side value
+    if (initialRender) return new Date(); 
     const d = new Date();
     d.setHours(0, 0, 0, 0);
     return d;
   }, [initialRender]);
 
-  // Filter events for the selected day in the calendar
   const selectedDayEvents = date ? sortedEvents.filter(event => isSameDay(event.date, date)) : [];
 
-
-   // Filter for sessions that are upcoming.
   const upcomingEvents = useMemo(() => sortedEvents.filter(event => new Date(event.date) >= today), [sortedEvents, today]);
   
   const eventDays = useMemo(() => events.map(e => e.date), [events]);
