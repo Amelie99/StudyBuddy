@@ -19,7 +19,7 @@ import {
 import * as chatManager from '../lib/chatManager';
 import { useAuth } from './AuthContext';
 import { db } from '@/config/firebase';
-import { onSnapshot, collection, query, orderBy, Timestamp, doc } from 'firebase/firestore';
+import { onSnapshot, collection, query, orderBy, Timestamp, doc, getDoc } from 'firebase/firestore';
 
 interface ChatsContextType {
     conversations: Conversation[];
