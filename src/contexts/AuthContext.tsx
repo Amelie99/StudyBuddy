@@ -9,9 +9,10 @@ import {
   createUserWithEmailAndPassword,
   signOut,
   sendPasswordResetEmail,
-  onAuthStateChanged
+  onAuthStateChanged,
+  deleteUser
 } from 'firebase/auth';
-import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import type { AppUser } from '@/lib/types';
 import { useRouter } from 'next/navigation';
@@ -27,7 +28,7 @@ interface AuthContextType {
   updateUserProfile: (profileData: Partial<AppUser>) => Promise<void>;
   uploadProfilePicture: (file: File, userId: string) => Promise<string>;
   updateAuthContextUser: (updatedUser: Partial<AppUser>) => void;
-  deleteCurrentUser: () => void;
+  deleteCurrentUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -100,12 +101,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return downloadURL;
   }, [updateUserProfile]);
 
-  const deleteCurrentUser = useCallback(() => {
-    if (currentUser) {
-      console.log("Deleting profile for:", currentUser.uid);
-      logout();
-    }
-  }, [currentUser, logout]);
+  const deleteCurrentUser = useCallback(async () => {
+      const user = auth.currentUser;
+      if (user) {
+          try {
+              // First, delete the Firestore document.
+              const userDocRef = doc(db, 'users', user.uid);
+              await deleteDoc(userDocRef);
+              
+              // Then, delete the user from Firebase Auth.
+              // This action will trigger the onAuthStateChanged listener,
+              // which will set currentUser to null and cause a redirect.
+              await deleteUser(user);
+              
+              console.log("User deleted successfully");
+          } catch (error) {
+              console.error("Error deleting user:", error);
+              // This might be a "re-authentication needed" error.
+              // For simplicity in this app, we'll just log out.
+              // In a production app, you'd prompt for re-login.
+              await logout();
+              throw error; // Re-throw so the UI can catch it.
+          }
+      }
+  }, [logout]);
 
   const login = useCallback(async (email: string, pass: string) => {
     return signInWithEmailAndPassword(auth, email, pass);

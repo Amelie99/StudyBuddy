@@ -16,9 +16,31 @@ import { lerninteressenOptions, lernstilOptions, verfuegbarkeitOptions, studieng
 import type { AppUser } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Loader2, Edit3, Save } from 'lucide-react';
+import { Loader2, Edit3, Save, Trash2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Separator } from '@/components/ui/separator';
 
+const approvedHosts = ['i.imgur.com', 'placehold.co'];
+const getSafeAvatar = (url?: string) => {
+    try {
+        if (!url) return 'https://i.imgur.com/8bFhU43.jpeg';
+        const hostname = new URL(url).hostname;
+        return approvedHosts.includes(hostname) ? url : 'https://i.imgur.com/8bFhU43.jpeg';
+    } catch (_e) {
+        return 'https://i.imgur.com/8bFhU43.jpeg';
+    }
+};
 
 const profileSchema = z.object({
   fullName: z.string().min(3, { message: 'Vollständiger Name ist erforderlich (mind. 3 Zeichen).' }),
@@ -36,7 +58,7 @@ type ProfileFormValues = z.infer<typeof profileSchema>;
 
 
 export default function MeinProfilPage() {
-  const { currentUser, loading: authLoading, uploadProfilePicture, updateUserProfile } = useAuth();
+  const { currentUser, loading: authLoading, uploadProfilePicture, updateUserProfile, deleteCurrentUser } = useAuth();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -133,6 +155,23 @@ export default function MeinProfilPage() {
       }
     }
   };
+  
+  const handleDeleteProfile = async () => {
+    toast({
+        title: "Profil wird gelöscht...",
+        description: "Du wirst in Kürze ausgeloggt."
+    })
+    try {
+        await deleteCurrentUser();
+        // The auth context will handle the redirect to /anmelden
+    } catch (error: any) {
+        toast({
+            title: "Fehler",
+            description: "Profil konnte nicht gelöscht werden: " + error.message,
+            variant: "destructive"
+        })
+    }
+  };
 
   if (authLoading) {
     return <div className="flex justify-center items-center h-screen"><Loader2 className="h-12 w-12 animate-spin text-primary" /></div>;
@@ -142,7 +181,7 @@ export default function MeinProfilPage() {
     return <div className="text-center p-8">Bitte zuerst anmelden.</div>;
   }
   
-  const profilePicUrl = form.watch('photoURL') || currentUser.photoURL || `https://placehold.co/128x128.png`;
+  const profilePicUrl = getSafeAvatar(form.watch('photoURL') || currentUser.photoURL);
 
 
   return (
@@ -205,47 +244,74 @@ export default function MeinProfilPage() {
               </Button>
             </div>
           ) : (
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                <FormField control={form.control} name="fullName" render={({ field }) => (<FormItem><FormLabel>Vollständiger Name</FormLabel><FormControl><Input placeholder="Max Mustermann" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                <FormField control={form.control} name="photoURL" render={({ field }) => (<FormItem><FormLabel>Profilbild URL</FormLabel><FormControl><Input placeholder="https://example.com/bild.png" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField control={form.control} name="studiengang" render={({ field }) => (<FormItem><FormLabel>Studiengang</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Studiengang wählen" /></SelectTrigger></FormControl><SelectContent>{studiengangOptions.map(o => <SelectItem key={o.id} value={o.id}>{o.label}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>)} />
-                    <FormField control={form.control} name="semester" render={({ field }) => (<FormItem><FormLabel>Semester</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Semester wählen" /></SelectTrigger></FormControl><SelectContent>{semesterOptions.map(o => <SelectItem key={o.id} value={o.id}>{o.label}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>)} />
+            <div>
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                    <FormField control={form.control} name="fullName" render={({ field }) => (<FormItem><FormLabel>Vollständiger Name</FormLabel><FormControl><Input placeholder="Max Mustermann" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                    <FormField control={form.control} name="photoURL" render={({ field }) => (<FormItem><FormLabel>Profilbild URL</FormLabel><FormControl><Input placeholder="https://example.com/bild.png" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <FormField control={form.control} name="studiengang" render={({ field }) => (<FormItem><FormLabel>Studiengang</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Studiengang wählen" /></SelectTrigger></FormControl><SelectContent>{studiengangOptions.map(o => <SelectItem key={o.id} value={o.id}>{o.label}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>)} />
+                        <FormField control={form.control} name="semester" render={({ field }) => (<FormItem><FormLabel>Semester</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Semester wählen" /></SelectTrigger></FormControl><SelectContent>{semesterOptions.map(o => <SelectItem key={o.id} value={o.id}>{o.label}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>)} />
+                    </div>
+                    <FormField control={form.control} name="ueberMich" render={({ field }) => (<FormItem><FormLabel>Über Mich / Meine Lernziele</FormLabel><FormControl><Textarea placeholder="Erzähl etwas über dich und deine Lernziele..." className="min-h-[100px]" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                    <FormField control={form.control} name="lerninteressen" render={() => (
+                        <FormItem>
+                            <FormLabel>Lerninteressen</FormLabel>
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                            {lerninteressenOptions.map((item) => (
+                                <FormField key={item.id} control={form.control} name="lerninteressen" render={({ field }) => {
+                                    return (<FormItem className="flex flex-row items-start space-x-3 space-y-0"><FormControl><Checkbox checked={field.value?.includes(item.id)} onCheckedChange={(checked) => { return checked ? field.onChange([...(field.value || []), item.id]) : field.onChange(field.value?.filter((value) => value !== item.id));}} /></FormControl><FormLabel className="font-normal">{item.label}</FormLabel></FormItem>);
+                                }} />
+                            ))}
+                            </div><FormMessage />
+                        </FormItem>
+                    )} />
+                    <FormField control={form.control} name="lernstil" render={({ field }) => (<FormItem><FormLabel>Lernstil</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Lernstil wählen" /></SelectTrigger></FormControl><SelectContent>{lernstilOptions.map(o => <SelectItem key={o.id} value={o.id}>{o.label}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>)} />
+                    <FormField control={form.control} name="kurse" render={({ field }) => (<FormItem><FormLabel>Kurse/Module (kommagetrennt)</FormLabel><FormControl><Input placeholder="z.B. Mathe I, BWL Grundlagen" {...field} /></FormControl><FormDescription>Gib deine relevanten Kurse an.</FormDescription><FormMessage /></FormItem>)} />
+                    <FormField control={form.control} name="verfuegbarkeit" render={() => (
+                        <FormItem>
+                            <FormLabel>Verfügbarkeit</FormLabel>
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                            {verfuegbarkeitOptions.map((item) => (
+                                <FormField key={item.id} control={form.control} name="verfuegbarkeit" render={({ field }) => {
+                                    return (<FormItem className="flex flex-row items-start space-x-3 space-y-0"><FormControl><Checkbox checked={field.value?.includes(item.id)} onCheckedChange={(checked) => { return checked ? field.onChange([...(field.value || []), item.id]) : field.onChange(field.value?.filter((value) => value !== item.id));}} /></FormControl><FormLabel className="font-normal">{item.label}</FormLabel></FormItem>);
+                                }} />
+                            ))}
+                            </div><FormMessage />
+                        </FormItem>
+                    )} />
+                    <div className="flex gap-4">
+                        <Button type="button" variant="outline" onClick={() => setIsEditing(false)} disabled={isLoading}>Abbrechen</Button>
+                        <Button type="submit" disabled={isLoading}>{isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}<Save className="mr-2 h-4 w-4"/> Änderungen speichern</Button>
+                    </div>
+                  </form>
+                </Form>
+                <Separator className="my-8"/>
+                <div className="text-center">
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button variant="destructive">
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Profil löschen
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Bist du absolut sicher?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    Diese Aktion kann nicht rückgängig gemacht werden. Dein Konto und alle zugehörigen Daten werden dauerhaft gelöscht.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+                                <AlertDialogAction onClick={handleDeleteProfile} className="bg-destructive hover:bg-destructive/90">
+                                    Ja, Profil löschen
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
                 </div>
-                <FormField control={form.control} name="ueberMich" render={({ field }) => (<FormItem><FormLabel>Über Mich / Meine Lernziele</FormLabel><FormControl><Textarea placeholder="Erzähl etwas über dich und deine Lernziele..." className="min-h-[100px]" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                <FormField control={form.control} name="lerninteressen" render={() => (
-                    <FormItem>
-                        <FormLabel>Lerninteressen</FormLabel>
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                        {lerninteressenOptions.map((item) => (
-                            <FormField key={item.id} control={form.control} name="lerninteressen" render={({ field }) => {
-                                return (<FormItem className="flex flex-row items-start space-x-3 space-y-0"><FormControl><Checkbox checked={field.value?.includes(item.id)} onCheckedChange={(checked) => { return checked ? field.onChange([...(field.value || []), item.id]) : field.onChange(field.value?.filter((value) => value !== item.id));}} /></FormControl><FormLabel className="font-normal">{item.label}</FormLabel></FormItem>);
-                            }} />
-                        ))}
-                        </div><FormMessage />
-                    </FormItem>
-                )} />
-                <FormField control={form.control} name="lernstil" render={({ field }) => (<FormItem><FormLabel>Lernstil</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Lernstil wählen" /></SelectTrigger></FormControl><SelectContent>{lernstilOptions.map(o => <SelectItem key={o.id} value={o.id}>{o.label}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>)} />
-                <FormField control={form.control} name="kurse" render={({ field }) => (<FormItem><FormLabel>Kurse/Module (kommagetrennt)</FormLabel><FormControl><Input placeholder="z.B. Mathe I, BWL Grundlagen" {...field} /></FormControl><FormDescription>Gib deine relevanten Kurse an.</FormDescription><FormMessage /></FormItem>)} />
-                <FormField control={form.control} name="verfuegbarkeit" render={() => (
-                    <FormItem>
-                        <FormLabel>Verfügbarkeit</FormLabel>
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                        {verfuegbarkeitOptions.map((item) => (
-                            <FormField key={item.id} control={form.control} name="verfuegbarkeit" render={({ field }) => {
-                                return (<FormItem className="flex flex-row items-start space-x-3 space-y-0"><FormControl><Checkbox checked={field.value?.includes(item.id)} onCheckedChange={(checked) => { return checked ? field.onChange([...(field.value || []), item.id]) : field.onChange(field.value?.filter((value) => value !== item.id));}} /></FormControl><FormLabel className="font-normal">{item.label}</FormLabel></FormItem>);
-                            }} />
-                        ))}
-                        </div><FormMessage />
-                    </FormItem>
-                )} />
-                <div className="flex gap-4">
-                    <Button type="button" variant="outline" onClick={() => setIsEditing(false)} disabled={isLoading}>Abbrechen</Button>
-                    <Button type="submit" disabled={isLoading}>{isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}<Save className="mr-2 h-4 w-4"/> Änderungen speichern</Button>
-                </div>
-              </form>
-            </Form>
+            </div>
           )}
         </CardContent>
       </Card>
