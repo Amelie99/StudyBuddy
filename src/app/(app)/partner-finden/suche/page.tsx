@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -71,6 +71,26 @@ export default function PartnerSuchePage() {
   const [results, setResults] = useState<AppUser[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
   const { currentUser } = useAuth();
+  const [dynamicStudiengangOptions, setDynamicStudiengangOptions] = useState<string[]>(studiengangOptions.map(o => o.label));
+
+
+  useEffect(() => {
+    const fetchAndSetUniqueCourses = async () => {
+        const usersRef = collection(db, 'users');
+        const querySnapshot = await getDocs(usersRef);
+        const allUsers = querySnapshot.docs.map(doc => doc.data() as AppUser);
+        
+        const coursesFromDB = allUsers
+            .map(user => user.studiengang)
+            .filter((course): course is string => !!course);
+
+        const combinedCourses = new Set([...studiengangOptions.map(o => o.label), ...coursesFromDB]);
+        
+        setDynamicStudiengangOptions(Array.from(combinedCourses));
+    };
+
+    fetchAndSetUniqueCourses();
+  }, []);
 
   const form = useForm<SearchFormValues>({
     resolver: zodResolver(searchSchema),
@@ -100,10 +120,7 @@ export default function PartnerSuchePage() {
 
         // Filter by Studiengang
         if (data.studiengang && data.studiengang !== 'all') {
-            const studiengangLabel = studiengangOptions.find(o => o.id === data.studiengang)?.label;
-            if (studiengangLabel) {
-                 filteredResults = filteredResults.filter(user => user.studiengang === studiengangLabel);
-            }
+            filteredResults = filteredResults.filter(user => user.studiengang === data.studiengang);
         }
 
         // Filter by Semester
@@ -147,7 +164,7 @@ export default function PartnerSuchePage() {
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <FormField control={form.control} name="studiengang" render={({ field }) => (<FormItem><FormLabel>Studiengang</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Alle Studiengänge" /></SelectTrigger></FormControl><SelectContent><SelectItem value="all">Alle</SelectItem>{studiengangOptions.map(o => <SelectItem key={o.id} value={o.id}>{o.label}</SelectItem>)}</SelectContent></Select></FormItem>)} />
+                            <FormField control={form.control} name="studiengang" render={({ field }) => (<FormItem><FormLabel>Studiengang</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Alle Studiengänge" /></SelectTrigger></FormControl><SelectContent><SelectItem value="all">Alle</SelectItem>{dynamicStudiengangOptions.map(course => <SelectItem key={course} value={course}>{course}</SelectItem>)}</SelectContent></Select></FormItem>)} />
                             <FormField control={form.control} name="semester" render={({ field }) => (<FormItem><FormLabel>Semester</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Alle Semester" /></SelectTrigger></FormControl><SelectContent><SelectItem value="all">Alle</SelectItem>{semesterOptions.map(o => <SelectItem key={o.id} value={o.id}>{o.label}</SelectItem>)}</SelectContent></Select></FormItem>)} />
                         </div>
                         <FormField control={form.control} name="lerninteressen" render={() => (
