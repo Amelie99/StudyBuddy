@@ -92,8 +92,12 @@ export default function KalenderPage() {
               mode="single"
               selected={date}
               onSelect={setDate}
-              className="rounded-md border p-0"
-              modifiers={{ eventDay: eventDays }}
+              className="rounded-md"
+              modifiers={{ event: eventDays }}
+              modifiersClassNames={{
+                today: 'bg-accent text-accent-foreground',
+                event: 'font-bold text-primary',
+              }}
             />
           </CardContent>
         </Card>
