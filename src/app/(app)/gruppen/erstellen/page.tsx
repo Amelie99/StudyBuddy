@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -16,13 +17,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Loader2, Users2, PlusCircle, UserPlus } from 'lucide-react';
 import { studiengangOptions } from '@/lib/constants';
 import { useGroups } from '@/contexts/GroupsContext';
+import { useBuddies } from '@/contexts/PartnersContext';
+import { Checkbox } from '@/components/ui/checkbox';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+
 
 const groupSchema = z.object({
   name: z.string().min(3, { message: 'Gruppenname muss mindestens 3 Zeichen lang sein.' }).max(50, { message: 'Gruppenname darf maximal 50 Zeichen lang sein.' }),
   description: z.string().max(200, { message: 'Beschreibung darf maximal 200 Zeichen lang sein.' }).optional(),
   studiengang: z.string().optional(),
   kursModul: z.string().optional(),
-  invites: z.string().optional(),
+  invites: z.array(z.string()).optional(),
   isPrivate: z.boolean().default(false),
 });
 
@@ -34,6 +40,7 @@ export default function GruppeErstellenPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const { addGroup } = useGroups();
+  const { buddies } = useBuddies();
 
   const form = useForm<GroupFormValues>({
     resolver: zodResolver(groupSchema),
@@ -42,7 +49,7 @@ export default function GruppeErstellenPage() {
       description: '',
       studiengang: '',
       kursModul: '',
-      invites: '',
+      invites: [],
       isPrivate: false,
     },
   });
@@ -59,6 +66,8 @@ export default function GruppeErstellenPage() {
         description: data.description,
       });
       
+      console.log("Invited buddies:", data.invites);
+
       toast({
         title: 'Gruppe erstellt!',
         description: `Die Gruppe "${data.name}" wurde erfolgreich erstellt.`,
@@ -150,25 +159,57 @@ export default function GruppeErstellenPage() {
                 />
               </div>
 
-               <FormField
-                control={form.control}
-                name="invites"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="flex items-center">
-                        <UserPlus className="mr-2 h-4 w-4" />
-                        Mitglieder einladen (optional)
-                    </FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="Namen oder E-Mails mit Komma getrennt eingeben..." {...field} />
-                    </FormControl>
-                    <FormDescription className="text-xs">
-                        Lade Mitglieder direkt bei der Erstellung ein.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                <FormField
+                    control={form.control}
+                    name="invites"
+                    render={() => (
+                        <FormItem>
+                            <FormLabel className="flex items-center">
+                                <UserPlus className="mr-2 h-4 w-4" />
+                                Mitglieder einladen (optional)
+                            </FormLabel>
+                            <FormDescription className="text-xs">
+                                Wähle deine Buddies aus, die du zur Gruppe einladen möchtest.
+                            </FormDescription>
+                             <ScrollArea className="h-40 w-full rounded-md border p-4">
+                               <div className="space-y-4">
+                                {buddies.length > 0 ? buddies.map((buddy) => (
+                                    <FormField
+                                        key={buddy.id}
+                                        control={form.control}
+                                        name="invites"
+                                        render={({ field }) => {
+                                            return (
+                                                <FormItem key={buddy.id} className="flex flex-row items-center space-x-3">
+                                                    <FormControl>
+                                                        <Checkbox
+                                                            checked={field.value?.includes(buddy.id)}
+                                                            onCheckedChange={(checked) => {
+                                                                return checked
+                                                                    ? field.onChange([...(field.value || []), buddy.id])
+                                                                    : field.onChange(field.value?.filter((value) => value !== buddy.id));
+                                                            }}
+                                                        />
+                                                    </FormControl>
+                                                     <Avatar className="h-8 w-8">
+                                                        <AvatarImage src={buddy.avatar} alt={buddy.name} />
+                                                        <AvatarFallback>{buddy.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                                                    </Avatar>
+                                                    <FormLabel className="font-normal flex flex-col">
+                                                        <span>{buddy.name}</span>
+                                                        <span className="text-xs text-muted-foreground">{buddy.course}</span>
+                                                    </FormLabel>
+                                                </FormItem>
+                                            );
+                                        }}
+                                    />
+                                )) : <p className="text-sm text-muted-foreground text-center py-4">Du hast noch keine Buddies, die du einladen kannst.</p>}
+                               </div>
+                            </ScrollArea>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
 
               <FormField
                 control={form.control}
@@ -182,7 +223,7 @@ export default function GruppeErstellenPage() {
                         </FormDescription>
                     </div>
                     <FormControl>
-                        <Input type="checkbox" className="form-checkbox h-5 w-5 text-primary focus:ring-primary border-gray-300 rounded" checked={field.value} onChange={field.onChange} />
+                        <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                     </FormControl>
                   </FormItem>
                 )}
