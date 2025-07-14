@@ -11,42 +11,19 @@ import { useToast } from '@/hooks/use-toast';
 import { lerninteressenOptions, lernstilOptions, verfuegbarkeitOptions } from '@/lib/constants';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
+import { db } from '@/config/firebase';
+import { doc, getDoc } from 'firebase/firestore';
+import type { AppUser } from '@/lib/types';
 
-// Mock data fetching for a user
-const fetchUserDetails = async (userId: string) => {
-  // In a real app, fetch from Firestore
-  console.log("Fetching user details for:", userId);
-  await new Promise(resolve => setTimeout(resolve, 300));
+const fetchUserDetails = async (userId: string): Promise<AppUser | null> => {
+  if (!userId) return null;
+  const userDocRef = doc(db, 'users', userId);
+  const userDoc = await getDoc(userDocRef);
 
-  const users: {[key: string]: any} = {
-    "1": {
-      id: "1",
-      fullName: "Lisa Schmidt",
-      studiengang: "Soziale Arbeit",
-      semester: "2",
-      photoURL: "https://i.imgur.com/PKtZX0C.jpeg",
-      dataAiHint: "woman student",
-      ueberMich: "Neu an der HAWL und suche Anschluss! Brauche Hilfe bei den Grundlagen in 'Wissenschaftliches Arbeiten' und würde gerne Lerngruppen für die ersten Semester gründen.",
-      lerninteressen: ["hausaufgabenhilfe", "lerngruppefinden"],
-      lernstil: "diskussion",
-      kurse: "Einführung in die Soziale Arbeit, Wissenschaftliches Arbeiten",
-      verfuegbarkeit: ["wochentags", "flexibel"],
-    },
-    "2": {
-      id: "2",
-      fullName: "David Meier",
-      studiengang: "Master Elektrotechnik",
-      semester: "3",
-      photoURL: "https://i.imgur.com/ZiKvLxU.jpeg",
-      dataAiHint: "man portrait",
-      ueberMich: "Fokussiert auf meine Masterarbeit. Suche einen Sparringspartner für wöchentliche Fortschritts-Checks und zur Diskussion von Fachartikeln.",
-      lerninteressen: ["tiefverstaendnis", "projektarbeit"],
-      lernstil: "visuell",
-      kurse: "Regelungstechnik II, Simulationstechnik",
-      verfuegbarkeit: ["abends"],
-    },
-  };
-  return users[userId] || null;
+  if (userDoc.exists()) {
+    return userDoc.data() as AppUser;
+  }
+  return null;
 }
 
 export default function UserProfilePage() {
@@ -54,7 +31,7 @@ export default function UserProfilePage() {
     const userId = params.userId as string;
     const router = useRouter();
     const { toast } = useToast();
-    const [user, setUser] = useState<any>(null);
+    const [user, setUser] = useState<AppUser | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -95,25 +72,25 @@ export default function UserProfilePage() {
             <Card className="max-w-3xl mx-auto">
                 <CardHeader className="text-center">
                     <Avatar className="w-32 h-32 border-4 border-primary shadow-lg mx-auto mb-4">
-                        <AvatarImage src={profilePicUrl} alt={user.fullName} data-ai-hint={user.dataAiHint} sizes="128px" />
+                        <AvatarImage src={profilePicUrl} alt={user.displayName || ''} data-ai-hint="person portrait" sizes="128px" />
                         <AvatarFallback className="text-4xl">
-                            {user.fullName ? user.fullName.substring(0,2).toUpperCase() : '??'}
+                            {user.displayName ? user.displayName.substring(0,2).toUpperCase() : '??'}
                         </AvatarFallback>
                     </Avatar>
-                    <CardTitle className="text-3xl font-bold">{user.fullName}</CardTitle>
+                    <CardTitle className="text-3xl font-bold">{user.displayName}</CardTitle>
                     <CardDescription>{user.studiengang} - {user.semester ? `${user.semester}. Semester` : ''}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6 pt-6">
                     <div className="flex justify-center gap-2">
                         <Button asChild>
-                            <Link href={`/chats/${user.id}`}>
+                            <Link href={`/chats/${user.uid}`}>
                                <MessageSquare className="mr-2 h-4 w-4" /> Nachricht senden
                             </Link>
                         </Button>
                     </div>
                     <div>
                         <h3 className="font-semibold text-lg mb-1">Über Mich</h3>
-                        <p className="text-muted-foreground whitespace-pre-line">{user.ueberMich || 'Keine Beschreibung vorhanden.'}</p>
+                        <p className="text-muted-foreground whitespace-pre-line">{user.bio || 'Keine Beschreibung vorhanden.'}</p>
                     </div>
                     <div>
                         <h3 className="font-semibold text-lg mb-1">Lerninteressen</h3>
@@ -127,7 +104,7 @@ export default function UserProfilePage() {
                     </div>
                     <div>
                         <h3 className="font-semibold text-lg mb-1">Kurse/Module</h3>
-                        <p className="text-muted-foreground">{user.kurse || 'Keine Kurse angegeben.'}</p>
+                        <p className="text-muted-foreground">{user.kurse?.join(', ') || 'Keine Kurse angegeben.'}</p>
                     </div>
                     <div>
                         <h3 className="font-semibold text-lg mb-1">Verfügbarkeit</h3>
