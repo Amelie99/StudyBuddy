@@ -283,11 +283,11 @@ export default function PartnerAndGroupsPage() {
                     <Button
                         variant="secondary"
                         className="w-full"
-                        onClick={handleGenerateSuggestions}
+                        onClick={() => router.push('/gruppen/erstellen')}
                         disabled={isGenerating}
                     >
-                        <Wand2 className="mr-2 h-4 w-4" />
-                        Gruppenvorschläge generieren
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        Neue Gruppe erstellen
                     </Button>
                 </div>
             </div>
