@@ -16,7 +16,7 @@ import { lerninteressenOptions, lernstilOptions, verfuegbarkeitOptions, studieng
 import type { AppUser } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Loader2, Edit3, Save, Trash2 } from 'lucide-react';
+import { Loader2, Edit3, Save, Trash2, Edit } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import {
   AlertDialog,
@@ -31,7 +31,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Separator } from '@/components/ui/separator';
 
-const approvedHosts = ['i.imgur.com', 'placehold.co'];
+const approvedHosts = ['i.imgur.com', 'placehold.co', 'firebasestorage.googleapis.com'];
 const getSafeAvatar = (url?: string) => {
     try {
         if (!url) return 'https://placehold.co/128x128.png';
@@ -93,7 +93,7 @@ export default function MeinProfilPage() {
         verfuegbarkeit: currentUser.verfuegbarkeit || [],
       });
     }
-  }, [currentUser, form]);
+  }, [currentUser, form, isEditing]);
 
   async function onSubmit(data: ProfileFormValues) {
     setIsLoading(true);
@@ -106,7 +106,7 @@ export default function MeinProfilPage() {
         ueberMich: data.ueberMich,
         lerninteressen: data.lerninteressen,
         lernstil: data.lernstil,
-        kurse: data.kurse?.split(',').map(k => k.trim()),
+        kurse: data.kurse?.split(',').map(k => k.trim()).filter(Boolean),
         verfuegbarkeit: data.verfuegbarkeit
       }
       await updateUserProfile(profileData);
@@ -189,7 +189,7 @@ export default function MeinProfilPage() {
       <Card className="max-w-3xl mx-auto bg-card/80 backdrop-blur-sm">
         <CardHeader className="text-center">
             <div className="relative mx-auto mb-4 w-32 h-32">
-                 <Avatar className="w-32 h-32 border-4 border-primary shadow-lg">
+                 <Avatar className={`w-32 h-32 border-4 border-primary shadow-lg ${isEditing ? 'cursor-pointer' : ''}`} onClick={handleAvatarClick}>
                     <AvatarImage src={profilePicUrl} alt={currentUser.displayName || 'Profilbild'} data-ai-hint="person portrait" sizes="128px" />
                     <AvatarFallback className="text-4xl">
                       {currentUser.displayName ? currentUser.displayName.substring(0,2).toUpperCase() : '??'}
@@ -201,10 +201,11 @@ export default function MeinProfilPage() {
                   onChange={handleFileChange}
                   className="hidden"
                   accept="image/png, image/jpeg"
+                  disabled={!isEditing}
                 />
                 {isEditing && (
                     <Button size="icon" variant="outline" className="absolute bottom-0 right-0 rounded-full bg-card" onClick={handleAvatarClick}>
-                        <Edit3 className="h-4 w-4"/>
+                        <Edit className="h-4 w-4"/>
                         <span className="sr-only">Profilbild ändern</span>
                     </Button>
                 )}
@@ -217,26 +218,26 @@ export default function MeinProfilPage() {
             <div className="space-y-6">
               <div>
                 <h3 className="font-semibold text-lg mb-1">Über Mich</h3>
-                <p className="text-muted-foreground whitespace-pre-line">{form.watch('ueberMich') || 'Keine Beschreibung vorhanden.'}</p>
+                <p className="text-muted-foreground whitespace-pre-line">{currentUser?.ueberMich || 'Keine Beschreibung vorhanden.'}</p>
               </div>
               <div>
                 <h3 className="font-semibold text-lg mb-1">Lerninteressen</h3>
                 <div className="flex flex-wrap gap-2">
-                  {form.watch('lerninteressen')?.map(interesse => <Badge key={interesse}>{lerninteressenOptions.find(o=>o.id === interesse)?.label || interesse}</Badge>) || <p className="text-muted-foreground">Keine angegeben.</p>}
+                  {currentUser?.lerninteressen?.map(interesse => <Badge key={interesse}>{lerninteressenOptions.find(o=>o.id === interesse)?.label || interesse}</Badge>) || <p className="text-muted-foreground">Keine angegeben.</p>}
                 </div>
               </div>
                <div>
                 <h3 className="font-semibold text-lg mb-1">Lernstil</h3>
-                <p className="text-muted-foreground">{lernstilOptions.find(o=>o.id === form.watch('lernstil'))?.label || form.watch('lernstil') || 'Kein Lernstil angegeben.'}</p>
+                <p className="text-muted-foreground">{lernstilOptions.find(o=>o.id === currentUser?.lernstil)?.label || currentUser?.lernstil || 'Kein Lernstil angegeben.'}</p>
               </div>
               <div>
                 <h3 className="font-semibold text-lg mb-1">Kurse/Module</h3>
-                <p className="text-muted-foreground">{form.watch('kurse') || 'Keine Kurse angegeben.'}</p>
+                <p className="text-muted-foreground">{currentUser?.kurse?.join(', ') || 'Keine Kurse angegeben.'}</p>
               </div>
               <div>
                 <h3 className="font-semibold text-lg mb-1">Verfügbarkeit</h3>
                  <div className="flex flex-wrap gap-2">
-                  {form.watch('verfuegbarkeit')?.map(zeit => <Badge variant="secondary" key={zeit}>{verfuegbarkeitOptions.find(o=>o.id === zeit)?.label || zeit}</Badge>) || <p className="text-muted-foreground">Keine angegeben.</p>}
+                  {currentUser?.verfuegbarkeit?.map(zeit => <Badge variant="secondary" key={zeit}>{verfuegbarkeitOptions.find(o=>o.id === zeit)?.label || zeit}</Badge>) || <p className="text-muted-foreground">Keine angegeben.</p>}
                 </div>
               </div>
               <Button onClick={() => setIsEditing(true)} className="w-full mt-6">
@@ -248,7 +249,6 @@ export default function MeinProfilPage() {
                 <Form {...form}>
                   <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                     <FormField control={form.control} name="fullName" render={({ field }) => (<FormItem><FormLabel>Vollständiger Name</FormLabel><FormControl><Input placeholder="Max Mustermann" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                    <FormField control={form.control} name="photoURL" render={({ field }) => (<FormItem><FormLabel>Profilbild URL</FormLabel><FormControl><Input placeholder="https://example.com/bild.png" {...field} /></FormControl><FormMessage /></FormItem>)} />
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <FormField control={form.control} name="studiengang" render={({ field }) => (<FormItem><FormLabel>Studiengang</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Studiengang wählen" /></SelectTrigger></FormControl><SelectContent>{studiengangOptions.map(o => <SelectItem key={o.id} value={o.id}>{o.label}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>)} />
                         <FormField control={form.control} name="semester" render={({ field }) => (<FormItem><FormLabel>Semester</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Semester wählen" /></SelectTrigger></FormControl><SelectContent>{semesterOptions.map(o => <SelectItem key={o.id} value={o.id}>{o.label}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>)} />

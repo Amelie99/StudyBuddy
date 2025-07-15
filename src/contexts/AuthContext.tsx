@@ -90,7 +90,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const updateUserProfile = useCallback(async (profileData: Partial<AppUser>) => {
     if (currentUser) {
       const userDocRef = doc(db, "users", currentUser.uid);
-      await setDoc(userDocRef, profileData, { merge: true });
+      await updateDoc(userDocRef, profileData);
       updateAuthContextUser(profileData);
     }
   }, [currentUser, updateAuthContextUser]);
