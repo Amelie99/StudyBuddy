@@ -27,11 +27,11 @@ const BuddyItem = memo(function BuddyItem({ buddy }: { buddy: any }) {
   const approvedHosts = ['i.imgur.com', 'placehold.co'];
   const getSafeAvatar = (url?: string) => {
       try {
-          if (!url) return 'https://i.imgur.com/8bFhU43.jpeg';
+          if (!url) return 'https://placehold.co/40x40.png';
           const hostname = new URL(url).hostname;
-          return approvedHosts.includes(hostname) ? url : 'https://i.imgur.com/8bFhU43.jpeg';
+          return approvedHosts.includes(hostname) ? url : 'https://placehold.co/40x40.png';
       } catch (_e) {
-          return 'https://i.imgur.com/8bFhU43.jpeg';
+          return 'https://placehold.co/40x40.png';
       }
   };
   const safeAvatar = getSafeAvatar(buddy.avatar);

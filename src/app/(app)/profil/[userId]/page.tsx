@@ -41,11 +41,11 @@ const fetchUserDetails = async (userId: string): Promise<AppUser | null> => {
 const approvedHosts = ['i.imgur.com', 'placehold.co'];
 const getSafeAvatar = (url?: string) => {
     try {
-        if (!url) return 'https://i.imgur.com/8bFhU43.jpeg';
+        if (!url) return 'https://placehold.co/128x128.png';
         const hostname = new URL(url).hostname;
-        return approvedHosts.includes(hostname) ? url : 'https://i.imgur.com/8bFhU43.jpeg';
+        return approvedHosts.includes(hostname) ? url : 'https://placehold.co/128x128.png';
     } catch (_e) {
-        return 'https://i.imgur.com/8bFhU43.jpeg';
+        return 'https://placehold.co/128x128.png';
     }
 };
 

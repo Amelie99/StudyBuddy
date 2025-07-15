@@ -22,11 +22,11 @@ import { useToast } from "@/hooks/use-toast";
 const approvedHosts = ['i.imgur.com', 'placehold.co'];
 const getSafeAvatar = (url?: string) => {
     try {
-        if (!url) return 'https://i.imgur.com/8bFhU43.jpeg';
+        if (!url) return 'https://placehold.co/56x56.png';
         const hostname = new URL(url).hostname;
-        return approvedHosts.includes(hostname) ? url : 'https://i.imgur.com/8bFhU43.jpeg';
+        return approvedHosts.includes(hostname) ? url : 'https://placehold.co/56x56.png';
     } catch (_e) {
-        return 'https://i.imgur.com/8bFhU43.jpeg';
+        return 'https://placehold.co/56x56.png';
     }
 };
 
@@ -239,7 +239,7 @@ function PartnerGruppenClient() {
                 <CardHeader>
                   <Users className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
                   <CardTitle>Keine Gruppen</CardTitle>
-                  <CardDescription>Erstelle eine Gruppe oder trete einer bei.</CardDescription>
+                  <CardDescription>Du bist noch keiner Lerngruppe beigetreten. Erstelle eine oder lass dir welche vorschlagen.</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <Button asChild>
