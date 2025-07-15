@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Popover, PopoverTrigger } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
-import { useState, useMemo, memo } from "react";
+import { useState, useMemo, memo, useEffect } from "react";
 import { useBuddies } from "@/contexts/PartnersContext";
 import { useCalendar } from "@/contexts/CalendarContext";
 import { formatDistanceToNow } from 'date-fns';
@@ -66,9 +66,24 @@ const UpcomingSessionItem = memo(function UpcomingSessionItem({ session }: { ses
 export default function DashboardPage() {
   const { currentUser } = useAuth();
   const [notifications, setNotifications] = useState(initialNotifications);
-  const [isProfileProgressVisible, setProfileProgressVisible] = useState(true);
+  const [isProfileProgressVisible, setProfileProgressVisible] = useState(false);
   const { buddies } = useBuddies();
   const { events } = useCalendar();
+  
+  const PROFILE_CARD_DISMISSED_KEY = 'profileCardDismissed';
+
+  useEffect(() => {
+    // We need to check localStorage only on the client-side after hydration
+    const dismissed = localStorage.getItem(PROFILE_CARD_DISMISSED_KEY);
+    if (dismissed !== 'true') {
+        setProfileProgressVisible(true);
+    }
+  }, []);
+
+  const dismissProfileCard = () => {
+    localStorage.setItem(PROFILE_CARD_DISMISSED_KEY, 'true');
+    setProfileProgressVisible(false);
+  };
 
   const upcomingSessions = useMemo(() => {
     if (!currentUser) return [];
@@ -219,7 +234,7 @@ export default function DashboardPage() {
                   variant="ghost"
                   size="icon"
                   className="absolute top-2 right-2 h-6 w-6 rounded-full text-primary-foreground/70 hover:text-primary-foreground hover:bg-white/20"
-                  onClick={() => setProfileProgressVisible(false)}
+                  onClick={dismissProfileCard}
                 >
                   <X className="h-4 w-4" />
                   <span className="sr-only">Schließen</span>
