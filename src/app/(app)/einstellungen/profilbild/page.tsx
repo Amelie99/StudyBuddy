@@ -31,9 +31,12 @@ export default function ProfilbildPage() {
     const [previewUrl, setPreviewUrl] = useState(currentUser?.photoURL || '');
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const [activeTab, setActiveTab] = useState('upload');
+
 
     const form = useForm<ImageFormValues>({
         resolver: zodResolver(imageSchema),
+        mode: 'onChange',
         defaultValues: {
             photoURL: '',
         },
@@ -51,47 +54,66 @@ export default function ProfilbildPage() {
         if (file) {
             setSelectedFile(file);
             setPreviewUrl(URL.createObjectURL(file));
-            form.setValue('photoURL', ''); // Clear URL field if file is selected
+            form.setValue('photoURL', '', { shouldValidate: true });
         }
     };
 
     const handleUrlChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const url = event.target.value;
-        if (form.getValues('photoURL') === url) { // Check schema validation on the URL
+        form.setValue('photoURL', url, { shouldValidate: true });
+        const validation = imageSchema.safeParse({ photoURL: url });
+        if (validation.success && url) {
              setPreviewUrl(url);
-             setSelectedFile(null); // Clear file if URL is being typed
+             setSelectedFile(null);
+        } else if (!url) {
+            setPreviewUrl(currentUser?.photoURL || '');
+        }
+    };
+    
+    const handleTabChange = (value: string) => {
+        setActiveTab(value);
+        // Reset states when switching tabs to avoid confusion
+        if (value === 'upload') {
+            form.reset({ photoURL: '' });
+            if (!selectedFile) { // If there was a url preview, reset to original
+               setPreviewUrl(currentUser?.photoURL || '');
+            }
+        } else {
+            setSelectedFile(null);
+            if(fileInputRef.current) {
+                fileInputRef.current.value = '';
+            }
+             // If there was a file preview, reset to original
+            setPreviewUrl(currentUser?.photoURL || '');
         }
     };
 
+
     const handleSave = async () => {
-        if (!currentUser) return;
         setIsLoading(true);
+        const { photoURL } = form.getValues();
 
         try {
-            if (selectedFile) {
-                // Handle file upload
-                const newPhotoURL = await uploadProfilePicture(selectedFile, currentUser.uid);
-                 toast({
+            if (activeTab === 'upload' && selectedFile) {
+                await uploadProfilePicture(selectedFile, currentUser!.uid);
+                toast({
                     title: 'Profilbild aktualisiert',
                     description: 'Dein neues Bild wurde erfolgreich hochgeladen und gespeichert.',
                 });
+                 router.push('/mein-profil');
+            } else if (activeTab === 'url' && photoURL && form.formState.isValid) {
+                 await updateUserProfile({ photoURL });
+                 toast({
+                    title: 'Profilbild aktualisiert',
+                    description: 'Dein neues Bild wurde erfolgreich gespeichert.',
+                });
                 router.push('/mein-profil');
             } else {
-                 const newUrl = form.getValues('photoURL');
-                 if (newUrl) {
-                    await updateUserProfile({ photoURL: newUrl });
-                    toast({
-                        title: 'Profilbild aktualisiert',
-                        description: 'Dein neues Bild wurde erfolgreich gespeichert.',
-                    });
-                    router.push('/mein-profil');
-                } else {
-                     toast({
-                        title: 'Keine Änderung',
-                        description: 'Es wurde kein neues Bild zum Speichern ausgewählt.',
-                        variant: 'default',
-                    });
-                }
+                 toast({
+                    title: 'Keine gültige Eingabe',
+                    description: 'Bitte wähle eine Datei aus oder gib eine gültige URL ein.',
+                    variant: 'default',
+                });
             }
         } catch (error: any) {
             toast({
@@ -104,12 +126,13 @@ export default function ProfilbildPage() {
         }
     };
 
-
     if (!currentUser) {
         return <div className="flex justify-center items-center h-screen"><Loader2 className="h-12 w-12 animate-spin text-primary" /></div>;
     }
 
     const safePreviewUrl = getSafeAvatar(previewUrl, '160x160');
+    const isSaveDisabled = isLoading || (activeTab === 'upload' && !selectedFile) || (activeTab === 'url' && !form.formState.isValid);
+
 
     return (
         <div className="container mx-auto py-8">
@@ -132,7 +155,7 @@ export default function ProfilbildPage() {
                         </Avatar>
                     </div>
 
-                    <Tabs defaultValue="upload" className="w-full">
+                    <Tabs defaultValue="upload" className="w-full" onValueChange={handleTabChange} value={activeTab}>
                         <TabsList className="grid w-full grid-cols-2">
                             <TabsTrigger value="upload"><Upload className="mr-2 h-4 w-4"/>Datei hochladen</TabsTrigger>
                             <TabsTrigger value="url"><LinkIcon className="mr-2 h-4 w-4"/>URL verwenden</TabsTrigger>
@@ -156,7 +179,7 @@ export default function ProfilbildPage() {
                         <TabsContent value="url">
                              <div className="p-4 border rounded-md">
                                  <Form {...form}>
-                                    <form>
+                                    <form onSubmit={(e) => e.preventDefault()}>
                                         <FormField
                                             control={form.control}
                                             name="photoURL"
@@ -167,10 +190,7 @@ export default function ProfilbildPage() {
                                                         <Input
                                                             placeholder="https://beispiel.com/bild.png"
                                                             {...field}
-                                                            onChange={(e) => {
-                                                                field.onChange(e);
-                                                                handleUrlChange(e);
-                                                            }}
+                                                            onChange={handleUrlChange}
                                                         />
                                                     </FormControl>
                                                     <FormMessage />
@@ -183,7 +203,7 @@ export default function ProfilbildPage() {
                         </TabsContent>
                     </Tabs>
                     
-                     <Button onClick={handleSave} className="w-full" disabled={isLoading}>
+                     <Button onClick={handleSave} className="w-full" disabled={isSaveDisabled}>
                         {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
                         Änderungen speichern
                     </Button>
