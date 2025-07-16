@@ -99,6 +99,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const storageRef = ref(storage, `profile-pictures/${userId}/${file.name}`);
     const snapshot = await uploadBytes(storageRef, file);
     const downloadURL = await getDownloadURL(snapshot.ref);
+    // Directly update the user profile after getting the URL
     await updateUserProfile({ photoURL: downloadURL });
     return downloadURL;
   }, [updateUserProfile]);
