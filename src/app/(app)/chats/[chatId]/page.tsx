@@ -120,6 +120,7 @@ export default function ChatDetailPage() {
         // The UI will update automatically via the real-time listener
         await sendMessage(chatId, {
             text: newMessage,
+            senderId: currentUser.uid,
         });
 
         setNewMessage('');
