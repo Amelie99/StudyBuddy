@@ -12,7 +12,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { lerninteressenOptions, lernstilOptions, verfuegbarkeitOptions, studiengangOptions, semesterOptions } from '@/lib/constants';
+import { lerninteressenOptions, lernstilOptions, verfuegbarkeitOptions, studiengangOptions as defaultStudiengangOptions, semesterOptions } from '@/lib/constants';
 import type { AppUser } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -44,14 +44,23 @@ const getSafeAvatar = (url?: string) => {
 
 const profileSchema = z.object({
   fullName: z.string().min(3, { message: 'Vollständiger Name ist erforderlich (mind. 3 Zeichen).' }),
-  studiengang: z.string().min(1, { message: 'Studiengang ist erforderlich.' }),
+  studiengang: z.string().optional(),
+  customStudiengang: z.string().optional(),
   semester: z.string().min(1, { message: 'Semester ist erforderlich.' }),
   photoURL: z.string().url({ message: 'Ungültige URL für Profilbild.' }).optional().or(z.literal('')),
   ueberMich: z.string().max(500, { message: 'Maximal 500 Zeichen.' }).optional(),
   lerninteressen: z.array(z.string()).min(1, { message: 'Wählen Sie mindestens ein Lerninteresse.' }),
   lernstil: z.string().min(1, { message: 'Lernstil ist erforderlich.' }),
-  kurse: z.string().optional(), // For simplicity, comma-separated string. Could be array of tags.
+  kurse: z.string().optional(),
   verfuegbarkeit: z.array(z.string()).min(1, { message: 'Wählen Sie mindestens eine Verfügbarkeit.' }),
+}).refine(data => {
+    if (data.studiengang === 'anderer') {
+        return !!data.customStudiengang && data.customStudiengang.length > 2;
+    }
+    return !!data.studiengang;
+}, {
+    message: 'Bitte geben Sie Ihren Studiengang an oder wählen Sie einen aus der Liste.',
+    path: ['studiengang'],
 });
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
@@ -69,6 +78,7 @@ export default function MeinProfilPage() {
     defaultValues: {
       fullName: '',
       studiengang: '',
+      customStudiengang: '',
       semester: '',
       photoURL: '',
       ueberMich: '',
@@ -78,12 +88,19 @@ export default function MeinProfilPage() {
       verfuegbarkeit: [],
     },
   });
+  
+  const studiengangValue = form.watch('studiengang');
+  const studiengangOptions = defaultStudiengangOptions;
 
   useEffect(() => {
     if (currentUser) {
+       const userStudiengang = currentUser.studiengang || '';
+       const isStandardCourse = studiengangOptions.some(o => o.label === userStudiengang);
+
       form.reset({
         fullName: currentUser.displayName || '',
-        studiengang: currentUser.studiengang || '',
+        studiengang: isStandardCourse ? studiengangOptions.find(o => o.label === userStudiengang)?.id : 'anderer',
+        customStudiengang: isStandardCourse ? '' : userStudiengang,
         semester: currentUser.semester || '',
         photoURL: currentUser.photoURL || '',
         ueberMich: currentUser.ueberMich || '',
@@ -93,21 +110,27 @@ export default function MeinProfilPage() {
         verfuegbarkeit: currentUser.verfuegbarkeit || [],
       });
     }
-  }, [currentUser, form, isEditing]);
+  }, [currentUser, form, isEditing, studiengangOptions]);
 
   async function onSubmit(data: ProfileFormValues) {
     setIsLoading(true);
     try {
+       const finalStudiengang = data.studiengang === 'anderer' 
+            ? data.customStudiengang 
+            : studiengangOptions.find(o => o.id === data.studiengang)?.label;
+
       const profileData: Partial<AppUser> = {
         displayName: data.fullName,
         photoURL: data.photoURL,
-        studiengang: data.studiengang,
+        studiengang: finalStudiengang,
         semester: data.semester,
         ueberMich: data.ueberMich,
+        bio: data.ueberMich, // also update bio
         lerninteressen: data.lerninteressen,
         lernstil: data.lernstil,
         kurse: data.kurse?.split(',').map(k => k.trim()).filter(Boolean),
-        verfuegbarkeit: data.verfuegbarkeit
+        verfuegbarkeit: data.verfuegbarkeit,
+        profileComplete: true,
       }
       await updateUserProfile(profileData);
       
@@ -163,7 +186,6 @@ export default function MeinProfilPage() {
     })
     try {
         await deleteCurrentUser();
-        // The auth context will handle the redirect to /anmelden
     } catch (error: any) {
         toast({
             title: "Fehler",
@@ -211,7 +233,7 @@ export default function MeinProfilPage() {
                 )}
             </div>
           <CardTitle className="text-3xl font-bold">{form.watch('fullName') || currentUser.displayName}</CardTitle>
-          <CardDescription>{form.watch('studiengang') || currentUser.studiengang} - {form.watch('semester') ? `${form.watch('semester')}. Semester` : (currentUser.semester ? `${currentUser.semester}. Semester` : '')}</CardDescription>
+          <CardDescription>{currentUser.studiengang} - {currentUser.semester ? `${currentUser.semester}. Semester` : ''}</CardDescription>
         </CardHeader>
         <CardContent>
           {!isEditing ? (
@@ -253,6 +275,21 @@ export default function MeinProfilPage() {
                         <FormField control={form.control} name="studiengang" render={({ field }) => (<FormItem><FormLabel>Studiengang</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Studiengang wählen" /></SelectTrigger></FormControl><SelectContent>{studiengangOptions.map(o => <SelectItem key={o.id} value={o.id}>{o.label}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>)} />
                         <FormField control={form.control} name="semester" render={({ field }) => (<FormItem><FormLabel>Semester</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Semester wählen" /></SelectTrigger></FormControl><SelectContent>{semesterOptions.map(o => <SelectItem key={o.id} value={o.id}>{o.label}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>)} />
                     </div>
+                     {studiengangValue === 'anderer' && (
+                        <FormField
+                            control={form.control}
+                            name="customStudiengang"
+                            render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Eigener Studiengang</FormLabel>
+                                <FormControl>
+                                <Input placeholder="z.B. Mechatronik, DPM" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                            )}
+                        />
+                     )}
                     <FormField control={form.control} name="ueberMich" render={({ field }) => (<FormItem><FormLabel>Über Mich / Meine Lernziele</FormLabel><FormControl><Textarea placeholder="Erzähl etwas über dich und deine Lernziele..." className="min-h-[100px]" {...field} /></FormControl><FormMessage /></FormItem>)} />
                     <FormField control={form.control} name="lerninteressen" render={() => (
                         <FormItem>
