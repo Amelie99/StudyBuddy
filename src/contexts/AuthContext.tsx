@@ -14,18 +14,19 @@ import {
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import type { AppUser } from '@/lib/types';
+import type { AppUser, UserProfile } from '@/lib/types';
 import { useRouter } from 'next/navigation';
 
 interface AuthContextType {
   currentUser: AppUser | null;
+  userProfile: UserProfile | null;
   loading: boolean;
   login: (email: string, pass: string) => Promise<any>;
   register: (email: string, pass: string) => Promise<any>;
   logout: () => Promise<void>;
   sendPasswordReset: (email: string) => Promise<void>;
   isHochschuleEmail: (email: string) => boolean;
-  updateUserProfile: (profileData: Partial<AppUser>) => Promise<void>;
+  updateUserProfile: (profileData: Partial<UserProfile>) => Promise<void>;
   uploadProfilePicture: (file: File, userId: string) => Promise<string>;
   updateAuthContextUser: (updatedUser: Partial<AppUser>) => void;
   deleteCurrentUser: () => Promise<void>;
@@ -43,6 +44,7 @@ export function useAuth() {
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentUser, setCurrentUser] = useState<AppUser | null>(null);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
@@ -54,6 +56,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (userDoc.exists()) {
           const userData = userDoc.data() as AppUser;
           setCurrentUser({ ...userData, uid: user.uid });
+          setUserProfile(userDoc.data() as UserProfile);
         } else {
           // This case handles users created via Firebase Auth but without a Firestore doc yet
           const appUser: AppUser = {
@@ -66,9 +69,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           // Create the document in firestore for this new user
           await setDoc(userDocRef, appUser);
           setCurrentUser(appUser);
+          const newUserProfile: UserProfile = {
+            uid: user.uid,
+            email: user.email || '',
+            name: user.displayName || user.email?.split('@')[0] || 'New User',
+            profileComplete: false,
+            bio: '',
+            courses: [],
+            studySubject: '',
+            semester: 1,
+            profilePicture: user.photoURL || '',
+            availability: {
+              'Montag': [],
+              'Dienstag': [],
+              'Mittwoch': [],
+              'Donnerstag': [],
+              'Freitag': [],
+              'Samstag': [],
+              'Sonntag': [],
+            }
+          };
+          setUserProfile(newUserProfile);
         }
       } else {
         setCurrentUser(null);
+        setUserProfile(null);
       }
       setLoading(false);
     });
@@ -87,20 +112,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     router.replace('/anmelden');
   }, [router]);
 
-  const updateUserProfile = useCallback(async (profileData: Partial<AppUser>) => {
+  const updateUserProfile = useCallback(async (profileData: Partial<UserProfile>) => {
     if (currentUser) {
       const userDocRef = doc(db, "users", currentUser.uid);
       await updateDoc(userDocRef, profileData);
-      updateAuthContextUser(profileData);
+      setUserProfile(prevProfile => {
+        if (!prevProfile) return null;
+        return { ...prevProfile, ...profileData };
+      });
     }
-  }, [currentUser, updateAuthContextUser]);
+  }, [currentUser]);
 
   const uploadProfilePicture = useCallback(async (file: File, userId: string): Promise<string> => {
     const storageRef = ref(storage, `profile-pictures/${userId}/${file.name}`);
     const snapshot = await uploadBytes(storageRef, file);
     const downloadURL = await getDownloadURL(snapshot.ref);
     // Directly update the user profile after getting the URL
-    await updateUserProfile({ photoURL: downloadURL });
+    await updateUserProfile({ profilePicture: downloadURL });
     return downloadURL;
   }, [updateUserProfile]);
 
@@ -137,11 +165,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
     if (userCredential.user) {
       const { uid } = userCredential.user;
-      const initialProfile = {
+      const initialProfile: UserProfile = {
         uid,
         email,
-        displayName: email.split('@')[0], 
+        name: email.split('@')[0], 
         profileComplete: false,
+        bio: '',
+        courses: [],
+        studySubject: '',
+        semester: 1,
+        profilePicture: '',
+        availability: {
+          'Montag': [],
+          'Dienstag': [],
+          'Mittwoch': [],
+          'Donnerstag': [],
+          'Freitag': [],
+          'Samstag': [],
+          'Sonntag': [],
+        }
       };
       await setDoc(doc(db, "users", uid), initialProfile);
     }
@@ -158,6 +200,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const value = useMemo(() => ({
     currentUser,
+    userProfile,
     loading,
     login,
     register,
@@ -168,7 +211,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     uploadProfilePicture,
     updateAuthContextUser,
     deleteCurrentUser,
-  }), [currentUser, loading, login, register, logout, sendPasswordReset, isHochschuleEmail, updateUserProfile, uploadProfilePicture, updateAuthContextUser, deleteCurrentUser]);
+  }), [currentUser, userProfile, loading, login, register, logout, sendPasswordReset, isHochschuleEmail, updateUserProfile, uploadProfilePicture, updateAuthContextUser, deleteCurrentUser]);
 
   // The AuthProvider no longer needs to render the loader itself,
   // as the HomePage now acts as the "splash screen".

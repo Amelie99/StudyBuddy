@@ -27,11 +27,7 @@ const registrationSchema = z.object({
 
 type RegistrationFormValues = z.infer<typeof registrationSchema>;
 
-interface RegistrationFormProps {
-  onSwitchToLogin: () => void;
-}
-
-export function RegistrationForm({ onSwitchToLogin }: RegistrationFormProps) {
+export function RegistrationForm() {
   const { register } = useAuth();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);

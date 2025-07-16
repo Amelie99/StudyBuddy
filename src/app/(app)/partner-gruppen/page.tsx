@@ -7,14 +7,14 @@ import { PlusCircle, Users, MessageSquare, User, Search, Wand2 } from "lucide-re
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useGroups, type Group } from "@/contexts/GroupsContext";
-import { useBuddies, type Buddy } from "@/contexts/PartnersContext";
+import { useBuddies } from "@/contexts/PartnersContext";
 import { useChats } from "@/contexts/ChatsContext";
 import { useRouter } from "next/navigation";
 import { memo, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { db } from "@/config/firebase";
 import { doc, getDoc } from "firebase/firestore";
-import type { AppUser } from "@/lib/types";
+import type { AppUser, Buddy } from "@/lib/types";
 import { suggestGroups, SuggestGroupsOutput } from "@/ai/flows/suggest-groups-flow";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";

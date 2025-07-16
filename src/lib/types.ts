@@ -16,6 +16,25 @@ export interface AppUser {
   profileComplete: boolean;
 }
 
+export interface UserProfile {
+  uid: string;
+  email: string;
+  name: string;
+  profileComplete: boolean;
+  bio: string;
+  courses: string[];
+  studySubject: string;
+  semester: number;
+  profilePicture: string;
+  photoURL?: string;
+  availability: Availability;
+}
+
+export type Day = 'Montag' | 'Dienstag' | 'Mittwoch' | 'Donnerstag' | 'Freitag' | 'Samstag' | 'Sonntag';
+export type TimeSlot = 'morning' | 'afternoon' | 'evening';
+export type Availability = Record<Day, TimeSlot[]>;
+
+
 export interface Buddy {
     id: string;
     name: string;

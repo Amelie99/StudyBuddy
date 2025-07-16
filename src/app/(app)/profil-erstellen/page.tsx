@@ -94,10 +94,10 @@ export default function ProfilErstellenPage() {
     try {
       const finalStudiengang = data.studiengang === 'anderer' ? data.customStudiengang : studiengangOptions.find(o => o.id === data.studiengang)?.label;
 
-      const updatedProfile: Partial<AppUser> = {
+      const updatedProfile = {
         displayName: data.fullName,
         studiengang: finalStudiengang,
-        semester: data.semester,
+        semester: Number(data.semester),
         photoURL: data.photoURL,
         ueberMich: data.ueberMich,
         bio: data.ueberMich,

@@ -107,10 +107,10 @@ export default function MeinProfilPage() {
             ? data.customStudiengang 
             : studiengangOptions.find(o => o.id === data.studiengang)?.label;
 
-      const profileData: Partial<AppUser> = {
+      const profileData = {
         displayName: data.fullName,
         studiengang: finalStudiengang,
-        semester: data.semester,
+        semester: Number(data.semester),
         ueberMich: data.ueberMich,
         bio: data.ueberMich, // also update bio
         lerninteressen: data.lerninteressen,

@@ -84,6 +84,7 @@ export const getConversationsForUser = async (
             return {
                 id: msgDoc.id,
                 senderId: msgData.senderId,
+                senderName: msgData.senderName,
                 text: msgData.text,
                 timestamp: timestamp.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
                 self: msgData.senderId === userId,

@@ -30,7 +30,7 @@ interface ChatsContextType {
     startNewChat: (otherUser: AppUser) => Promise<string | null>;
     sendMessage: (
         chatId: string,
-        message: Omit<Message, 'id' | 'timestamp' | 'self' | 'senderName'>,
+        message: Omit<Message, 'id' | 'timestamp' | 'self' | 'senderId' | 'senderName'>,
     ) => Promise<void>;
     deleteMessage: (chatId: string, messageId: string) => Promise<void>;
     markChatAsRead: (chatId: string) => void;
@@ -49,7 +49,7 @@ export function useChats() {
 export const ChatsProvider: React.FC<{ children: ReactNode }> = ({
     children,
 }) => {
-    const { currentUser } = useAuth();
+    const { currentUser, userProfile } = useAuth();
     const [conversations, setConversations] = useState<Conversation[]>([]);
     const [loadingConversations, setLoadingConversations] = useState(true);
     const [chatDetails, setChatDetails] = useState<ChatDetail | null>(null);
@@ -151,30 +151,31 @@ export const ChatsProvider: React.FC<{ children: ReactNode }> = ({
 
     const startNewChat = useCallback(
         async (otherUser: AppUser) => {
-            if (!currentUser) return null;
+            if (!currentUser || !userProfile) return null;
             const newChatId = await chatManager.createChatWithUser(
-                currentUser,
+                { ...currentUser, displayName: userProfile.name, photoURL: userProfile.profilePicture },
                 otherUser,
             );
             await fetchConversations(); // Refresh conversations after creating a new one
             return newChatId;
         },
-        [currentUser, fetchConversations],
+        [currentUser, userProfile, fetchConversations],
     );
 
     const sendMessage = useCallback(
         async (
             chatId: string,
-            message: Omit<Message, 'id' | 'timestamp' | 'self' | 'senderName'>,
+            message: Omit<Message, 'id' | 'timestamp' | 'self' | 'senderId' | 'senderName'>,
         ) => {
-            if (!currentUser) return;
+            if (!currentUser || !userProfile) return;
             await chatManager.sendMessage(chatId, {
                 ...message,
                 senderId: currentUser.uid,
+                senderName: userProfile.name, // Add sender's name
             });
             // No need to manually update state, the listener will do it.
         },
-        [currentUser],
+        [currentUser, userProfile],
     );
 
      const deleteMessage = useCallback(async (chatId: string, messageId: string) => {
@@ -231,3 +232,5 @@ export const ChatsProvider: React.FC<{ children: ReactNode }> = ({
         <ChatsContext.Provider value={value}>{children}</ChatsContext.Provider>
     );
 };
+
+export type { Conversation };

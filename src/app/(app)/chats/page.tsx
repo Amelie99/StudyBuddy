@@ -103,7 +103,7 @@ export default function ChatsPage() {
        }
 
       return null;
-    }).filter((c): c is Conversation => c !== null);
+    }).filter((c): c is (Conversation & { match: { type: "name" | "message"; text: string; } }) => c !== null);
 
   }, [conversations, searchTerm]);
 
