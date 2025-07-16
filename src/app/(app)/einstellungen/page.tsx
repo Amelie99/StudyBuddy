@@ -2,7 +2,7 @@
 'use client';
 
 import { Card, CardContent } from '@/components/ui/card';
-import { Bell, Palette, Shield, Info, ChevronRight, Moon, Sun, Mail, Instagram, Youtube, Linkedin, Facebook } from 'lucide-react';
+import { Bell, Palette, Shield, Info, ChevronRight, Moon, Sun, Mail, Instagram, Youtube, Linkedin, Facebook, UserCircle } from 'lucide-react';
 import Link from 'next/link';
 import React from 'react';
 import { useTheme } from 'next-themes';
@@ -17,6 +17,12 @@ const DialogContent = dynamic(() => import('@/components/ui/dialog').then(mod =>
 
 
 const settingsOptions = [
+  {
+    id: 'profile-picture',
+    title: 'Profilbild ändern',
+    icon: UserCircle,
+    href: '/einstellungen/profilbild',
+  },
   {
     id: 'notifications',
     title: 'Benachrichtigungen',

@@ -30,6 +30,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Separator } from '@/components/ui/separator';
+import Link from 'next/link';
 
 const approvedHosts = ['i.imgur.com', 'placehold.co', 'firebasestorage.googleapis.com'];
 const getSafeAvatar = (url?: string) => {
@@ -47,7 +48,6 @@ const profileSchema = z.object({
   studiengang: z.string().optional(),
   customStudiengang: z.string().optional(),
   semester: z.string().min(1, { message: 'Semester ist erforderlich.' }),
-  photoURL: z.string().url({ message: 'Ungültige URL für Profilbild.' }).optional().or(z.literal('')),
   ueberMich: z.string().max(500, { message: 'Maximal 500 Zeichen.' }).optional(),
   lerninteressen: z.array(z.string()).min(1, { message: 'Wählen Sie mindestens ein Lerninteresse.' }),
   lernstil: z.string().min(1, { message: 'Lernstil ist erforderlich.' }),
@@ -67,11 +67,10 @@ type ProfileFormValues = z.infer<typeof profileSchema>;
 
 
 export default function MeinProfilPage() {
-  const { currentUser, loading: authLoading, uploadProfilePicture, updateUserProfile, deleteCurrentUser } = useAuth();
+  const { currentUser, loading: authLoading, updateUserProfile, deleteCurrentUser } = useAuth();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
@@ -80,7 +79,6 @@ export default function MeinProfilPage() {
       studiengang: '',
       customStudiengang: '',
       semester: '',
-      photoURL: '',
       ueberMich: '',
       lerninteressen: [],
       lernstil: '',
@@ -102,7 +100,6 @@ export default function MeinProfilPage() {
         studiengang: isStandardCourse ? studiengangOptions.find(o => o.label === userStudiengang)?.id : 'anderer',
         customStudiengang: isStandardCourse ? '' : userStudiengang,
         semester: currentUser.semester || '',
-        photoURL: currentUser.photoURL || '',
         ueberMich: currentUser.ueberMich || '',
         lerninteressen: currentUser.lerninteressen || [],
         lernstil: currentUser.lernstil || '',
@@ -121,7 +118,6 @@ export default function MeinProfilPage() {
 
       const profileData: Partial<AppUser> = {
         displayName: data.fullName,
-        photoURL: data.photoURL,
         studiengang: finalStudiengang,
         semester: data.semester,
         ueberMich: data.ueberMich,
@@ -150,35 +146,6 @@ export default function MeinProfilPage() {
     }
   }
 
-  const handleAvatarClick = () => {
-    if (isEditing) {
-      fileInputRef.current?.click();
-    }
-  };
-
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file && currentUser) {
-      setIsLoading(true);
-      try {
-        const newPhotoURL = await uploadProfilePicture(file, currentUser.uid);
-        form.setValue('photoURL', newPhotoURL, { shouldValidate: true });
-        toast({
-          title: 'Profilbild hochgeladen',
-          description: 'Dein neues Profilbild wurde gespeichert.',
-        });
-      } catch (error) {
-        toast({
-          title: 'Upload fehlgeschlagen',
-          description: 'Das Profilbild konnte nicht hochgeladen werden.',
-          variant: 'destructive',
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    }
-  };
-  
   const handleDeleteProfile = async () => {
     toast({
         title: "Profil wird gelöscht...",
@@ -203,7 +170,7 @@ export default function MeinProfilPage() {
     return <div className="text-center p-8">Bitte zuerst anmelden.</div>;
   }
   
-  const profilePicUrl = getSafeAvatar(form.watch('photoURL') || currentUser.photoURL);
+  const profilePicUrl = getSafeAvatar(currentUser.photoURL);
 
 
   return (
@@ -211,24 +178,18 @@ export default function MeinProfilPage() {
       <Card className="max-w-3xl mx-auto bg-card/80 backdrop-blur-sm">
         <CardHeader className="text-center">
             <div className="relative mx-auto mb-4 w-32 h-32">
-                 <Avatar className={`w-32 h-32 border-4 border-primary shadow-lg ${isEditing ? 'cursor-pointer' : ''}`} onClick={handleAvatarClick}>
+                 <Avatar className={`w-32 h-32 border-4 border-primary shadow-lg`}>
                     <AvatarImage src={profilePicUrl} alt={currentUser.displayName || 'Profilbild'} data-ai-hint="person portrait" sizes="128px" />
                     <AvatarFallback className="text-4xl">
                       {currentUser.displayName ? currentUser.displayName.substring(0,2).toUpperCase() : '??'}
                     </AvatarFallback>
                 </Avatar>
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={handleFileChange}
-                  className="hidden"
-                  accept="image/png, image/jpeg"
-                  disabled={!isEditing}
-                />
                 {isEditing && (
-                    <Button size="icon" variant="outline" className="absolute bottom-0 right-0 rounded-full bg-card" onClick={handleAvatarClick}>
-                        <Edit className="h-4 w-4"/>
-                        <span className="sr-only">Profilbild ändern</span>
+                    <Button size="icon" variant="outline" className="absolute bottom-0 right-0 rounded-full bg-card" asChild>
+                        <Link href="/einstellungen/profilbild">
+                            <Edit className="h-4 w-4"/>
+                            <span className="sr-only">Profilbild ändern</span>
+                        </Link>
                     </Button>
                 )}
             </div>
