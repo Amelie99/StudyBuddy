@@ -92,7 +92,7 @@ export default function ProfilErstellenPage() {
     }
     setIsLoading(true);
     try {
-      const finalStudiengang = data.studiengang === 'anderer' ? data.customStudiengang : data.studiengang;
+      const finalStudiengang = data.studiengang === 'anderer' ? data.customStudiengang : studiengangOptions.find(o => o.id === data.studiengang)?.label;
 
       const updatedProfile: Partial<AppUser> = {
         displayName: data.fullName,
@@ -164,7 +164,7 @@ export default function ProfilErstellenPage() {
                       <FormItem>
                         <FormLabel>Eigener Studiengang</FormLabel>
                         <FormControl>
-                          <Input placeholder="z.B. Mechatronik" {...field} />
+                          <Input placeholder="z.B. Mechatronik, DPM" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
