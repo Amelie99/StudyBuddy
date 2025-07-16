@@ -14,6 +14,7 @@ import { useCalendar } from "@/contexts/CalendarContext";
 import { formatDistanceToNow } from 'date-fns';
 import { de } from 'date-fns/locale';
 import dynamic from "next/dynamic";
+import { getSafeAvatar } from "@/lib/utils";
 
 const PopoverContent = dynamic(() => import('@/components/ui/popover').then(mod => mod.PopoverContent));
 
@@ -24,16 +25,6 @@ const initialNotifications = [
 ];
 
 const BuddyItem = memo(function BuddyItem({ buddy }: { buddy: any }) {
-  const approvedHosts = ['i.imgur.com', 'placehold.co'];
-  const getSafeAvatar = (url?: string) => {
-      try {
-          if (!url) return 'https://placehold.co/40x40.png';
-          const hostname = new URL(url).hostname;
-          return approvedHosts.includes(hostname) ? url : 'https://placehold.co/40x40.png';
-      } catch (_e) {
-          return 'https://placehold.co/40x40.png';
-      }
-  };
   const safeAvatar = getSafeAvatar(buddy.avatar);
   return (
     <Link href={`/profil/${buddy.id}`} className="block rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">

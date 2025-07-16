@@ -19,6 +19,7 @@ import { db } from '@/config/firebase';
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { getSafeAvatar } from '@/lib/utils';
 
 const searchSchema = z.object({
   studiengang: z.string().optional(),
@@ -29,19 +30,9 @@ const searchSchema = z.object({
 
 type SearchFormValues = z.infer<typeof searchSchema>;
 
-const approvedHosts = ['i.imgur.com', 'placehold.co'];
-const getSafeAvatar = (url?: string) => {
-    try {
-        if (!url) return 'https://placehold.co/48x48.png';
-        const hostname = new URL(url).hostname;
-        return approvedHosts.includes(hostname) ? url : 'https://placehold.co/48x48.png';
-    } catch (_e) {
-        return 'https://placehold.co/48x48.png';
-    }
-};
 
 const UserResultCard = ({ user }: { user: AppUser }) => {
-    const safeAvatar = getSafeAvatar(user.photoURL);
+    const safeAvatar = getSafeAvatar(user.photoURL, '48x48');
     return (
         <Card className="hover:shadow-md transition-shadow">
             <CardContent className="p-4 flex items-center justify-between">

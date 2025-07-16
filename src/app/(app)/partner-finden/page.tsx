@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useBuddies } from "@/contexts/PartnersContext";
 import { useChats } from "@/contexts/ChatsContext";
-import { cn } from "@/lib/utils";
+import { cn, getSafeAvatar } from "@/lib/utils";
 import dynamic from "next/dynamic";
 import { useAuth } from "@/contexts/AuthContext";
 import { db } from "@/config/firebase";
@@ -26,16 +26,6 @@ import Link from "next/link";
 
 const AlertDialogContent = dynamic(() => import('@/components/ui/alert-dialog').then(mod => mod.AlertDialogContent));
 
-const approvedHosts = ['i.imgur.com', 'placehold.co'];
-const getSafeAvatar = (url?: string) => {
-    try {
-        if (!url) return 'https://placehold.co/320x500.png';
-        const hostname = new URL(url).hostname;
-        return approvedHosts.includes(hostname) ? url : 'https://placehold.co/320x500.png';
-    } catch (_e) {
-        return 'https://placehold.co/320x500.png';
-    }
-};
 
 export default function PartnerFindenPage() {
   const [suggestions, setSuggestions] = useState<AppUser[]>([]);
@@ -140,7 +130,7 @@ export default function PartnerFindenPage() {
 
     if (suggestions.length > 0) {
       const buddy = suggestions[0];
-      const safePhotoURL = getSafeAvatar(buddy.photoURL);
+      const safePhotoURL = getSafeAvatar(buddy.photoURL, '320x500');
 
       return (
         <>

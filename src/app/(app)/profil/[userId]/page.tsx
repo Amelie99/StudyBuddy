@@ -26,6 +26,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { getSafeAvatar } from '@/lib/utils';
 
 const fetchUserDetails = async (userId: string): Promise<AppUser | null> => {
   if (!userId) return null;
@@ -38,16 +39,6 @@ const fetchUserDetails = async (userId: string): Promise<AppUser | null> => {
   return null;
 }
 
-const approvedHosts = ['i.imgur.com', 'placehold.co'];
-const getSafeAvatar = (url?: string) => {
-    try {
-        if (!url) return 'https://placehold.co/128x128.png';
-        const hostname = new URL(url).hostname;
-        return approvedHosts.includes(hostname) ? url : 'https://placehold.co/128x128.png';
-    } catch (_e) {
-        return 'https://placehold.co/128x128.png';
-    }
-};
 
 export default function UserProfilePage() {
     const params = useParams();
@@ -106,7 +97,7 @@ export default function UserProfilePage() {
         );
     }
 
-    const profilePicUrl = getSafeAvatar(user.photoURL);
+    const profilePicUrl = getSafeAvatar(user.photoURL, '128x128');
 
     return (
         <div className="container mx-auto py-8">

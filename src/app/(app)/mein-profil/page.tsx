@@ -31,17 +31,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Separator } from '@/components/ui/separator';
 import Link from 'next/link';
+import { getSafeAvatar } from '@/lib/utils';
 
-const approvedHosts = ['i.imgur.com', 'placehold.co', 'firebasestorage.googleapis.com'];
-const getSafeAvatar = (url?: string) => {
-    try {
-        if (!url) return 'https://placehold.co/128x128.png';
-        const hostname = new URL(url).hostname;
-        return approvedHosts.includes(hostname) ? url : 'https://placehold.co/128x128.png';
-    } catch (_e) {
-        return 'https://placehold.co/128x128.png';
-    }
-};
 
 const profileSchema = z.object({
   fullName: z.string().min(3, { message: 'Vollständiger Name ist erforderlich (mind. 3 Zeichen).' }),
@@ -170,7 +161,7 @@ export default function MeinProfilPage() {
     return <div className="text-center p-8">Bitte zuerst anmelden.</div>;
   }
   
-  const profilePicUrl = getSafeAvatar(currentUser.photoURL);
+  const profilePicUrl = getSafeAvatar(currentUser.photoURL, '128x128');
 
 
   return (

@@ -18,23 +18,13 @@ import type { AppUser } from "@/lib/types";
 import { suggestGroups, SuggestGroupsOutput } from "@/ai/flows/suggest-groups-flow";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-
-const approvedHosts = ['i.imgur.com', 'placehold.co'];
-const getSafeAvatar = (url?: string) => {
-    try {
-        if (!url) return 'https://placehold.co/56x56.png';
-        const hostname = new URL(url).hostname;
-        return approvedHosts.includes(hostname) ? url : 'https://placehold.co/56x56.png';
-    } catch (_e) {
-        return 'https://placehold.co/56x56.png';
-    }
-};
+import { getSafeAvatar } from "@/lib/utils";
 
 const BuddyCard = memo(function BuddyCard({ buddy }: { buddy: Buddy }) {
   const { startNewChat } = useChats();
   const router = useRouter();
   const [isCreatingChat, setIsCreatingChat] = useState(false);
-  const safeAvatar = getSafeAvatar(buddy.avatar);
+  const safeAvatar = getSafeAvatar(buddy.avatar, '56x56');
 
   const handleStartChat = async () => {
     setIsCreatingChat(true);

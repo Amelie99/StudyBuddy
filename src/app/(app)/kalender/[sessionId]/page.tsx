@@ -9,17 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { Calendar, Clock, MapPin, Users, Info, ArrowLeft, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-
-const approvedHosts = ['i.imgur.com', 'placehold.co'];
-const getSafeAvatar = (url?: string) => {
-    try {
-        if (!url) return 'https://placehold.co/48x48.png';
-        const hostname = new URL(url).hostname;
-        return approvedHosts.includes(hostname) ? url : 'https://placehold.co/48x48.png';
-    } catch (_e) {
-        return 'https://placehold.co/48x48.png';
-    }
-};
+import { getSafeAvatar } from '@/lib/utils';
 
 // Mock data, in a real app this would be fetched from a database
 const fetchSessionDetails = async (sessionId: string) => {
@@ -94,7 +84,7 @@ export default function SessionDetailPage() {
         );
     }
     
-    const organizerSafeAvatar = getSafeAvatar(session.organizer.avatar);
+    const organizerSafeAvatar = getSafeAvatar(session.organizer.avatar, '48x48');
 
     return (
         <div className="container mx-auto py-8">
@@ -143,7 +133,7 @@ export default function SessionDetailPage() {
                                 <span>{session.organizer.name} <span className="text-xs text-primary">(Organisator)</span></span>
                             </div>
                             {session.attendees.map((attendee: any) => {
-                                const attendeeSafeAvatar = getSafeAvatar(attendee.avatar);
+                                const attendeeSafeAvatar = getSafeAvatar(attendee.avatar, '48x48');
                                 return (
                                 <div key={attendee.id} className="flex items-center space-x-3 text-sm">
                                     <Avatar>

@@ -17,22 +17,12 @@ import React, { useEffect, useState, memo } from 'react';
 import dynamic from 'next/dynamic';
 import { useGroups, type Group, type GroupMember } from '@/contexts/GroupsContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { getSafeAvatar } from '@/lib/utils';
 
 const DialogContent = dynamic(() => import('@/components/ui/dialog').then(mod => mod.DialogContent));
 
-const approvedHosts = ['i.imgur.com', 'placehold.co'];
-const getSafeAvatar = (url?: string) => {
-    try {
-        if (!url) return 'https://placehold.co/48x48.png';
-        const hostname = new URL(url).hostname;
-        return approvedHosts.includes(hostname) ? url : 'https://placehold.co/48x48.png';
-    } catch (_e) {
-        return 'https://placehold.co/48x48.png';
-    }
-};
-
 const GroupMemberItem = memo(function GroupMemberItem({ member, isAdmin }: { member: GroupMember, isAdmin: boolean }) {
-    const safeAvatar = getSafeAvatar(member.photoURL);
+    const safeAvatar = getSafeAvatar(member.photoURL, '48x48');
     return (
         <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-accent/10">
             <Link href={`/profil/${member.uid}`} className="flex items-center space-x-3 w-full">

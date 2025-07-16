@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -14,7 +14,8 @@ import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Loader2, ArrowLeft, Upload, Link as LinkIcon, Save } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { getSafeAvatar } from '@/lib/utils';
 
 const imageSchema = z.object({
   photoURL: z.string().url({ message: 'Bitte geben Sie eine gültige URL ein.' }).optional().or(z.literal('')),
@@ -37,6 +38,13 @@ export default function ProfilbildPage() {
             photoURL: '',
         },
     });
+
+    useEffect(() => {
+        if (currentUser?.photoURL) {
+            setPreviewUrl(currentUser.photoURL);
+        }
+    }, [currentUser?.photoURL]);
+
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
@@ -101,6 +109,8 @@ export default function ProfilbildPage() {
         return <div className="flex justify-center items-center h-screen"><Loader2 className="h-12 w-12 animate-spin text-primary" /></div>;
     }
 
+    const safePreviewUrl = getSafeAvatar(previewUrl, '160x160');
+
     return (
         <div className="container mx-auto py-8">
             <Button variant="ghost" onClick={() => router.back()} className="mb-4">
@@ -115,7 +125,7 @@ export default function ProfilbildPage() {
                 <CardContent className="space-y-6">
                     <div className="flex justify-center">
                         <Avatar className="w-40 h-40 border-4 border-primary shadow-lg">
-                            <AvatarImage src={previewUrl} alt="Profilbild Vorschau" data-ai-hint="person portrait" sizes="160px" />
+                            <AvatarImage src={safePreviewUrl} alt="Profilbild Vorschau" data-ai-hint="person portrait" sizes="160px" />
                             <AvatarFallback className="text-5xl">
                                 {currentUser.displayName ? currentUser.displayName.substring(0, 2).toUpperCase() : '??'}
                             </AvatarFallback>
