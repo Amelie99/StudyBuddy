@@ -161,7 +161,7 @@ export default function MeinProfilPage() {
     return <div className="text-center p-8">Bitte zuerst anmelden.</div>;
   }
   
-  const profilePicUrl = getSafeAvatar(currentUser.photoURL, '128x128');
+  const profilePicUrl = getSafeAvatar(currentUser.photoURL, currentUser.displayName || 'User');
 
 
   return (
@@ -170,7 +170,7 @@ export default function MeinProfilPage() {
         <CardHeader className="text-center">
             <div className="relative mx-auto mb-4 w-32 h-32">
                  <Avatar className={`w-32 h-32 border-4 border-primary shadow-lg`}>
-                    <AvatarImage src={profilePicUrl} alt={currentUser.displayName || 'Profilbild'} data-ai-hint="person portrait" sizes="128px" />
+                    <AvatarImage src={profilePicUrl} alt={currentUser.displayName || 'Profilbild'} />
                     <AvatarFallback className="text-4xl">
                       {currentUser.displayName ? currentUser.displayName.substring(0,2).toUpperCase() : '??'}
                     </AvatarFallback>

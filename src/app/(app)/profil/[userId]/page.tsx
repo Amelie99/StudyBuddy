@@ -97,7 +97,7 @@ export default function UserProfilePage() {
         );
     }
 
-    const profilePicUrl = getSafeAvatar(user.photoURL, '128x128');
+    const profilePicUrl = getSafeAvatar(user.photoURL, user.displayName || 'User');
 
     return (
         <div className="container mx-auto py-8">
@@ -108,7 +108,7 @@ export default function UserProfilePage() {
             <Card className="max-w-3xl mx-auto">
                 <CardHeader className="text-center">
                     <Avatar className="w-32 h-32 border-4 border-primary shadow-lg mx-auto mb-4">
-                        <AvatarImage src={profilePicUrl} alt={user.displayName || ''} data-ai-hint="person portrait" sizes="128px" />
+                        <AvatarImage src={profilePicUrl} alt={user.displayName || ''} />
                         <AvatarFallback className="text-4xl">
                             {user.displayName ? user.displayName.substring(0,2).toUpperCase() : '??'}
                         </AvatarFallback>

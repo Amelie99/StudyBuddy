@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { useChats, type Conversation } from "@/contexts/ChatsContext";
 import Image from "next/image";
 import React, { memo, useState, useMemo } from "react";
-import { cn } from "@/lib/utils";
+import { cn, getSafeAvatar } from "@/lib/utils";
 
 
 const Highlight = memo(function Highlight({ text, highlight }: { text: string; highlight: string }) {
@@ -34,17 +34,19 @@ const Highlight = memo(function Highlight({ text, highlight }: { text: string; h
 });
 
 
-const ConversationItem = memo(function ConversationItem({ chat, searchTerm }: { chat: Conversation; searchTerm: string }) {
-  const { match, name, avatar, dataAiHint, id, timestamp, unread, lastMessage } = chat;
+const ConversationItem = memo(function ConversationItem({ chat, searchTerm }: { chat: Conversation; searchTerm:string }) {
+  const { match, name, avatar, id, timestamp, unread, lastMessage } = chat;
 
   const displayMessage = match?.type === 'message' ? match.text : lastMessage;
   const highlightTerm = match?.type === 'message' ? searchTerm : '';
+  const safeAvatarUrl = getSafeAvatar(avatar, name);
+
 
   return (
     <Link href={`/chats/${id}`} className="block hover:bg-accent/50 rounded-lg transition-colors">
       <div className="flex items-center p-3 space-x-3">
         <Avatar className="h-12 w-12">
-          <AvatarImage src={avatar} alt={name} data-ai-hint={dataAiHint} />
+          <AvatarImage src={safeAvatarUrl} alt={name} />
           <AvatarFallback>{name.substring(0, 2).toUpperCase()}</AvatarFallback>
         </Avatar>
         <div className="flex-1 min-w-0">

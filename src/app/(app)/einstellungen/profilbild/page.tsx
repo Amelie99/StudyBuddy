@@ -130,7 +130,7 @@ export default function ProfilbildPage() {
         return <div className="flex justify-center items-center h-screen"><Loader2 className="h-12 w-12 animate-spin text-primary" /></div>;
     }
 
-    const safePreviewUrl = getSafeAvatar(previewUrl, '160x160');
+    const safePreviewUrl = getSafeAvatar(previewUrl, currentUser.displayName || 'User');
     const isSaveDisabled = isLoading || (activeTab === 'upload' && !selectedFile) || (activeTab === 'url' && !form.formState.isValid);
 
 
@@ -148,7 +148,7 @@ export default function ProfilbildPage() {
                 <CardContent className="space-y-6">
                     <div className="flex justify-center">
                         <Avatar className="w-40 h-40 border-4 border-primary shadow-lg">
-                            <AvatarImage src={safePreviewUrl} alt="Profilbild Vorschau" data-ai-hint="person portrait" sizes="160px" />
+                            <AvatarImage src={safePreviewUrl} alt="Profilbild Vorschau" />
                             <AvatarFallback className="text-5xl">
                                 {currentUser.displayName ? currentUser.displayName.substring(0, 2).toUpperCase() : '??'}
                             </AvatarFallback>

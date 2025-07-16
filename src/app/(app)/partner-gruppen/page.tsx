@@ -24,7 +24,7 @@ const BuddyCard = memo(function BuddyCard({ buddy }: { buddy: Buddy }) {
   const { startNewChat } = useChats();
   const router = useRouter();
   const [isCreatingChat, setIsCreatingChat] = useState(false);
-  const safeAvatar = getSafeAvatar(buddy.avatar, '56x56');
+  const safeAvatar = getSafeAvatar(buddy.avatar, buddy.name);
 
   const handleStartChat = async () => {
     setIsCreatingChat(true);
@@ -53,7 +53,7 @@ const BuddyCard = memo(function BuddyCard({ buddy }: { buddy: Buddy }) {
       <CardContent className="flex items-center justify-between space-x-4 p-4">
         <Link href={`/profil/${buddy.id}`} className="flex items-center space-x-4 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
           <Avatar className="h-14 w-14">
-            <AvatarImage src={safeAvatar} alt={buddy.name} sizes="56px" />
+            <AvatarImage src={safeAvatar} alt={buddy.name} />
             <AvatarFallback>{buddy.name.substring(0, 2).toUpperCase()}</AvatarFallback>
           </Avatar>
           <div>
@@ -75,13 +75,13 @@ const BuddyCard = memo(function BuddyCard({ buddy }: { buddy: Buddy }) {
 });
 
 const GroupCard = memo(function GroupCard({ group }: { group: Group }) {
-  const safeImage = getSafeAvatar(group.image);
+  const safeImage = getSafeAvatar(group.image, group.name);
   return (
     <Card className="hover:shadow-lg hover:border-primary/50 transition-all bg-card/80 backdrop-blur-sm">
       <CardContent className="flex items-center justify-between space-x-4 p-4">
           <Link href={`/gruppen/${group.id}`} className="flex items-center space-x-4 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
               <Avatar className="h-14 w-14">
-                  <AvatarImage src={safeImage} alt={group.name} data-ai-hint={group.dataAiHint} sizes="56px"/>
+                  <AvatarImage src={safeImage} alt={group.name} />
                   <AvatarFallback>{group.name.substring(0, 2).toUpperCase()}</AvatarFallback>
               </Avatar>
               <div>

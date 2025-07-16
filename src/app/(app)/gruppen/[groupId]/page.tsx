@@ -22,12 +22,12 @@ import { getSafeAvatar } from '@/lib/utils';
 const DialogContent = dynamic(() => import('@/components/ui/dialog').then(mod => mod.DialogContent));
 
 const GroupMemberItem = memo(function GroupMemberItem({ member, isAdmin }: { member: GroupMember, isAdmin: boolean }) {
-    const safeAvatar = getSafeAvatar(member.photoURL, '48x48');
+    const safeAvatar = getSafeAvatar(member.photoURL, member.displayName || 'User');
     return (
         <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-accent/10">
             <Link href={`/profil/${member.uid}`} className="flex items-center space-x-3 w-full">
                 <Avatar>
-                    <AvatarImage src={safeAvatar} alt={member.displayName || 'Avatar'} sizes="48px" />
+                    <AvatarImage src={safeAvatar} alt={member.displayName || 'Avatar'} />
                     <AvatarFallback>{member.displayName?.substring(0, 2).toUpperCase()}</AvatarFallback>
                 </Avatar>
                 <span>{member.displayName} {isAdmin && <span className="text-xs text-primary ml-1">(Admin)</span>}</span>

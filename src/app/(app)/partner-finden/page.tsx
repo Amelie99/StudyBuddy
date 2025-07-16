@@ -130,7 +130,7 @@ export default function PartnerFindenPage() {
 
     if (suggestions.length > 0) {
       const buddy = suggestions[0];
-      const safePhotoURL = getSafeAvatar(buddy.photoURL, '320x500');
+      const safePhotoURL = getSafeAvatar(buddy.photoURL, buddy.displayName || 'User');
 
       return (
         <>
@@ -143,7 +143,7 @@ export default function PartnerFindenPage() {
                     swipeState === 'right' && "transform translate-x-[150%] rotate-[15deg]"
                   )}
                 >
-                  <Image src={safePhotoURL} alt={buddy.displayName || "user"} fill sizes="320px" className="object-cover"/>
+                  <Image src={safePhotoURL} alt={buddy.displayName || "user"} fill className="object-cover"/>
                   <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent" />
                   <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
                     <h3 className="text-2xl font-bold drop-shadow-md">{buddy.displayName}</h3>

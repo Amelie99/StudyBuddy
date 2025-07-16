@@ -10,7 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, Send, CalendarPlus, Smile, Paperclip, Loader2, UploadCloud, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import React, { useEffect, useState, useRef, memo } from 'react';
-import { cn } from '@/lib/utils';
+import { cn, getSafeAvatar } from '@/lib/utils';
 import { Popover, PopoverTrigger } from '@/components/ui/popover';
 import { Dialog, DialogTrigger, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useChats } from '@/contexts/ChatsContext';
@@ -162,7 +162,7 @@ export default function ChatDetailPage() {
                     <ArrowLeft className="h-5 w-5" />
                 </Button>
                 <Avatar className="h-10 w-10 mr-3">
-                    <AvatarImage src={chatDetails.avatar} alt={chatDetails.name} sizes="40px" />
+                    <AvatarImage src={getSafeAvatar(chatDetails.avatar, chatDetails.name)} alt={chatDetails.name} />
                     <AvatarFallback>{chatDetails.name.substring(0, 2).toUpperCase()}</AvatarFallback>
                 </Avatar>
                 <div className="flex-1">

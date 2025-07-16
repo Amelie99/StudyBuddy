@@ -62,6 +62,7 @@ export const BuddiesProvider: React.FC<{ children: ReactNode }> = ({ children })
             name: buddy.displayName || 'Unknown',
             course: buddy.studiengang || 'Not specified',
             avatar: buddy.photoURL || '',
+            dataAiHint: buddy.dataAiHint, // Make sure to carry over the hint
         };
 
         await setDoc(buddyRef, buddyData);
@@ -72,6 +73,7 @@ export const BuddiesProvider: React.FC<{ children: ReactNode }> = ({ children })
              name: currentUser.displayName || 'Unknown',
              course: currentUser.studiengang || 'Not specified',
              avatar: currentUser.photoURL || '',
+             dataAiHint: currentUser.dataAiHint,
         };
         await setDoc(otherBuddyRef, currentUserAsBuddy);
     }, [currentUser]);

@@ -4,6 +4,7 @@ export interface AppUser {
   email: string;
   displayName: string | null;
   photoURL?: string;
+  dataAiHint?: string;
   studiengang?: string;
   semester?: string;
   ueberMich?: string;
@@ -20,6 +21,7 @@ export interface Buddy {
     name: string;
     course: string;
     avatar: string;
+    dataAiHint?: string;
 }
 
 export interface SuggestedBuddy {

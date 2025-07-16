@@ -32,7 +32,7 @@ type SearchFormValues = z.infer<typeof searchSchema>;
 
 
 const UserResultCard = ({ user }: { user: AppUser }) => {
-    const safeAvatar = getSafeAvatar(user.photoURL, '48x48');
+    const safeAvatar = getSafeAvatar(user.photoURL, user.displayName || 'User');
     return (
         <Card className="hover:shadow-md transition-shadow">
             <CardContent className="p-4 flex items-center justify-between">
