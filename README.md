@@ -50,7 +50,7 @@ Das Projekt folgt der Standardstruktur von Next.js mit dem App Router. Die wicht
 ## Authentifizierung & Sicherheit
 - **Firebase Authentication:** Der gesamte Authentifizierungsprozess wird über Firebase abgewickelt. Bei der Registrierung wird serverseitig überprüft, ob die E-Mail-Adresse mit `@stud.haw-landshut.de` endet.
 - **Protected Routes:** Der `AuthGuard`-Mechanismus, implementiert in `/src/components/layout/AuthGuard.tsx`, schützt alle Seiten innerhalb des `(app)`-Verzeichnisses. Nicht authentifizierte Nutzer werden automatisch zur Anmeldeseite weitergeleitet.
-- **Firestore-Sicherheitsregeln:** (Für eine Produktionsumgebung würden hier detaillierte Firestore-Regeln implementiert, um sicherzustellen, dass Benutzer nur auf ihre eigenen Daten zugreifen und diese bearbeiten können. Bspw. `allow read, write: if request.auth.uid == userId;`).
+- **Firestore-Sicherheitsregeln:** Für eine Produktionsumgebung würden hier detaillierte Firestore-Regeln implementiert, um sicherzustellen, dass Benutzer nur auf ihre eigenen Daten zugreifen und diese bearbeiten können. Bspw. `allow read, write: if request.auth.uid == userId;`.
 
 ## Datenmodell
 Die Anwendung nutzt Firestore als NoSQL-Datenbank. Die Haupt-Collections sind:
