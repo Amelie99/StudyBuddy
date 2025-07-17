@@ -60,7 +60,7 @@ Die Anwendung nutzt Firestore als NoSQL-Datenbank. Die Haupt-Collections sind:
 - **groups:** Speichert Informationen über die erstellten Lerngruppen, inklusive Mitglieder und Gruppen-Metadaten.
 
 ## Erste Schritte & Installation
-Die Anwendung wird über Firebase App Hosting bereitgestellt und ist unter der folgenden URL erreichbar: [https://studybuddy-haw-4vdjx.web.app/](https://studybuddy-haw-4vdjx.web.app/)
+Die Anwendung wird über Firebase App Hosting bereitgestellt und ist unter der folgenden URL erreichbar: [https://studio--studybuddy-haw-4vdjx.us-central1.hosted.app/dashboard)
 
 Für Entwicklungszwecke kann das Projekt auch lokal ausgeführt werden:
 1. **Repository klonen:** `git clone https://github.com/Amelie99/StudyBuddy.git`
