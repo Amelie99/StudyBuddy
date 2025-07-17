@@ -78,8 +78,6 @@ Die Anwendung ist dann unter `http://localhost:3000` erreichbar.
 6. **Kalender:** Im Kalender werden Termine für Lernsitzungen angezeigt und können neue Termine erstellt werden.
 
 ## Aktueller Status & Bekannte Probleme (Work in Progress)
-Diese Anwendung wurde im Rahmen einer Hochschulprüfung entwickelt und ist als **Minimum Viable Product (MVP)** zu verstehen. Der Fokus lag auf der Implementierung der Kernarchitektur und der grundlegenden Funktionen. Einige Features sind daher noch nicht vollständig ausgereift oder befinden sich in einem frühen Entwicklungsstadium.
-
-- **Partner-Matching:** Das Matching von Lernpartnern ist aktuell noch nicht intelligent. Die "Partner finden"-Seite zeigt derzeit eine Liste aller anderen registrierten Benutzer an, anstatt eine gefilterte oder sortierte Auswahl basierend auf Übereinstimmungen im Profil zu präsentieren. Eine KI-gestützte Logik ist für eine zukünftige Version geplant.
-
+Diese Anwendung wurde im Rahmen eines Moduls an der Hochschule Landshut entwickelt und ist als **Minimum Viable Product (MVP)** zu verstehen. Der Fokus lag auf der Implementierung der Kernarchitektur und der grundlegenden Funktionen. Einige Features sind daher noch nicht vollständig ausgereift oder befinden sich in einem frühen Entwicklungsstadium.
+- **Partner-Matching:** Das Matching von Lernpartnern ist aktuell noch nicht intelligent. Die "Buddies finden"-Seite zeigt derzeit eine Liste aller anderen registrierten Benutzer an, anstatt eine gefilterte oder sortierte Auswahl basierend auf Übereinstimmungen im Profil zu präsentieren. Eine KI-gestützte Logik ist für eine zukünftige Version geplant.
 - **Benutzer-Profilbilder:** Die Funktionalität zum Hochladen und Anzeigen von Profilbildern per URL ist implementiert, kann aber unter Umständen noch fehlerhaft sein (Buggy).
