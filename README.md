@@ -1,4 +1,4 @@
-# LernBuddy HS Landshut
+# StudyBuddy HS Landshut
 
 ## Inhaltsverzeichnis
 1. [Projektübersicht](#projektübersicht)
@@ -14,7 +14,7 @@
 ---
 
 ## Projektübersicht
-LernBuddy ist eine für die Hochschule Landshut entwickelte Webanwendung, die Studierenden hilft, passende Lernpartner und -gruppen zu finden. Die App löst das gängige Problem, dass Studierende oft Schwierigkeiten haben, Kommilitonen mit ähnlichen Lernzielen, Fachbereichen oder Verfügbarkeiten zu finden. Durch ein detailliertes Profilsystem und eine intelligente Matching-Funktion (zukünftig mit KI-Unterstützung) erleichtert LernBuddy die Organisation des gemeinsamen Lernens und fördert so den akademischen Erfolg und die soziale Vernetzung innerhalb der Hochschule.
+StudyBuddy ist eine für die Hochschule Landshut entwickelte Webanwendung, die Studierenden hilft, passende Lernpartner und -gruppen zu finden. Die App löst das gängige Problem, dass Studierende oft Schwierigkeiten haben, Kommilitonen mit ähnlichen Lernzielen, Fachbereichen oder Verfügbarkeiten zu finden. Durch ein detailliertes Profilsystem und eine intelligente Matching-Funktion (zukünftig mit KI-Unterstützung) erleichtert StudyBuddy die Organisation des gemeinsamen Lernens und fördert so den akademischen Erfolg und die soziale Vernetzung innerhalb der Hochschule.
 
 ## Kernfunktionen
 - **Benutzerauthentifizierung:** Sichere Registrierung und Anmeldung ausschließlich mit E-Mail-Adressen der HS Landshut (`@stud.haw-landshut.de`).
