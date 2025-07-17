@@ -72,10 +72,10 @@ Die Anwendung ist dann unter `http://localhost:3000` erreichbar.
 ## User Stories & Features
 1. **Registrierung:** Ein neuer Benutzer registriert sich mit seiner Hochschul-E-Mail.
 2. **Profilerstellung:** Nach der ersten Anmeldung wird der Benutzer aufgefordert, sein Profil zu vervollständigen, um die bestmöglichen Partnervorschläge zu erhalten.
-3. **Dashboard:** Das Dashboard dient als zentrale Anlaufstelle und zeigt Lernpartner und Lerngruppen an.
-4. **Buddies finden:** Über die Suche kann der Benutzer aktiv nach anderen Studierenden suchen und deren Profile einsehen.
-5. **Chats:** Über das Profil eines anderen Benutzers kann ein Chat gestartet werden, um ein erstes Kennenlernen zu ermöglichen. Im Chat können sich die Lernpartner austauschen, Lernmaterialien teilen und Termine für Lernsitzungen vereinbaren.
-6. **Kalender:** Im Kalender werden Termine für Lernsitzungen angezeigt und können neue Termine erstellt werden.
+4. **Dashboard:** Das Dashboard dient als zentrale Anlaufstelle und zeigt den Profilfortschritt, sowie anstehende Lernsitzungen und Lernpartner an.
+6. **Buddies finden:** Über die Suche kann der Benutzer aktiv nach anderen Studierenden suchen und deren Profile einsehen.
+7. **Chats:** Über das Profil eines anderen Benutzers kann ein Chat gestartet werden, um ein erstes Kennenlernen zu ermöglichen. Im Chat können sich die Lernpartner austauschen, Lernmaterialien teilen und Termine für Lernsitzungen vereinbaren.
+8. **Kalender:** Im Kalender werden Termine für Lernsitzungen angezeigt und können neue Termine erstellt werden.
 
 ## Aktueller Status & Bekannte Probleme (Work in Progress)
 Diese Anwendung wurde im Rahmen eines Moduls an der Hochschule Landshut entwickelt und ist als **Minimum Viable Product (MVP)** zu verstehen. Der Fokus lag auf der Implementierung der Kernarchitektur und der grundlegenden Funktionen. Einige Features sind daher noch nicht vollständig ausgereift oder befinden sich in einem frühen Entwicklungsstadium.
