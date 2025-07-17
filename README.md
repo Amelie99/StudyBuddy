@@ -8,7 +8,7 @@
 5. [Authentifizierung & Sicherheit](#authentifizierung--sicherheit)
 6. [Datenmodell](#datenmodell)
 7. [Erste Schritte & Installation](#erste-schritte--installation)
-8. [Nutzung der App](#nutzung-der-app)
+8. [User Stories & Features](#nutzung-der-app)
 9. [Aktueller Status & Bekannte Probleme](#aktueller-status--bekannte-probleme)
 
 ---
