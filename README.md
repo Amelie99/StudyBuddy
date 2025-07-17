@@ -1,17 +1,25 @@
 # StudyBuddy HS Landshut
 
 ## Inhaltsverzeichnis
-1. [Projektübersicht](#projektübersicht)
-2. [Kernfunktionen](#kernfunktionen)
-3. [Technologie-Stack](#technologie-stack)
-4. [Projektstruktur](#projektstruktur)
+1. [Erste Schritte & Installation](#erste-schritte--installation)
+2. [Projektübersicht](#projektübersicht)
+3. [Kernfunktionen](#kernfunktionen)
+4. [Technologie-Stack](#technologie-stack)
 5. [Authentifizierung & Sicherheit](#authentifizierung--sicherheit)
 6. [Datenmodell](#datenmodell)
-7. [Erste Schritte & Installation](#erste-schritte--installation)
-8. [User Stories & Features](#nutzung-der-app)
-9. [Aktueller Status & Bekannte Probleme](#aktueller-status--bekannte-probleme)
+7. [User Stories & Features](#nutzung-der-app)
+8. [Aktueller Status & Bekannte Probleme](#aktueller-status--bekannte-probleme)
 
 ---
+## Erste Schritte & Installation
+Die Anwendung wird über Firebase App Hosting bereitgestellt und ist unter der folgenden URL erreichbar: https://studio--studybuddy-haw-4vdjx.us-central1.hosted.app/dashboard
+
+Für Entwicklungszwecke kann das Projekt auch lokal ausgeführt werden:
+1. **Repository klonen:** `git clone https://github.com/Amelie99/StudyBuddy.git`
+2. **Abhängigkeiten installieren:** `npm install`
+3. **Firebase-Konfiguration:** Eine funktionierende Firebase-Konfiguration ist bereits im Projekt enthalten.
+4. **Lokalen Entwicklungsserver starten:** `npm run dev`
+Die Anwendung ist dann unter `http://localhost:3000` erreichbar.
 
 ## Projektübersicht
 StudyBuddy ist eine für die Hochschule Landshut entwickelte Webanwendung, die Studierenden hilft, passende Lernpartner und -gruppen zu finden. Die App löst das gängige Problem, dass Studierende oft Schwierigkeiten haben, Kommilitonen mit ähnlichen Lernzielen, Fachbereichen oder Verfügbarkeiten zu finden. Durch ein detailliertes Profilsystem und eine intelligente Matching-Funktion (zukünftig mit KI-Unterstützung) erleichtert StudyBuddy die Organisation des gemeinsamen Lernens und fördert so den akademischen Erfolg und die soziale Vernetzung innerhalb der Hochschule.
@@ -32,21 +40,6 @@ StudyBuddy ist eine für die Hochschule Landshut entwickelte Webanwendung, die S
 - **Formular-Management:** `react-hook-form` mit `zod` zur Validierung - Eine performante und flexible Lösung für die Formular-Handhabung und -Validierung.
 - **Deployment:** Firebase App Hosting - Ermöglicht ein schnelles und einfaches Deployment von Webanwendungen.
 
-## Projektstruktur
-Das Projekt folgt der Standardstruktur von Next.js mit dem App Router. Die wichtigsten Verzeichnisse sind:
-- **/src/app:** Enthält alle Routen der Anwendung.
-    - **(app):** Geschützte Routen, die nur für eingeloggte Benutzer zugänglich sind (z.B. Dashboard, Profil, Chats).
-    - **(auth):** Routen für Authentifizierung (Login, Registrierung).
-    - **layout.tsx:** Das Hauptlayout der Anwendung, das auf alle Seiten angewendet wird.
-    - **page.tsx:** Die Landing Page der Anwendung.
-- **/src/components:** Beinhaltet wiederverwendbare React-Komponenten.
-    - **/ui:** UI-Komponenten von `shadcn/ui`, die für das Projekt angepasst wurden.
-    - **/auth:** Komponenten speziell für den Login- und Registrierungsprozess.
-    - **/layout:** Komponenten, die das Grundgerüst der App-Ansicht bilden (z.B. Sidebar, Navbar).
-- **/src/contexts:** React Contexts für das globale State Management (z.B. `AuthContext`, `ChatsContext`).
-- **/src/lib:** Hilfsfunktionen, Typdefinitionen (`types.ts`) und Konstanten (`constants.ts`).
-- **/src/config:** Firebase-Konfigurationsdatei, die die Verbindung zur Firebase-Plattform herstellt.
-
 ## Authentifizierung & Sicherheit
 - **Firebase Authentication:** Der gesamte Authentifizierungsprozess wird über Firebase abgewickelt. Bei der Registrierung wird serverseitig überprüft, ob die E-Mail-Adresse mit `@stud.haw-landshut.de` endet.
 - **Protected Routes:** Der `AuthGuard`-Mechanismus, implementiert in `/src/components/layout/AuthGuard.tsx`, schützt alle Seiten innerhalb des `(app)`-Verzeichnisses. Nicht authentifizierte Nutzer werden automatisch zur Anmeldeseite weitergeleitet.
@@ -58,16 +51,6 @@ Die Anwendung nutzt Firestore als NoSQL-Datenbank. Die Haupt-Collections sind:
 - **chats:** Speichert Metadaten zu jeder Konversation (Teilnehmer, letzte Nachricht). Die Dokumenten-ID wird aus den UIDs der beiden Teilnehmer generiert, um Duplikate zu vermeiden.
     - **messages:** Eine Sub-Collection innerhalb jedes `chats`-Dokuments, die alle Nachrichten dieser Konversation enthält.
 - **groups:** Speichert Informationen über die erstellten Lerngruppen, inklusive Mitglieder und Gruppen-Metadaten.
-
-## Erste Schritte & Installation
-Die Anwendung wird über Firebase App Hosting bereitgestellt und ist unter der folgenden URL erreichbar: https://studio--studybuddy-haw-4vdjx.us-central1.hosted.app/dashboard
-
-Für Entwicklungszwecke kann das Projekt auch lokal ausgeführt werden:
-1. **Repository klonen:** `git clone https://github.com/Amelie99/StudyBuddy.git`
-2. **Abhängigkeiten installieren:** `npm install`
-3. **Firebase-Konfiguration:** Eine funktionierende Firebase-Konfiguration ist bereits im Projekt enthalten.
-4. **Lokalen Entwicklungsserver starten:** `npm run dev`
-Die Anwendung ist dann unter `http://localhost:3000` erreichbar.
 
 ## User Stories & Features
 1. **Registrierung:** Ein neuer Benutzer registriert sich mit seiner Hochschul-E-Mail.
